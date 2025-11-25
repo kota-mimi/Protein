@@ -74,7 +74,7 @@ export default function DiagnosePage() {
                 1. プロテインを飲む目的は？
               </label>
               <div className="grid grid-cols-1 gap-3">
-                {['ダイエット', '筋トレ', '健康維持'].map((option) => (
+                {['初心者', 'コスパ重視', 'ダイエット', '筋トレ', '健康維持'].map((option) => (
                   <label 
                     key={option}
                     className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
