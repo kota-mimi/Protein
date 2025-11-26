@@ -24,13 +24,19 @@ export default function Home() {
           </p>
           
           {/* Main Actions */}
-          <div className="flex justify-center mb-16">
+          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
              <Link 
-              href="/diagnose" 
-              className="group bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold py-5 px-10 rounded-full shadow-xl shadow-blue-900/10 transition-all transform hover:-translate-y-1 flex items-center gap-3"
+              href="/advanced-diagnosis" 
+              className="group bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold py-5 px-10 rounded-full shadow-xl shadow-blue-900/10 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-3"
             >
-              <span>自分に合うプロテインを見つける</span>
+              <span>詳細AI診断で最適なプロテインを見つける</span>
               <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform"/>
+            </Link>
+            <Link 
+              href="/diagnose" 
+              className="group bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 text-lg font-bold py-5 px-10 rounded-full shadow-xl transition-all transform hover:-translate-y-1 flex items-center justify-center gap-3"
+            >
+              <span>簡単診断</span>
             </Link>
           </div>
 
@@ -63,8 +69,8 @@ export default function Home() {
               <div className="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-6 mx-auto">
                 <CheckCircle2 size={28} />
               </div>
-              <h3 className="text-lg font-bold mb-3 text-gray-900">5つの質問で診断</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">目的や予算に合わせて、AIがあなたに最適な商品をピックアップします。</p>
+              <h3 className="text-lg font-bold mb-3 text-gray-900">7つの質問で精密診断</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">詳細な体質・味の好み・ライフスタイルに合わせて、AIがあなたに最適な商品をピックアップします。</p>
             </div>
 
             <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow">
