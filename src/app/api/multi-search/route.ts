@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     results.forEach((result, index) => {
       const sourceName = ['rakuten', 'amazon', 'yahoo'][index]
       
-      if (result.status === 'fulfilled' && result.value.success && result.value.products) {
+      if (result.status === 'fulfilled' && result.value.success && 'products' in result.value && result.value.products) {
         allProducts.push(...result.value.products.map((p: any) => ({ ...p, source: sourceName })))
         totalFound += result.value.totalFound || 0
         sources.push(sourceName)
