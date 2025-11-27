@@ -45,13 +45,13 @@ export async function GET(request: NextRequest) {
     results.forEach((result, index) => {
       const sourceName = ['rakuten', 'amazon', 'yahoo'][index]
       
-      if (result.status === 'fulfilled' && result.value.success) {
+      if (result.status === 'fulfilled' && result.value.success && result.value.products) {
         allProducts.push(...result.value.products.map((p: any) => ({ ...p, source: sourceName })))
-        totalFound += result.value.totalFound
+        totalFound += result.value.totalFound || 0
         sources.push(sourceName)
         console.log(`${sourceName}: ${result.value.products.length}件取得`)
       } else {
-        console.log(`${sourceName}: 検索失敗 -`, result.status === 'rejected' ? result.reason : result.value.error)
+        console.log(`${sourceName}: 検索失敗 -`, result.status === 'rejected' ? result.reason : (result.value as any)?.error)
       }
     })
 
