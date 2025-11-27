@@ -47,6 +47,16 @@ interface Product {
   score?: number
   platforms: PlatformInfo[]  // 複数ECサイト対応
   bestPrice?: PlatformInfo   // 最安値情報
+  sale?: {
+    onSale: boolean
+    discountRate: number
+    saleEndTime: string | null
+  }
+  stock?: {
+    status: string
+    quantity: number
+    lowStock: boolean
+  }
 }
 
 interface SearchResult {
