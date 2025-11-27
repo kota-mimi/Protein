@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
             brand: extractBrand(itemName),
             price: parseInt(product.itemPrice) || 0,
             pricePerServing: Math.round((parseInt(product.itemPrice) || 0) / (nutrition.servingSize || 30)),
-            imageUrl: product.mediumImageUrls?.[0]?.imageUrl || product.smallImageUrls?.[0]?.imageUrl || '',
+            imageUrl: product.mediumImageUrls?.[0] || product.smallImageUrls?.[0] || '',
             shopName: product.shopName || 'ショップ不明',
             reviewCount: product.reviewCount || 0,
             reviewAverage: parseFloat(product.reviewAverage) || 0,

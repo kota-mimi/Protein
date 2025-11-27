@@ -238,9 +238,13 @@ function ProteinResultsContent() {
               {/* 商品画像 */}
               <div className="relative">
                 <img
-                  src={product.imageUrl || '/placeholder-protein.jpg'}
+                  src={product.imageUrl || '/placeholder-protein.svg'}
                   alt={product.name}
                   className="w-full h-48 object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/placeholder-protein.svg';
+                  }}
                 />
               </div>
 

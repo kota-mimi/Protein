@@ -291,7 +291,7 @@ function processRakutenProduct(product: any, filters: SearchFilters) {
     brand: extractBrand(itemName),
     price: price,
     pricePerServing: pricePerServing,
-    imageUrl: product.mediumImageUrls?.[0]?.imageUrl || '',
+    imageUrl: product.mediumImageUrls?.[0] || product.smallImageUrls?.[0] || '',
     shopName: product.shopName || '',
     reviewAverage: parseFloat(product.reviewAverage) || 0,
     reviewCount: product.reviewCount || 0,

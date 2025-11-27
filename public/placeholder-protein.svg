@@ -1,0 +1,6 @@
+<svg width="300" height="200" viewBox="0 0 300 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="200" fill="#f3f4f6"/>
+  <path d="M150 50C165.464 50 178 62.536 178 78C178 93.464 165.464 106 150 106C134.536 106 122 93.464 122 78C122 62.536 134.536 50 150 50Z" fill="#d1d5db"/>
+  <path d="M130 110H170C177.732 110 184 116.268 184 124V140C184 147.732 177.732 154 170 154H130C122.268 154 116 147.732 116 140V124C116 116.268 122.268 110 130 110Z" fill="#d1d5db"/>
+  <text x="150" y="175" text-anchor="middle" fill="#6b7280" font-family="system-ui" font-size="14" font-weight="500">プロテイン画像</text>
+</svg>

@@ -235,9 +235,13 @@ export default function AdminPage() {
               {products.map((product) => (
                 <div key={product.id} className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
                   <img
-                    src={product.imageUrl || '/placeholder.png'}
+                    src={product.imageUrl || '/placeholder-protein.svg'}
                     alt={product.name}
                     className="w-full h-48 object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/placeholder-protein.svg';
+                    }}
                   />
                   
                   <div className="p-4">

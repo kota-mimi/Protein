@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
         brand: extractBrand(product.itemName),
         price: product.itemPrice,
         pricePerServing: Math.round(product.itemPrice / estimateServings(product.itemName)),
-        imageUrl: product.mediumImageUrls?.[0]?.imageUrl || product.smallImageUrls?.[0]?.imageUrl,
+        imageUrl: product.mediumImageUrls?.[0] || product.smallImageUrls?.[0] || '',
         shopName: product.shopName,
         reviewCount: product.reviewCount,
         reviewAverage: product.reviewAverage,
