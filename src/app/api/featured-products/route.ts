@@ -105,12 +105,20 @@ export async function GET() {
     console.log(`✅ 楽天APIから${allProducts.length}件の商品を取得`)
     console.log('🖼️ 画像URL確認:', allProducts[0]?.imageUrl)
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       categories,
       totalProducts: allProducts.length,
-      source: 'rakuten-live'
+      source: 'rakuten-live',
+      timestamp: new Date().toISOString()
     })
+    
+    // キャッシュを無効化
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
+    
+    return response
 
   } catch (error: any) {
     console.error('楽天API取得エラー:', error)

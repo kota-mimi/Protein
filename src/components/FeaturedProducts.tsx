@@ -57,7 +57,16 @@ export default function FeaturedProducts() {
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        const response = await fetch('/api/featured-products')
+        // キャッシュを強制的に無効化
+        const timestamp = new Date().getTime()
+        const response = await fetch(`/api/featured-products?t=${timestamp}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        })
         const data = await response.json()
         
         if (data.success) {
