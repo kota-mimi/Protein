@@ -149,20 +149,14 @@ export default function FeaturedProducts() {
                   <div key={product.id} className="group bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300">
                     {/* Product Image */}
                     <div className="relative h-40 bg-gray-100">
-                      {product.imageUrl ? (
-                        <img
-                          src={product.imageUrl}
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          onError={(e) => {
-                            e.currentTarget.src = '/placeholder-protein.svg'
-                          }}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <div className="text-4xl">🥤</div>
-                        </div>
-                      )}
+                      <img
+                        src={product.imageUrl || 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=400&h=300&fit=crop'}
+                        alt={product.name}
+                        className="w-full h-full object-contain bg-gray-50 group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=400&h=300&fit=crop'
+                        }}
+                      />
                       
                       {/* Category Badge */}
                       <div className="absolute top-2 left-2">
