@@ -112,10 +112,10 @@ export default function FeaturedProducts() {
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            🔥 楽天で人気のプロテイン
+            🔥 人気のプロテイン
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            実際に売れている商品から厳選。リアルタイムの価格・在庫・レビュー情報でお得に購入できます。
+            実際に売れている商品から厳選。複数のECサイトから価格・在庫・レビュー情報を比較できます。
           </p>
         </div>
 
@@ -225,9 +225,9 @@ export default function FeaturedProducts() {
                         href={product.affiliateUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block w-full bg-red-600 hover:bg-red-700 text-white text-center py-2 rounded font-medium transition-colors text-sm"
+                        className="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2 rounded font-medium transition-colors text-sm"
                       >
-                        🛒 楽天で購入
+                        🛒 購入サイトへ
                       </a>
                     </div>
                   </div>

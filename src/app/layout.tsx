@@ -8,15 +8,15 @@ import GoogleAnalytics from '@/components/GoogleAnalytics'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'プロテイン診断 | 最適なプロテインを無料で見つける | 楽天価格比較',
-  description: '5つの質問に答えるだけで、あなたの目的・体質・好みにぴったりのプロテインを診断。楽天商品から最安値を検索して最適な商品を提案します。完全無料、登録不要。',
+  title: 'プロテイン診断 | 最適なプロテインを無料で見つける | 価格比較',
+  description: '5つの質問に答えるだけで、あなたの目的・体質・好みにぴったりのプロテインを診断。複数のECサイトから最安値を検索して最適な商品を提案します。完全無料、登録不要。',
   keywords: 'プロテイン,診断,楽天,価格比較,ホエイプロテイン,ソイプロテイン,筋トレ,ダイエット,栄養,サプリメント',
   authors: [{ name: 'プロテイン診断サービス' }],
   viewport: 'width=device-width, initial-scale=1',
   robots: 'index, follow',
   openGraph: {
     title: 'プロテイン診断 | 最適なプロテインを無料で見つける',
-    description: '5つの質問に答えるだけで、あなたにぴったりのプロテインを診断。楽天最安値で購入できます。',
+    description: '5つの質問に答えるだけで、あなたにぴったりのプロテインを診断。複数サイトの最安値で購入できます。',
     type: 'website',
     locale: 'ja_JP',
     siteName: 'プロテイン診断サービス',
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'プロテイン診断 | 最適なプロテインを無料で見つける',
-    description: '5つの質問に答えるだけで、あなたにぴったりのプロテインを診断。楽天最安値で購入できます。',
+    description: '5つの質問に答えるだけで、あなたにぴったりのプロテインを診断。複数サイトの最安値で購入できます。',
   },
   alternates: {
     canonical: 'https://your-domain.vercel.app',

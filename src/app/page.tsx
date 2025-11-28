@@ -45,7 +45,7 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-2">
                 <CheckCircle2 size={16} className="text-blue-600" />
-                <span>ECサイト直結</span>
+                <span>マルチプラットフォーム対応</span>
             </div>
           </div>
         </div>
@@ -56,8 +56,8 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold mb-2">1,000+</div>
-              <div className="text-blue-100">楽天商品を分析</div>
+              <div className="text-4xl font-bold mb-2">2,000+</div>
+              <div className="text-blue-100">商品を分析</div>
             </div>
             <div>
               <div className="text-4xl font-bold mb-2">500+</div>
