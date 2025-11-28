@@ -275,10 +275,10 @@ export default function FeaturedProducts() {
                   </div>
                 </div>
                 <Link 
-                  href="/simple-diagnosis" 
+                  href="/products" 
                   className="hidden sm:flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
                 >
-                  あなた専用の診断はこちら
+                  商品を見る
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
