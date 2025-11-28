@@ -190,6 +190,14 @@ function mergeAndCompareProducts(rakutenProducts: any[], yahooProducts: any[], f
 async function searchRakutenAPI(filters: SearchFilters) {
   const rakutenAppId = process.env.RAKUTEN_APP_ID
   
+  console.log('🔧 楽天API環境変数チェック:', {
+    NODE_ENV: process.env.NODE_ENV,
+    hasRakutenId: !!rakutenAppId,
+    rakutenIdLength: rakutenAppId?.length,
+    rakutenIdPreview: rakutenAppId?.substring(0, 8) + '...',
+    allEnvKeys: Object.keys(process.env).filter(key => key.includes('RAKUTEN'))
+  })
+
   if (!rakutenAppId || rakutenAppId === 'your_rakuten_app_id_here') {
     console.log('⚠️ 楽天APIが設定されていません')
     return []
