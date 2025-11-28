@@ -189,7 +189,7 @@ export default function FeaturedProducts() {
 
               {/* Products Grid - Ultra Compact */}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-                {category.products.map((product) => (
+                {category.products.slice(0, 12).map((product) => (
                   <div key={product.id} className="group bg-white border border-gray-100 rounded-md overflow-hidden hover:shadow-md transition-all duration-300">
                     {/* Product Image - Square Layout */}
                     <div className="relative aspect-square bg-gray-100">
@@ -256,6 +256,19 @@ export default function FeaturedProducts() {
                   </div>
                 ))}
               </div>
+              
+              {/* View All Button */}
+              {category.products.length > 12 && (
+                <div className="mt-6 text-center">
+                  <Link 
+                    href="/products"
+                    className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-xl transition-colors"
+                  >
+                    📦 全{category.products.length}商品を見る
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              )}
             </div>
           ))}
         </div>
