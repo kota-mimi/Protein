@@ -73,7 +73,7 @@ export async function GET() {
     const soyProductsMap = new Map()
 
     searchResults.forEach(result => {
-      result.products.forEach(product => {
+      result.products.forEach((product: any) => {
         const productMap = result.category === 'whey' ? wheyProductsMap : soyProductsMap
         if (!productMap.has(product.id)) {
           productMap.set(product.id, product)
