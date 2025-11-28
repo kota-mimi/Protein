@@ -20,7 +20,7 @@ async function searchRakutenProducts(query: string, hits: number = 5) {
       name: item.itemName,
       brand: item.shopName,
       // 診断結果と同じ画像URL抽出ロジック
-      imageUrl: item.mediumImageUrls?.[0]?.imageUrl || item.smallImageUrls?.[0]?.imageUrl || '',
+      imageUrl: item.mediumImageUrls?.[0] || item.smallImageUrls?.[0] || '',
       reviewAverage: item.reviewAverage || 4.0,
       reviewCount: item.reviewCount || 0,
       description: item.catchcopy || '',
