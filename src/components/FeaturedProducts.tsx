@@ -147,14 +147,14 @@ export default function FeaturedProducts() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {category.products.map((product) => (
                   <div key={product.id} className="group bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300">
-                    {/* Product Image */}
-                    <div className="relative h-40 bg-gray-100">
+                    {/* Product Image - Square Layout */}
+                    <div className="relative aspect-square bg-gray-100">
                       <img
-                        src={product.imageUrl || 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=400&h=300&fit=crop'}
+                        src={product.imageUrl || 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=400&h=400&fit=crop'}
                         alt={product.name}
-                        className="w-full h-full object-contain bg-gray-50 group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover rounded-t-lg group-hover:scale-105 transition-transform duration-300"
                         onError={(e) => {
-                          e.currentTarget.src = 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=400&h=300&fit=crop'
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=400&h=400&fit=crop'
                         }}
                       />
                       
@@ -173,17 +173,17 @@ export default function FeaturedProducts() {
                       </div>
                     </div>
 
-                    {/* Product Info */}
-                    <div className="p-3">
+                    {/* Product Info - Compact Layout */}
+                    <div className="p-2">
                       {/* Product Name */}
-                      <h4 className="font-bold text-gray-900 mb-2 line-clamp-2 text-sm group-hover:text-blue-600 transition-colors">
-                        {product.name.length > 40 ? product.name.substring(0, 40) + '...' : product.name}
+                      <h4 className="font-bold text-gray-900 mb-1 line-clamp-2 text-xs group-hover:text-blue-600 transition-colors leading-tight">
+                        {product.name.length > 35 ? product.name.substring(0, 35) + '...' : product.name}
                       </h4>
 
                       {/* Price */}
-                      <div className="mb-3">
+                      <div className="mb-2">
                         <div className="flex items-baseline gap-1">
-                          <span className="text-lg font-bold text-gray-900">
+                          <span className="text-base font-bold text-gray-900">
                             ¥{product.pricePerServing}
                           </span>
                           <span className="text-xs text-gray-600">/食</span>
@@ -193,23 +193,23 @@ export default function FeaturedProducts() {
                         </div>
                       </div>
 
-                      {/* Nutrition */}
-                      <div className="grid grid-cols-2 gap-2 mb-3">
-                        <div className="bg-blue-50 p-2 rounded text-center">
+                      {/* Nutrition - Compact */}
+                      <div className="grid grid-cols-2 gap-1 mb-2">
+                        <div className="bg-blue-50 p-1 rounded text-center">
                           <div className="text-xs text-gray-600">タンパク質</div>
                           <div className="text-sm font-bold text-blue-600">{product.nutrition.protein}g</div>
                         </div>
-                        <div className="bg-gray-50 p-2 rounded text-center">
+                        <div className="bg-gray-50 p-1 rounded text-center">
                           <div className="text-xs text-gray-600">カロリー</div>
                           <div className="text-sm font-bold">{product.nutrition.calories}kcal</div>
                         </div>
                       </div>
 
                       {/* Reviews */}
-                      <div className="flex items-center gap-1 mb-3">
+                      <div className="flex items-center gap-1 mb-2">
                         <div className="flex items-center gap-1">
                           <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                          <span className="text-sm font-medium">{product.reviewAverage}</span>
+                          <span className="text-xs font-medium">{product.reviewAverage}</span>
                         </div>
                         <span className="text-gray-500 text-xs">({product.reviewCount}件)</span>
                       </div>
@@ -219,7 +219,7 @@ export default function FeaturedProducts() {
                         href={product.affiliateUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2 rounded font-medium transition-colors text-sm"
+                        className="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-1.5 rounded font-medium transition-colors text-xs"
                       >
                         🛒 購入サイトへ
                       </a>
