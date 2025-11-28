@@ -41,10 +41,33 @@ const categoryIcons = {
 }
 
 const categoryColors = {
-  popular: 'bg-red-500',
-  cospa: 'bg-orange-500',
-  sale: 'bg-green-500',
-  premium: 'bg-purple-500'
+  popular: 'bg-gradient-to-r from-emerald-500 to-teal-600',
+  cospa: 'bg-gradient-to-r from-amber-500 to-orange-600', 
+  sale: 'bg-gradient-to-r from-rose-500 to-pink-600',
+  premium: 'bg-gradient-to-r from-violet-500 to-purple-600'
+}
+
+const categoryThemes = {
+  popular: {
+    bg: 'bg-gradient-to-br from-emerald-50 to-teal-50',
+    text: 'text-emerald-900',
+    accent: 'text-emerald-600'
+  },
+  cospa: {
+    bg: 'bg-gradient-to-br from-amber-50 to-orange-50',
+    text: 'text-amber-900', 
+    accent: 'text-amber-600'
+  },
+  sale: {
+    bg: 'bg-gradient-to-br from-rose-50 to-pink-50',
+    text: 'text-rose-900',
+    accent: 'text-rose-600'
+  },
+  premium: {
+    bg: 'bg-gradient-to-br from-violet-50 to-purple-50',
+    text: 'text-violet-900',
+    accent: 'text-violet-600'
+  }
 }
 
 export default function FeaturedProducts() {
@@ -162,8 +185,10 @@ export default function FeaturedProducts() {
   }
 
   return (
-    <section className="py-20 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+    <section className="py-20 bg-gradient-to-br from-slate-50 via-white to-slate-50 relative overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(68,68,68,.03)_25%,rgba(68,68,68,.03)_75%,transparent_75%,transparent)] bg-[length:20px_20px]" />
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
         {/* Section Header */}
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
@@ -173,221 +198,253 @@ export default function FeaturedProducts() {
             実際に売れている商品から厳選。複数のECサイトから価格・在庫・レビュー情報を比較できます。
           </p>
           
-          {/* Search and Filter Bar */}
-          <div className="max-w-4xl mx-auto">
-            <div className="flex flex-col lg:flex-row gap-4 items-center">
-              {/* Search Bar */}
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="プロテインを検索..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm('')}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                )}
-              </div>
-
-              {/* Sort Dropdown */}
-              <div className="relative">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
-                  className="appearance-none bg-white border border-gray-300 rounded-xl px-4 py-3 pr-8 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="default">デフォルト</option>
-                  <option value="price-asc">価格: 安い順</option>
-                  <option value="price-desc">価格: 高い順</option>
-                  <option value="rating">評価順</option>
-                  <option value="review">レビュー数順</option>
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-              </div>
-
-              {/* Filter Button */}
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition-colors ${
-                  showFilters 
-                    ? 'bg-blue-500 text-white border-blue-500' 
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                <SlidersHorizontal className="w-5 h-5" />
-                フィルター
-              </button>
-            </div>
-
-            {/* Price Range Filter */}
-            {showFilters && (
-              <div className="mt-4 p-4 bg-gray-50 rounded-xl">
-                <div className="flex items-center gap-4">
-                  <span className="text-sm font-medium text-gray-700">価格帯:</span>
+          {/* Modern Search and Filter Bar */}
+          <div className="max-w-5xl mx-auto">
+            <div className="bg-white/80 backdrop-blur-lg rounded-2xl border border-gray-200 shadow-xl p-6">
+              <div className="flex flex-col lg:flex-row gap-4 items-center">
+                {/* Search Bar */}
+                <div className="flex-1 relative group">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
                   <input
-                    type="number"
-                    placeholder="最小"
-                    value={priceRange[0]}
-                    onChange={(e) => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
-                    className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    type="text"
+                    placeholder="お気に入りのプロテインを見つけよう..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-12 pr-12 py-4 bg-slate-50 border-0 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all duration-200 text-slate-800 placeholder-slate-400"
                   />
-                  <span className="text-gray-500">〜</span>
-                  <input
-                    type="number"
-                    placeholder="最大"
-                    value={priceRange[1]}
-                    onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 10000])}
-                    className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                  />
-                  <span className="text-sm text-gray-500">円</span>
-                  <button
-                    onClick={() => setPriceRange([0, 10000])}
-                    className="text-sm text-blue-500 hover:text-blue-700"
-                  >
-                    リセット
-                  </button>
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded-full transition-all"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
+
+                {/* Modern Sort Dropdown */}
+                <div className="relative">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    className="appearance-none bg-slate-50 hover:bg-white border-0 rounded-xl px-6 py-4 pr-10 focus:ring-2 focus:ring-emerald-500 transition-all duration-200 font-medium text-slate-700"
+                  >
+                    <option value="default">おすすめ順</option>
+                    <option value="price-asc">価格: 安い順</option>
+                    <option value="price-desc">価格: 高い順</option>
+                    <option value="rating">評価順</option>
+                    <option value="review">人気順</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
+                </div>
+
+                {/* Modern Filter Button */}
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`flex items-center gap-3 px-6 py-4 rounded-xl font-medium transition-all duration-200 ${
+                    showFilters 
+                      ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg transform scale-105' 
+                      : 'bg-slate-50 hover:bg-white text-slate-700 hover:text-emerald-600 border border-slate-200 hover:border-emerald-200'
+                  }`}
+                >
+                  <SlidersHorizontal className="w-5 h-5" />
+                  価格フィルター
+                </button>
               </div>
-            )}
+
+              {/* Modern Price Range Filter */}
+              {showFilters && (
+                <div className="mt-6 p-6 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-slate-200">
+                  <div className="flex flex-wrap items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full"></div>
+                      <span className="text-sm font-semibold text-slate-800">価格帯で絞り込み</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="number"
+                        placeholder="最小価格"
+                        value={priceRange[0]}
+                        onChange={(e) => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
+                        className="w-28 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+                      />
+                      <div className="w-4 h-px bg-slate-300"></div>
+                      <input
+                        type="number"
+                        placeholder="最大価格"
+                        value={priceRange[1]}
+                        onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 10000])}
+                        className="w-28 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+                      />
+                      <span className="text-sm text-slate-500 font-medium">円</span>
+                    </div>
+                    <button
+                      onClick={() => setPriceRange([0, 10000])}
+                      className="px-4 py-2 text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+                    >
+                      リセット
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Categories */}
         <div className="space-y-16">
           {filteredCategories.map((category) => (
-            <div key={category.category} className="relative">
-              {/* Category Header */}
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-4">
-                  <div className={`p-3 ${categoryColors[category.category as keyof typeof categoryColors]} rounded-xl text-white`}>
+            <div key={category.category} className={`relative ${categoryThemes[category.category as keyof typeof categoryThemes].bg} rounded-2xl p-8 mb-8`}>
+              {/* Modern Category Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-6">
+                  <div className={`p-4 ${categoryColors[category.category as keyof typeof categoryColors]} rounded-2xl text-white shadow-lg backdrop-blur-sm`}>
                     {categoryIcons[category.category as keyof typeof categoryIcons]}
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-gray-900">{category.categoryName}</h3>
-                    <p className="text-gray-600">{category.products.length}商品をピックアップ</p>
+                    <h3 className={`text-3xl font-bold ${categoryThemes[category.category as keyof typeof categoryThemes].text} mb-2`}>
+                      {category.categoryName}
+                    </h3>
+                    <div className="flex items-center gap-4">
+                      <p className={`${categoryThemes[category.category as keyof typeof categoryThemes].accent} font-medium`}>
+                        {category.products.length}商品をピックアップ
+                      </p>
+                      <div className="w-2 h-2 bg-current opacity-30 rounded-full"></div>
+                      <span className={`text-sm ${categoryThemes[category.category as keyof typeof categoryThemes].accent} font-medium`}>
+                        最新更新
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <Link 
                   href="/products" 
-                  className="hidden sm:flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                  className={`hidden sm:flex items-center gap-3 ${categoryThemes[category.category as keyof typeof categoryThemes].accent} hover:${categoryThemes[category.category as keyof typeof categoryThemes].text} font-semibold px-6 py-3 bg-white/60 backdrop-blur-sm hover:bg-white rounded-xl transition-all duration-200 shadow-sm hover:shadow-md group`}
                 >
-                  商品を見る
-                  <ArrowRight className="w-4 h-4" />
+                  すべて見る
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
 
-              {/* Products Grid - Diagnosis Style (Compact) */}
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              {/* Revolutionary Products Grid - MyProtein Inspired */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {category.products.slice(0, 12).map((product, index) => (
-                  <div key={product.id} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                    {/* Ranking Badge (for first 3 items) */}
-                    {index < 3 && (
-                      <div className={`absolute z-10 m-2 px-2 py-1 rounded-full text-white font-bold text-xs ${
-                        index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : 'bg-orange-500'
-                      }`}>
-                        {index === 0 ? '🥇 1位' : index === 1 ? '🥈 2位' : '🥉 3位'}
-                      </div>
-                    )}
-
-                    {/* NEW Badge for others */}
-                    {index >= 3 && (
-                      <div className="absolute z-10 top-2 right-2">
-                        <div className="bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold">
-                          NEW
+                  <div key={product.id} className="group relative bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105">
+                    
+                    {/* Floating Badges */}
+                    <div className="absolute top-3 left-3 z-20 flex flex-col gap-2">
+                      {index < 3 ? (
+                        <div className={`px-3 py-1.5 rounded-full text-white font-bold text-xs shadow-lg backdrop-blur-sm ${
+                          index === 0 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' : 
+                          index === 1 ? 'bg-gradient-to-r from-slate-400 to-slate-600' : 
+                          'bg-gradient-to-r from-orange-400 to-orange-600'
+                        }`}>
+                          {index === 0 ? '🥇 BEST' : index === 1 ? '🥈 HOT' : '🥉 NEW'}
                         </div>
-                      </div>
-                    )}
-
-                    {/* Product Image */}
-                    <div className="relative bg-gray-100">
-                      <img
-                        src={product.imageUrl || 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=200&h=150&fit=crop'}
-                        alt={product.name}
-                        className="w-full h-32 object-contain bg-gray-50 rounded-t-lg"
-                        onError={(e) => {
-                          e.currentTarget.src = 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=200&h=150&fit=crop'
-                        }}
-                      />
+                      ) : (
+                        <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg">
+                          PICK
+                        </div>
+                      )}
                     </div>
 
-                    <div className="p-3">
-                      {/* Brand and Type Tags */}
-                      <div className="flex flex-wrap gap-1 mb-2">
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                    {/* Wishlist Heart */}
+                    <div className="absolute top-3 right-3 z-20">
+                      <button className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white hover:scale-110 transition-all">
+                        <svg className="w-4 h-4 text-slate-600 hover:text-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    {/* Product Image with Gradient Overlay */}
+                    <div className="relative aspect-square bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
+                      <img
+                        src={product.imageUrl || 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=300&h=300&fit=crop'}
+                        alt={product.name}
+                        className="w-full h-full object-contain bg-white p-4 group-hover:scale-110 transition-transform duration-500"
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=300&h=300&fit=crop'
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
+
+                    {/* Product Info with Modern Layout */}
+                    <div className="p-4 space-y-3">
+                      {/* Brand Badge & Rating */}
+                      <div className="flex items-center justify-between">
+                        <span className={`px-2 py-1 ${categoryThemes[category.category as keyof typeof categoryThemes].bg} ${categoryThemes[category.category as keyof typeof categoryThemes].accent} text-xs font-semibold rounded-lg border ${categoryThemes[category.category as keyof typeof categoryThemes].accent.replace('text-', 'border-')}`}>
                           {product.brand.length > 6 ? product.brand.substring(0, 6) + '...' : product.brand}
                         </span>
-                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
-                          {product.type}
-                        </span>
+                        <div className="flex items-center gap-1">
+                          <Star className="w-3 h-3 text-amber-400 fill-current" />
+                          <span className="text-xs font-semibold text-slate-700">{product.reviewAverage}</span>
+                        </div>
                       </div>
 
                       {/* Product Name */}
-                      <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 text-sm">
-                        {product.name.length > 30 ? product.name.substring(0, 30) + '...' : product.name}
+                      <h3 className="font-bold text-slate-800 text-sm leading-tight line-clamp-2 group-hover:text-slate-900">
+                        {product.name.length > 35 ? product.name.substring(0, 35) + '...' : product.name}
                       </h3>
 
-                      {/* Price Display (Diagnosis Style) */}
-                      <div className="mb-3">
-                        <div className="text-lg font-bold text-gray-900">
-                          ¥{product.pricePerServing}
-                          <span className="text-xs font-normal text-gray-600">/食</span>
+                      {/* Compact Nutrition Grid */}
+                      <div className="grid grid-cols-2 gap-2 py-2">
+                        <div className={`${categoryThemes[category.category as keyof typeof categoryThemes].bg} rounded-lg p-2 text-center border border-white/50`}>
+                          <div className="text-xs text-slate-600">プロテイン</div>
+                          <div className={`font-bold text-sm ${categoryThemes[category.category as keyof typeof categoryThemes].text}`}>{product.nutrition.protein}g</div>
                         </div>
-                        <div className="text-xs text-gray-600">
+                        <div className={`${categoryThemes[category.category as keyof typeof categoryThemes].bg} rounded-lg p-2 text-center border border-white/50`}>
+                          <div className="text-xs text-slate-600">カロリー</div>
+                          <div className={`font-bold text-sm ${categoryThemes[category.category as keyof typeof categoryThemes].text}`}>{product.nutrition.calories}</div>
+                        </div>
+                      </div>
+
+                      {/* Modern Price Display */}
+                      <div className="space-y-1">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-lg font-bold text-slate-900">
+                            ¥{product.pricePerServing}
+                          </span>
+                          <span className="text-xs text-slate-500 font-medium">/食</span>
+                        </div>
+                        <div className="text-xs text-slate-600">
                           本体価格: ¥{product.price?.toLocaleString() || '0'}
                         </div>
                       </div>
 
-                      {/* Nutrition Info */}
-                      <div className="grid grid-cols-2 gap-1 mb-3 text-xs">
-                        <div className="bg-gray-50 p-1 rounded text-center">
-                          <div className="text-gray-600">プロテイン</div>
-                          <div className="font-bold text-gray-900">{product.nutrition.protein}g</div>
-                        </div>
-                        <div className="bg-gray-50 p-1 rounded text-center">
-                          <div className="text-gray-600">カロリー</div>
-                          <div className="font-bold text-gray-900">{product.nutrition.calories}</div>
-                        </div>
-                      </div>
-
-                      {/* Rating */}
-                      <div className="flex items-center justify-center gap-1 mb-3 text-xs">
-                        <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                        <span className="font-medium">{product.reviewAverage}</span>
-                        <span className="text-gray-500">({product.reviewCount})</span>
-                      </div>
-
-                      {/* Purchase Button */}
+                      {/* Modern CTA Button */}
                       <a
                         href={product.affiliateUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-3 rounded-lg font-semibold text-xs transition-colors"
+                        className={`block w-full ${categoryColors[category.category as keyof typeof categoryColors]} text-white text-center py-3 px-4 rounded-xl font-bold text-xs shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95`}
                       >
-                        🛒 購入する
+                        カートへ追加
                       </a>
+
+                      {/* Quick View Link */}
+                      <button className="w-full text-xs text-slate-500 hover:text-slate-700 font-medium py-1 transition-colors">
+                        詳細を見る →
+                      </button>
                     </div>
                   </div>
                 ))}
               </div>
               
-              {/* View All Button */}
+              {/* Modern View All Button */}
               {category.products.length > 12 && (
                 <div className="mt-8 text-center">
                   <Link 
                     href="/products"
-                    className="inline-flex items-center gap-3 bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-900 hover:to-black text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                    className={`group inline-flex items-center gap-4 ${categoryColors[category.category as keyof typeof categoryColors]} text-white font-bold py-4 px-8 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 backdrop-blur-sm`}
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0l-4-4m4 4l-4 4" />
-                    </svg>
+                    <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0l-4-4m4 4l-4 4" />
+                      </svg>
+                    </div>
                     全{category.products.length}商品を見る
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
                   </Link>
                 </div>
               )}
@@ -395,30 +452,72 @@ export default function FeaturedProducts() {
           ))}
         </div>
 
-        {/* Bottom CTA */}
-        <div className="text-center mt-16">
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              🎯 もっと正確な診断で最適な商品を見つけませんか？
-            </h3>
-            <p className="text-gray-600 mb-6 max-w-lg mx-auto">
-              5つの質問に答えるだけで、あなたの目的・体質・好みに100%マッチしたプロテインを提案します。
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link 
-                href="/simple-diagnosis"
-                className="inline-flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl transition-colors"
-              >
-                <span>🎯 無料診断を始める</span>
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-              <Link 
-                href="/products"
-                className="inline-flex items-center gap-3 bg-white hover:bg-gray-50 text-blue-600 border border-blue-600 font-bold py-4 px-8 rounded-xl transition-colors"
-              >
-                <span>📦 全商品を見る</span>
-                <ArrowRight className="w-5 h-5" />
-              </Link>
+        {/* Revolutionary Bottom CTA */}
+        <div className="text-center mt-20">
+          <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-12 shadow-2xl">
+            {/* Animated Background Pattern */}
+            <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.02)_25%,rgba(255,255,255,.02)_75%,transparent_75%,transparent)] bg-[length:60px_60px] animate-pulse"></div>
+            
+            {/* Content */}
+            <div className="relative z-10">
+              <div className="inline-flex items-center gap-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-2 rounded-full text-sm font-bold mb-6 shadow-lg">
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                AI パーソナル診断
+              </div>
+              
+              <h3 className="text-4xl font-bold text-white mb-6 leading-tight">
+                あなた専用のプロテインを
+                <br />
+                <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+                  AIが見つけ出します
+                </span>
+              </h3>
+              
+              <p className="text-slate-300 mb-8 max-w-2xl mx-auto text-lg leading-relaxed">
+                体質、目標、好みを分析してあなたにピッタリの商品を提案。
+                <br />
+                数千種類の中から最適な1つを見つけましょう。
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                <Link 
+                  href="/simple-diagnosis"
+                  className="group inline-flex items-center gap-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-5 px-10 rounded-2xl shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
+                >
+                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                    <span className="text-lg">🎯</span>
+                  </div>
+                  <span className="text-lg">無料診断を始める</span>
+                  <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" />
+                </Link>
+                
+                <Link 
+                  href="/products"
+                  className="group inline-flex items-center gap-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/20 hover:border-white/40 font-bold py-5 px-10 rounded-2xl transition-all duration-300 hover:scale-105"
+                >
+                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                    <span className="text-lg">📦</span>
+                  </div>
+                  <span className="text-lg">全商品を見る</span>
+                  <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform duration-300" />
+                </Link>
+              </div>
+              
+              {/* Trust Badges */}
+              <div className="flex items-center justify-center gap-8 mt-10 text-slate-400 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
+                  <span>100% 無料</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-teal-500 rounded-full"></div>
+                  <span>AI分析</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                  <span>即時結果</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
