@@ -236,14 +236,15 @@ function ProteinResultsContent() {
               </div>
 
               {/* 商品画像 */}
-              <div className="relative">
+              <div className="relative bg-gray-100">
                 <img
-                  src={product.imageUrl || '/placeholder-protein.svg'}
+                  src={product.imageUrl || 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=400&h=300&fit=crop'}
                   alt={product.name}
-                  className="w-full h-48 object-cover"
+                  className="w-full h-48 object-contain bg-gray-50 rounded-t-lg"
+                  loading="lazy"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    target.src = '/placeholder-protein.svg';
+                    target.src = 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=400&h=300&fit=crop';
                   }}
                 />
               </div>
