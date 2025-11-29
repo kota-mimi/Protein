@@ -844,7 +844,6 @@ export default function GeminiPage() {
         </div>
       </footer>
 
-
       {/* AI Diagnosis Modal */}
       <AIDiagnosisModal 
         isOpen={isDiagnosisOpen}
