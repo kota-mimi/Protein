@@ -29,8 +29,8 @@ export async function GET(request: Request) {
     let totalCount = 0
     
     // 楽天から「プロテイン」で全商品を取得（複数ページ）
-    const maxPages = 20 // 最大20ページ（1000商品）
-    const hitsPerPage = 50 // ページあたり50商品
+    const maxPages = 30 // 最大30ページ（900商品）
+    const hitsPerPage = 30 // ページあたり30商品（楽天API制限）
     
     for (let page = 1; page <= maxPages; page++) {
       try {
@@ -63,14 +63,18 @@ export async function GET(request: Request) {
           const data = await response.json()
           
           if (data.Items && data.Items.length > 0) {
-            const processedProducts = data.Items
-              .map((item: any) => processRakutenProduct(item))
-              .filter((product: any) => isValidProteinProduct(product))
+            const rawProducts = data.Items.map((item: any) => processRakutenProduct(item))
+            const processedProducts = rawProducts.filter((product: any) => isValidProteinProduct(product))
             
             allProducts.push(...processedProducts)
             totalCount += processedProducts.length
             
-            console.log(`✅ ページ ${page}: ${processedProducts.length}件取得 (累計: ${totalCount}件)`)
+            console.log(`✅ ページ ${page}: ${rawProducts.length}件処理 → ${processedProducts.length}件採用 (累計: ${totalCount}件)`)
+            
+            // デバッグ用：最初の商品の情報を出力
+            if (rawProducts.length > 0) {
+              console.log(`📝 サンプル商品: "${rawProducts[0].name.substring(0, 50)}..." プロテイン: ${rawProducts[0].nutrition.protein}g`)
+            }
             
             // 最後のページの場合は終了
             if (data.Items.length < hitsPerPage) {
@@ -82,7 +86,8 @@ export async function GET(request: Request) {
             break
           }
         } else {
-          console.error(`❌ ページ ${page} APIエラー:`, response.status)
+          const errorText = await response.text()
+          console.error(`❌ ページ ${page} APIエラー:`, response.status, errorText.substring(0, 200))
         }
         
         // APIレート制限対応（1.2秒間隔）
@@ -261,7 +266,7 @@ async function categorizeProductsWithAI(products: any[]) {
   return categories.filter(cat => cat.products.length > 0)
 }
 
-// プロテイン商品判定（強化版）
+// プロテイン商品判定（緩和版）
 function isValidProteinProduct(product: any): boolean {
   const name = product.name.toLowerCase()
   const description = product.fullDescription.toLowerCase()
@@ -272,22 +277,22 @@ function isValidProteinProduct(product: any): boolean {
     name.includes(keyword.toLowerCase()) || description.includes(keyword.toLowerCase())
   )
   
-  // 除外キーワード
-  const excludeKeywords = ['シェイカー', 'ボトル', '計量', 'スプーン', 'サプリメント', 'ビタミン', 'シェーカー']
+  // 除外キーワード（追加）
+  const excludeKeywords = ['甘酒', 'あまざけ', 'シェイカー', 'ボトル', '計量', 'スプーン', 'サプリメント', 'ビタミン', 'シェーカー', '米麹', 'レジスタントプロテイン']
   const hasExcludeKeyword = excludeKeywords.some(keyword => 
     name.includes(keyword) || description.includes(keyword)
   )
   
-  // 栄養・価格条件
-  const hasAdequateProtein = product.nutrition.protein >= 8
-  const reasonablePrice = product.pricePerServing >= 20 && product.pricePerServing <= 500
-  const hasReviews = product.reviewCount >= 1
+  // 栄養・価格条件を緩和
+  const hasAdequateProtein = product.nutrition.protein >= 5 // 8から5に緩和
+  const reasonablePrice = product.pricePerServing >= 10 && product.pricePerServing <= 800 // 範囲拡大
+  const hasBasicInfo = product.name && product.imageUrl
   
   return hasProteinKeyword && 
          !hasExcludeKeyword && 
          hasAdequateProtein && 
          reasonablePrice && 
-         hasReviews
+         hasBasicInfo
 }
 
 // 高品質画像URL取得
