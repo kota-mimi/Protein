@@ -315,7 +315,7 @@ export default function GeminiPage() {
             </div>
 
             {/* Search & Advanced Filter Section */}
-            <div className="mb-8 sticky top-20 z-30">
+            <div className="mb-8">
               <div className="flex flex-col gap-2">
                 
                 {/* Search Bar + Filter Toggle */}
