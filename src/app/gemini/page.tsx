@@ -118,13 +118,28 @@ export default function GeminiPage() {
       setIsLoadingAllProducts(true);
       
       const response = await fetch('/api/products');
+      
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      }
+      
       const data = await response.json();
       
-      if (data.success && data.categories) {
+      if (data.success && data.categories && Array.isArray(data.categories)) {
         // カテゴリから全商品を平坦化
-        const flatProducts = data.categories.flatMap((cat: any) => 
-          cat.products
+        const flatProducts = data.categories.flatMap((cat: any) => {
+          if (!cat || !Array.isArray(cat.products)) {
+            console.warn('カテゴリデータが不正:', cat);
+            return [];
+          }
+          
+          return cat.products
             .filter((product: any) => {
+              // 基本的な必須フィールドチェック
+              if (!product || !product.name || !product.id) {
+                return false;
+              }
+              
               // プロテイン以外の商品を除外
               const name = product.name.toLowerCase()
               const excludeKeywords = [
@@ -135,28 +150,46 @@ export default function GeminiPage() {
               ]
               return !excludeKeywords.some(keyword => name.includes(keyword))
             })
-            .map((product: any) => ({
-              ...product,
-              categoryName: cat.name,
-              category: cat.category, // Add category field for filtering
-              // Map API field names to frontend expected names
-              image: product.imageUrl,
-              rating: product.reviewAverage || 0,
-              protein: product.nutrition?.protein || product.protein || 20,
-              calories: product.nutrition?.calories || product.calories || 110,
-              reviews: product.reviewCount || 0
-            }))
-        );
+            .map((product: any) => {
+              try {
+                return {
+                  ...product,
+                  categoryName: cat.name || 'その他',
+                  category: cat.category || 'OTHER',
+                  // Map API field names to frontend expected names
+                  image: product.imageUrl || product.image || '/placeholder-protein.svg',
+                  rating: product.reviewAverage || product.rating || 0,
+                  protein: product.nutrition?.protein || product.protein || 20,
+                  calories: product.nutrition?.calories || product.calories || 110,
+                  reviews: product.reviewCount || product.reviews || 0,
+                  // 必須フィールドのデフォルト値を設定
+                  tags: product.tags || [],
+                  description: product.description || '',
+                  name: product.name || 'Unknown Product'
+                };
+              } catch (mapError) {
+                console.warn('商品データマッピングエラー:', mapError, product);
+                return null;
+              }
+            })
+            .filter(Boolean); // null値を除去
+        });
         
         setAllProducts(flatProducts);
         setShowAllProducts(true);
         
         console.log(`✅ 全商品データを読み込み (${data.source}):`, flatProducts.length, '商品');
       } else {
-        console.error('❌ 全商品データ取得失敗:', data.error);
+        console.error('❌ 全商品データ取得失敗:', data);
+        // フォールバック: 空配列を設定
+        setAllProducts([]);
+        setShowAllProducts(true);
       }
     } catch (error) {
       console.error('❌ 全商品データ取得エラー:', error);
+      // エラー時は空配列を設定して画面を壊さない
+      setAllProducts([]);
+      setShowAllProducts(true);
     } finally {
       setIsLoadingAllProducts(false);
     }
@@ -206,7 +239,13 @@ export default function GeminiPage() {
         setMinPrice('');
         setMaxPrice('');
         if (allProducts.length === 0) {
-          loadAllProducts();
+          // 非同期処理を安全に実行
+          loadAllProducts().catch((error) => {
+            console.error('全商品読み込みエラー:', error);
+          });
+        } else {
+          // 既にデータがある場合は表示フラグをON
+          setShowAllProducts(true);
         }
       }
     }
@@ -397,8 +436,12 @@ export default function GeminiPage() {
                           ? 'bg-primary text-white shadow-md shadow-primary/20' 
                           : 'text-slate-600 hover:text-primary hover:bg-slate-50'
                       }`}
+                      disabled={isLoadingAllProducts && filter.id === 'ALL_PRODUCTS'}
                     >
                       {filter.label}
+                      {isLoadingAllProducts && filter.id === 'ALL_PRODUCTS' && (
+                        <span className="ml-2 w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></span>
+                      )}
                     </button>
                   ))}
                </div>
@@ -576,7 +619,7 @@ export default function GeminiPage() {
             </div>
 
             {/* Product Grid - Compact 2 columns on Mobile, 5 on Large Screens */}
-            {isLoading ? (
+            {isLoading || (isLoadingAllProducts && activeTabId === 'ALL_PRODUCTS') ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                 {[...Array(10)].map((_, index) => (
                   <div key={index} className="bg-white border border-slate-200 rounded-lg p-4 animate-pulse">
@@ -589,13 +632,30 @@ export default function GeminiPage() {
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                {displayProducts.map(product => (
-                  <ProductCard 
-                    key={product.id} 
-                    product={product} 
-                    onOpenDetail={handleOpenDetail}
-                  />
-                ))}
+                {displayProducts.map(product => {
+                  // 商品データの基本的な検証
+                  if (!product || !product.id) {
+                    console.warn('不正な商品データ:', product);
+                    return null;
+                  }
+                  
+                  try {
+                    return (
+                      <ProductCard 
+                        key={product.id} 
+                        product={product} 
+                        onOpenDetail={handleOpenDetail}
+                      />
+                    );
+                  } catch (cardError) {
+                    console.error('ProductCard描画エラー:', cardError, product);
+                    return (
+                      <div key={product.id} className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                        <p className="text-xs text-red-600">商品データエラー</p>
+                      </div>
+                    );
+                  }
+                })}
               </div>
             )}
 

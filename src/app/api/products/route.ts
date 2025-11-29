@@ -40,16 +40,35 @@ export async function GET() {
                   id: "dummy_1",
                   name: "ザバス ホエイプロテイン100 ココア味",
                   brand: "ザバス",
-                  imageUrl: "https://via.placeholder.com/150",
+                  imageUrl: "/placeholder-protein.svg",
                   reviewAverage: 4.5,
                   reviewCount: 1000,
                   price: 3980,
                   pricePerServing: 133,
-                  nutrition: { protein: 20, calories: 110 },
+                  nutrition: { protein: 20, calories: 110, servings: 30, servingSize: 30 },
                   type: "ホエイ",
                   flavor: "チョコ",
                   shopName: "サンプル店舗",
-                  affiliateUrl: "#"
+                  affiliateUrl: "#",
+                  tags: ["人気商品"],
+                  description: "信頼のザバスブランド ホエイプロテイン"
+                },
+                {
+                  id: "dummy_2",
+                  name: "マイプロテイン インパクトホエイ バニラ味",
+                  brand: "マイプロテイン",
+                  imageUrl: "/placeholder-protein.svg",
+                  reviewAverage: 4.2,
+                  reviewCount: 2500,
+                  price: 2980,
+                  pricePerServing: 99,
+                  nutrition: { protein: 21, calories: 103, servings: 30, servingSize: 30 },
+                  type: "ホエイ",
+                  flavor: "バニラ",
+                  shopName: "公式ストア",
+                  affiliateUrl: "#",
+                  tags: ["コスパ最強"],
+                  description: "ヨーロッパ No.1 ブランドの高品質プロテイン"
                 }
               ]
             }

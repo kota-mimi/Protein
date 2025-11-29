@@ -10,15 +10,25 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenDetail }) => {
-  // 最安値を取得（楽天APIからのpriceプロパティ優先）
-  const minPrice = product.price || (product.shops && product.shops.length > 0 ? Math.min(...product.shops.map(s => s.price)) : 0);
-
-  // タンパク質1gあたりの価格計算 (簡易)
-  let pricePerProtein = 0;
-  if (product.specs && product.specs.proteinRatio > 0 && product.specs.weightGrams > 0) {
-    const totalProtein = product.specs.weightGrams * (product.specs.proteinRatio / 100);
-    pricePerProtein = Math.round((minPrice / totalProtein) * 10) / 10;
+  // 基本データ検証
+  if (!product || !product.id || !product.name) {
+    return (
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+        <p className="text-xs text-gray-500">商品データが不正です</p>
+      </div>
+    );
   }
+
+  try {
+    // 最安値を取得（楽天APIからのpriceプロパティ優先）
+    const minPrice = product.price || (product.shops && product.shops.length > 0 ? Math.min(...product.shops.map(s => s.price || 0)) : 0);
+
+    // タンパク質1gあたりの価格計算 (簡易)
+    let pricePerProtein = 0;
+    if (product.specs && product.specs.proteinRatio > 0 && product.specs.weightGrams > 0) {
+      const totalProtein = product.specs.weightGrams * (product.specs.proteinRatio / 100);
+      pricePerProtein = Math.round((minPrice / totalProtein) * 10) / 10;
+    }
 
   return (
     <div 
@@ -27,7 +37,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenDetail 
     >
       
       {/* Ranking/Badge (Accent Red - Jersey Number Color) */}
-      {product.tags && product.tags.includes('ランキング1位') && (
+      {product.tags && Array.isArray(product.tags) && product.tags.includes('ランキング1位') && (
         <div className="absolute top-0 left-0 z-10 bg-red-600 text-white font-black text-[10px] px-2 py-0.5 rounded-br-lg shadow-md">
           No.1 👑
         </div>
@@ -37,14 +47,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenDetail 
       {/* Image */}
       <div className="aspect-[4/3] overflow-hidden relative bg-slate-50">
         <img 
-          src={product.image} 
-          alt={product.name} 
+          src={product.image || '/placeholder-protein.svg'} 
+          alt={product.name || 'プロテイン商品'} 
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = '/placeholder-protein.svg';
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/5 to-transparent"></div>
 
         <div className="absolute bottom-2 left-2 flex gap-1 flex-wrap pr-2">
-          {product.tags.slice(0, 2).map(tag => (
+          {(product.tags && Array.isArray(product.tags) ? product.tags : []).slice(0, 2).map(tag => (
              <span key={tag} className="text-[10px] font-bold bg-white/95 text-slate-800 px-1.5 py-0.5 rounded backdrop-blur-sm border border-slate-100 shadow-sm">
                {tag}
              </span>
@@ -57,8 +71,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenDetail 
         <div className="flex items-center space-x-1 mb-1">
           {/* 星を黄色に */}
           <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
-          <span className="text-sm text-slate-800 font-bold">{product.rating}</span>
-          <span className="text-xs text-slate-400">({product.reviews})</span>
+          <span className="text-sm text-slate-800 font-bold">{product.rating || 0}</span>
+          <span className="text-xs text-slate-400">({product.reviews || 0})</span>
         </div>
 
         <h3 className="text-base font-bold text-slate-800 mb-2 leading-snug line-clamp-2 group-hover:text-primary transition-colors min-h-[3em]">
@@ -136,4 +150,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenDetail 
       </div>
     </div>
   );
+  } catch (error) {
+    console.error('ProductCard描画エラー:', error);
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+        <p className="text-xs text-red-600">商品表示エラー</p>
+        <p className="text-xs text-gray-500 mt-1">{product.name || 'Unknown'}</p>
+      </div>
+    );
+  }
 };
