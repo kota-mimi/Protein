@@ -58,10 +58,6 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
 
   const analyze = async (finalAnswers: {[key: number]: string}) => {
     setIsAnalyzing(true);
-    // Gemini API call
-    const report = await generateDiagnosisReport(finalAnswers);
-    setResult(report);
-    setIsAnalyzing(false);
     
     // 簡易ロジックで推奨フィルターを決定
     let recommendedType = 'ALL';
@@ -69,7 +65,11 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
     else if (finalAnswers[1].includes("ダイエット")) recommendedType = 'VEGAN';
     else if (finalAnswers[4].includes("価格")) recommendedType = 'WHEY';
     
-    onComplete(recommendedType);
+    // 短い遅延後に直接完了処理
+    setTimeout(() => {
+      setIsAnalyzing(false);
+      onComplete(recommendedType);
+    }, 1500);
   };
 
   const reset = () => {
@@ -107,22 +107,6 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
               <div>
                 <h3 className="text-xl font-bold text-secondary mb-2">AIが分析中...</h3>
                 <p className="text-slate-500">あなたのライフスタイルに最適な配合を計算しています</p>
-              </div>
-            </div>
-          ) : result ? (
-            <div className="space-y-6">
-              <div className="bg-blue-50 border border-blue-100 p-6 rounded-xl">
-                <h3 className="text-lg font-bold text-secondary mb-4 flex items-center">
-                  <Check className="w-5 h-5 mr-2 text-primary" />
-                  診断結果レポート
-                </h3>
-                <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">{result}</p>
-              </div>
-              <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                <p className="text-sm text-slate-500 mb-2">この診断に基づくおすすめ商品を絞り込みました。</p>
-                <Button className="w-full" onClick={reset}>
-                  おすすめ商品を見る <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
               </div>
             </div>
           ) : (

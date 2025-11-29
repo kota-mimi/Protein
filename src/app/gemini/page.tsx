@@ -32,6 +32,8 @@ export default function GeminiPage() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [isDiagnosisOpen, setIsDiagnosisOpen] = useState(false);
+  const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
+  const [showRecommendations, setShowRecommendations] = useState(false);
   
   // Product data
   const [products, setProducts] = useState<Product[]>([]);
@@ -102,10 +104,22 @@ export default function GeminiPage() {
 
   const handleDiagnosisComplete = (recommendedType: string) => {
     setCurrentView('HOME');
-    setSelectedCategory(recommendedType);
-    setActiveTabId('CUSTOM'); // Clear tab selection
+    setIsDiagnosisOpen(false);
+    
+    // 診断結果に基づいて推薦商品を選択（最大10個）
+    const filteredProducts = products.filter(product => {
+      if (recommendedType === 'WHEY') return product.category === 'WHEY';
+      if (recommendedType === 'VEGAN') return product.category === 'VEGAN';
+      return true; // ALL の場合
+    });
+    
+    // 10個に制限して推薦商品を設定
+    const recommended = filteredProducts.slice(0, 10);
+    setRecommendedProducts(recommended);
+    setShowRecommendations(true);
+    
     setTimeout(() => {
-        document.getElementById('ranking')?.scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('recommendations')?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
   };
 
@@ -291,6 +305,45 @@ export default function GeminiPage() {
               </div>
             </div>
           </header>
+
+          {/* AI診断結果の推薦商品セクション */}
+          {showRecommendations && (
+            <section id="recommendations" className="container mx-auto px-4 py-8 bg-gradient-to-br from-blue-50 to-slate-50 border-b border-slate-100">
+              <div className="text-center mb-8">
+                <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full mb-4">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-semibold text-primary">AI診断結果</span>
+                </div>
+                <h2 className="text-2xl font-bold text-secondary mb-2">
+                  あなたにおすすめのプロテイン
+                </h2>
+                <p className="text-slate-600">診断結果に基づいて、最適な商品を厳選しました</p>
+              </div>
+              
+              {/* 推薦商品グリッド */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+                {recommendedProducts.map((product) => (
+                  <ProductCard
+                    key={product.id} 
+                    product={product} 
+                    onSave={toggleSave}
+                    isSaved={savedItems.some(i => i.id === product.id)}
+                    onOpenDetail={handleOpenDetail}
+                  />
+                ))}
+              </div>
+              
+              {/* 他の商品も見る */}
+              <div className="text-center">
+                <button 
+                  onClick={() => setShowRecommendations(false)}
+                  className="text-primary hover:text-primaryDark font-semibold text-sm"
+                >
+                  他の商品も見る →
+                </button>
+              </div>
+            </section>
+          )}
 
           {/* Main Content Area */}
           <main id="ranking" className="container mx-auto px-4 py-8 bg-white min-h-[600px]">
