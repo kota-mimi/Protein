@@ -67,6 +67,24 @@ export default function GeminiPage() {
     }
   }, []);
 
+  // 初期データを楽天APIから取得
+  useEffect(() => {
+    const loadInitialProducts = async () => {
+      try {
+        setIsLoading(true);
+        const products = await searchRakutenProducts('プロテイン');
+        setRecommendedProducts(products.slice(0, 20));
+        console.log('✅ 初期商品データを楽天APIから読み込み:', products.length, '商品');
+      } catch (error) {
+        console.error('❌ 初期データ読み込みエラー:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadInitialProducts();
+  }, []);
+
   // Load products
   useEffect(() => {
     const loadProducts = async () => {
@@ -112,11 +130,52 @@ export default function GeminiPage() {
     }, 100);
   };
 
-  // Load all products from API
+  // Load all products from API - 楽天APIから直接取得
   const loadAllProducts = async () => {
     try {
       setIsLoadingAllProducts(true);
       
+      // 楽天APIから直接プロテイン商品を検索
+      const rakutenResponse = await fetch('/api/rakuten?keyword=プロテイン&page=1');
+      
+      if (!rakutenResponse.ok) {
+        throw new Error(`Rakuten API Error: ${rakutenResponse.status} ${rakutenResponse.statusText}`);
+      }
+      
+      const rakutenData = await rakutenResponse.json();
+      
+      if (rakutenData.success && rakutenData.products && Array.isArray(rakutenData.products)) {
+        // 楽天商品データを直接使用
+        const rakutenProducts = rakutenData.products.map((product: any) => ({
+          ...product,
+          categoryName: 'プロテイン商品',
+          category: 'PROTEIN',
+          // Map API field names to frontend expected names
+          image: product.imageUrl || product.image || '/placeholder-protein.svg',
+          rating: product.reviewAverage || product.rating || 0,
+          protein: product.features?.protein || product.nutrition?.protein || product.protein || 20,
+          calories: product.features?.calories || product.nutrition?.calories || product.calories || 110,
+          reviews: product.reviewCount || product.reviews || 0,
+          // 必須フィールドのデフォルト値を設定
+          tags: ['楽天', ...extractProteinTags(product.name)].filter(Boolean),
+          description: product.description || '',
+          name: product.name || 'Unknown Product',
+          shops: product.shops || [{
+            name: 'Rakuten' as const,
+            price: product.price || 0,
+            url: product.affiliateUrl || product.url || '#'
+          }]
+        }));
+        
+        setAllProducts(rakutenProducts);
+        setShowAllProducts(true);
+        
+        console.log(`✅ 楽天から商品データを読み込み:`, rakutenProducts.length, '商品');
+        return;
+      }
+      
+      // 楽天APIが失敗した場合、キャッシュAPIにフォールバック
+      console.log('⚠️ 楽天API失敗、キャッシュAPIにフォールバック');
       const response = await fetch('/api/products');
       
       if (!response.ok) {
@@ -195,38 +254,101 @@ export default function GeminiPage() {
     }
   };
 
+  // プロテイン商品名からタグを抽出
+  const extractProteinTags = (productName: string): string[] => {
+    const tags = [];
+    const name = productName.toLowerCase();
+    
+    if (name.includes('ザバス') || name.includes('savas')) tags.push('人気ブランド');
+    if (name.includes('マイプロテイン') || name.includes('myprotein')) tags.push('海外ブランド');
+    if (name.includes('激安') || name.includes('コスパ') || name.includes('安い')) tags.push('コスパ最強');
+    if (name.includes('セール') || name.includes('特価') || name.includes('割引')) tags.push('セール中');
+    if (name.includes('wpi') || name.includes('アイソレート')) tags.push('高品質');
+    if (name.includes('3kg') || name.includes('大容量')) tags.push('大容量');
+    if (name.includes('1kg') && !name.includes('3kg')) tags.push('標準サイズ');
+    if (name.includes('チョコ') || name.includes('ココア')) tags.push('チョコ味');
+    if (name.includes('バニラ')) tags.push('バニラ味');
+    if (name.includes('ストロベリー') || name.includes('いちご')) tags.push('ストロベリー味');
+    
+    return tags;
+  };
+
+  // 楽天APIから商品検索（共通関数）
+  const searchRakutenProducts = async (keyword: string) => {
+    try {
+      const response = await fetch(`/api/rakuten?keyword=${encodeURIComponent(keyword)}&page=1`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.products) {
+          return data.products.map((product: any) => ({
+            ...product,
+            categoryName: 'プロテイン商品',
+            category: 'PROTEIN',
+            image: product.imageUrl || '/placeholder-protein.svg',
+            rating: product.reviewAverage || 0,
+            reviews: product.reviewCount || 0,
+            tags: ['楽天', ...extractProteinTags(product.name)].filter(Boolean),
+            description: product.description || '',
+            shops: [{
+              name: 'Rakuten' as const,
+              price: product.price || 0,
+              url: product.affiliateUrl || '#'
+            }]
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('楽天検索エラー:', error);
+    }
+    return [];
+  };
+
   // Quick Filter Tabs Logic
   const quickFilters = [
     { 
       id: 'POPULAR', 
       label: '人気ランキング', 
-      apply: () => {
+      apply: async () => {
+        setIsLoading(true);
+        const products = await searchRakutenProducts('プロテイン 人気');
+        setRecommendedProducts(products.slice(0, 20));
         setSortBy('RATING');
         setSelectedCategory('ALL');
         setSearchQuery('');
         setMinPrice('');
         setMaxPrice('');
+        setIsLoading(false);
       }
     },
     { 
       id: 'COSPHA', 
       label: 'コスパ最強', 
-      apply: () => {
+      apply: async () => {
+        setIsLoading(true);
+        const products = await searchRakutenProducts('プロテイン 激安');
+        // 価格でソート
+        const sortedProducts = products.sort((a: any, b: any) => (a.price || 99999) - (b.price || 99999));
+        setRecommendedProducts(sortedProducts.slice(0, 20));
         setSortBy('PRICE_ASC');
         setSelectedCategory('ALL');
         setSearchQuery('');
         setMinPrice('');
         setMaxPrice('');
+        setIsLoading(false);
       }
     },
     { 
       id: 'SALE', 
       label: 'セール中', 
-      apply: () => {
+      apply: async () => {
+        setIsLoading(true);
+        const products = await searchRakutenProducts('プロテイン セール');
+        setRecommendedProducts(products.slice(0, 20));
         setSearchQuery('セール');
         setSelectedCategory('ALL');
         setMinPrice('');
         setMaxPrice('');
+        setIsLoading(false);
       }
     },
     { 
@@ -251,9 +373,13 @@ export default function GeminiPage() {
     }
   ];
 
-  const handleQuickFilter = (id: string, applyFn: () => void) => {
+  const handleQuickFilter = async (id: string, applyFn: () => void | Promise<void>) => {
     setActiveTabId(id);
-    applyFn();
+    try {
+      await applyFn();
+    } catch (error) {
+      console.error('フィルター適用エラー:', error);
+    }
   };
 
   // Logic for filtering
