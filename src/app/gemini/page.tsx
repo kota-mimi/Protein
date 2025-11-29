@@ -678,7 +678,7 @@ export default function GeminiPage() {
                           if (searchQuery) {
                             filteredProducts = filteredProducts.filter(p => 
                               p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                              p.brand.toLowerCase().includes(searchQuery.toLowerCase())
+                              (p.brand && p.brand.toLowerCase().includes(searchQuery.toLowerCase()))
                             );
                           }
                           return `${filteredProducts.length}件表示中`;
@@ -702,15 +702,15 @@ export default function GeminiPage() {
                     if (searchQuery) {
                       filteredProducts = filteredProducts.filter(p => 
                         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        p.brand.toLowerCase().includes(searchQuery.toLowerCase())
+                        (p.brand && p.brand.toLowerCase().includes(searchQuery.toLowerCase()))
                       );
                     }
                     
                     // Sort
                     if (sortBy === 'PRICE_ASC') {
-                      filteredProducts.sort((a, b) => a.price - b.price);
+                      filteredProducts.sort((a, b) => (a.price || 0) - (b.price || 0));
                     } else if (sortBy === 'PRICE_DESC') {
-                      filteredProducts.sort((a, b) => b.price - a.price);
+                      filteredProducts.sort((a, b) => (b.price || 0) - (a.price || 0));
                     } else if (sortBy === 'RATING') {
                       filteredProducts.sort((a, b) => b.rating - a.rating);
                     }
@@ -729,27 +729,27 @@ export default function GeminiPage() {
                         </div>
 
                         <div className="p-3">
-                          <div className="text-xs text-blue-600 font-medium mb-1">{product.brand}</div>
+                          <div className="text-xs text-blue-600 font-medium mb-1">{product.brand || 'その他'}</div>
                           
                           <h3 className="font-medium text-sm text-gray-900 mb-2 line-clamp-2 h-10">
                             {product.name}
                           </h3>
 
                           <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 mb-2">
-                            <div>タンパク質: {product.protein}g</div>
-                            <div>カロリー: {product.calories}kcal</div>
+                            <div>タンパク質: {product.protein || 20}g</div>
+                            <div>カロリー: {product.calories || 110}kcal</div>
                           </div>
 
                           {product.rating > 0 && (
                             <div className="flex items-center mb-2">
                               <span className="text-yellow-400 text-sm">★{product.rating.toFixed(1)}</span>
-                              <span className="text-xs text-gray-500 ml-1">({product.reviewCount || 0})</span>
+                              <span className="text-xs text-gray-500 ml-1">({product.reviewCount || product.reviews || 0})</span>
                             </div>
                           )}
 
                           <div className="mb-3">
-                            <div className="text-lg font-bold text-gray-900">¥{product.price.toLocaleString()}</div>
-                            <div className="text-xs text-gray-500">1回分 ¥{Math.round(product.price / 30)}</div>
+                            <div className="text-lg font-bold text-gray-900">¥{(product.price || 0).toLocaleString()}</div>
+                            <div className="text-xs text-gray-500">1回分 ¥{Math.round((product.price || 0) / 30)}</div>
                           </div>
 
                           <button
@@ -773,7 +773,7 @@ export default function GeminiPage() {
                   if (searchQuery) {
                     filteredProducts = filteredProducts.filter(p => 
                       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      p.brand.toLowerCase().includes(searchQuery.toLowerCase())
+                      (p.brand && p.brand.toLowerCase().includes(searchQuery.toLowerCase()))
                     );
                   }
                   

@@ -17,18 +17,31 @@ export interface Product {
   name: string;
   description: string;
   image: string;
-  category: 'WHEY' | 'CASEIN' | 'VEGAN' | 'BCAA' | 'ACCESSORIES';
+  category: 'WHEY' | 'CASEIN' | 'VEGAN' | 'BCAA' | 'ACCESSORIES' | string;
   rating: number;
   reviews: number;
+  reviewCount?: number;
   tags: string[];
+  
+  // 楽天API追加データ
+  brand?: string;
+  price?: number;
+  protein?: number;
+  calories?: number;
+  pricePerServing?: number;
+  shopName?: string;
+  affiliateUrl?: string;
+  categoryName?: string;
+  
   // アフィリエイト・比較用データ
-  shops: ShopPrice[];
-  specs: {
+  shops?: ShopPrice[];
+  specs?: {
     proteinRatio: number; // タンパク質含有率 %
     flavor: string;
     weight: string;
     weightGrams: number; // 計算用グラム数
   };
+  
   // 詳細分析データ
   flavorProfile?: {
     sweetness: number; // 1-5
