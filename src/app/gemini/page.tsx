@@ -7,6 +7,7 @@ import { ProductCard } from '@/components/ProductCard';
 import { AIChatWidget } from '@/components/AIChatWidget';
 import { AIDiagnosisModal } from '@/components/AIDiagnosisModal';
 import { ProteinGuide } from '@/components/ProteinGuide';
+import { ProductDetailModal } from '@/components/ProductDetailModal';
 import { Button } from '@/components/ui/Button';
 import { fetchProducts } from '@/lib/productService';
 
@@ -568,6 +569,13 @@ export default function GeminiPage() {
         isOpen={isDiagnosisOpen}
         onClose={() => setIsDiagnosisOpen(false)}
         onComplete={handleDiagnosisComplete}
+      />
+
+      {/* Product Detail Modal */}
+      <ProductDetailModal 
+        product={selectedProduct}
+        isOpen={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
       />
 
       <AIChatWidget />
