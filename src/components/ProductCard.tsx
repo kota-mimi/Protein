@@ -88,7 +88,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenDetail 
 
           {/* Direct Shop Links - Clean Text Style */}
           <div className="flex flex-col gap-1.5" onClick={(e) => e.stopPropagation()}>
-            {product.shops.map((shop) => (
+            {product.shops && product.shops.length > 0 ? product.shops.map((shop) => (
               <a 
                 key={shop.name}
                 href={shop.url}
@@ -113,7 +113,24 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenDetail 
                     <ExternalLink className="w-2.5 h-2.5 opacity-50 group-hover/btn:opacity-100 group-hover/btn:text-primary" />
                  </div>
               </a>
-            ))}
+            )) : (
+              <a 
+                href={product.affiliateUrl || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between p-1 pl-2 rounded bg-white border border-slate-200 hover:border-primary/50 transition-all group/btn shadow-sm"
+              >
+                 <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#BF0000]" />
+                    <span className="text-xs font-bold text-slate-600 leading-none">楽天</span>
+                 </div>
+                 
+                 <div className="flex items-center gap-1 px-2 py-0.5 font-mono font-bold text-xs leading-none text-slate-900">
+                    ¥{minPrice.toLocaleString()}
+                    <ExternalLink className="w-2.5 h-2.5 opacity-50 group-hover/btn:opacity-100 group-hover/btn:text-primary" />
+                 </div>
+              </a>
+            )}
           </div>
         </div>
       </div>
