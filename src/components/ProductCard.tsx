@@ -68,7 +68,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenDetail 
         {/* Specs Mini Table */}
         <div className="grid grid-cols-2 gap-2 text-xs text-slate-500 mb-3 bg-slate-50 p-2 rounded border border-slate-100">
           {/* タンパク質を緑色に */}
-          <div>タンパク質: <span className="text-green-600 font-bold">{product.specs.proteinRatio}%</span></div>
+          <div>タンパク質: <span className="text-green-600 font-bold">
+            {product.protein ? `${product.protein}g` : (product.specs?.proteinRatio ? `${product.specs.proteinRatio}%` : '-')}
+          </span></div>
           {/* コスパを赤色に */}
           <div>コスパ: 
             {pricePerProtein > 0 ? (
