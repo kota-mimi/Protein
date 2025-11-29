@@ -6,12 +6,10 @@ import { Product } from '@/types';
 
 interface ProductCardProps {
   product: Product;
-  onSave: (product: Product) => void;
-  isSaved?: boolean;
   onOpenDetail?: (product: Product) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, onSave, isSaved = false, onOpenDetail }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenDetail }) => {
   // 最安値を取得
   const minPrice = Math.min(...product.shops.map(s => s.price));
 
@@ -35,17 +33,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSave, isSav
         </div>
       )}
 
-      {/* Save Button */}
-      <button 
-        onClick={(e) => { e.stopPropagation(); onSave(product); }}
-        className={`absolute top-2 right-2 z-10 p-1.5 rounded-full transition-colors shadow-sm ${
-          isSaved 
-            ? 'bg-white text-primary shadow-primary/20' 
-            : 'bg-white/90 text-slate-400 hover:text-primary hover:bg-white'
-        }`}
-      >
-        <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
-      </button>
 
       {/* Image */}
       <div className="aspect-[4/3] overflow-hidden relative bg-slate-50">

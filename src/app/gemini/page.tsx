@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Bookmark, Menu, Search, Dumbbell, Zap, CheckCircle2, TrendingUp, Filter, Sparkles, BookOpen, X, ChevronDown, ArrowUpDown, SlidersHorizontal, Trophy, Coins, Tag, ScanSearch } from 'lucide-react';
-import { Product, SavedItem } from '@/types';
+import { Menu, Search, Dumbbell, Zap, TrendingUp, Filter, Sparkles, BookOpen, X, ChevronDown, ArrowUpDown, SlidersHorizontal, Trophy, Coins, Tag } from 'lucide-react';
+import { Product } from '@/types';
 import { ProductCard } from '@/components/ProductCard';
 import { AIChatWidget } from '@/components/AIChatWidget';
 import { AIDiagnosisModal } from '@/components/AIDiagnosisModal';
@@ -12,8 +12,6 @@ import { fetchProducts } from '@/lib/productService';
 
 export default function GeminiPage() {
   const [currentView, setCurrentView] = useState<'HOME' | 'GUIDE'>('HOME');
-  const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
-  const [isSavedListOpen, setIsSavedListOpen] = useState(false);
   
   // Modal States
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -30,7 +28,6 @@ export default function GeminiPage() {
   // UI States
   const [activeTabId, setActiveTabId] = useState<string>('POPULAR');
   const [isScrolled, setIsScrolled] = useState(false);
-  const [showToast, setShowToast] = useState(false);
   const [isDiagnosisOpen, setIsDiagnosisOpen] = useState(false);
   const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
   const [showRecommendations, setShowRecommendations] = useState(false);
@@ -81,21 +78,7 @@ export default function GeminiPage() {
     loadProducts();
   }, []);
 
-  const toggleSave = (product: Product) => {
-    setSavedItems(prev => {
-      const exists = prev.find(item => item.id === product.id);
-      if (exists) {
-        return prev.filter(item => item.id !== product.id);
-      }
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 2000);
-      return [...prev, { ...product, savedAt: new Date() }];
-    });
-  };
 
-  const removeSavedItem = (id: string) => {
-    setSavedItems(prev => prev.filter(item => item.id !== id));
-  };
 
   const handleOpenDetail = (product: Product) => {
     setSelectedProduct(product);
@@ -214,11 +197,6 @@ export default function GeminiPage() {
   return (
     <div className="min-h-screen bg-white text-secondary selection:bg-primary selection:text-white font-sans">
       
-      {/* Toast Notification */}
-      <div className={`fixed top-24 right-5 z-50 bg-white border border-primary/30 text-secondary px-4 py-3 rounded-lg shadow-xl flex items-center space-x-3 transition-all duration-300 ${showToast ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0 pointer-events-none'}`}>
-        <CheckCircle2 className="text-primary w-5 h-5" />
-        <span className="font-medium text-sm">気になるリストに保存しました</span>
-      </div>
 
       {/* Navbar */}
       <nav className={`fixed top-0 w-full z-40 transition-all duration-300 border-b ${isScrolled || currentView === 'GUIDE' ? 'bg-white/95 backdrop-blur-md border-slate-100 py-3 shadow-sm' : 'bg-transparent border-transparent py-6'}`}>
@@ -250,17 +228,6 @@ export default function GeminiPage() {
             >
                 無料診断スタート
             </Button>
-            <button 
-              className="relative p-2 text-secondary hover:text-primary transition-colors group"
-              onClick={() => setIsSavedListOpen(true)}
-            >
-              <Bookmark className="w-6 h-6 group-hover:fill-current" />
-              {savedItems.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm animate-pulse">
-                  {savedItems.length}
-                </span>
-              )}
-            </button>
             <button className="md:hidden p-2 text-secondary">
               <Menu className="w-6 h-6" />
             </button>
@@ -326,8 +293,6 @@ export default function GeminiPage() {
                   <ProductCard
                     key={product.id} 
                     product={product} 
-                    onSave={toggleSave}
-                    isSaved={savedItems.some(i => i.id === product.id)}
                     onOpenDetail={handleOpenDetail}
                   />
                 ))}
@@ -556,8 +521,6 @@ export default function GeminiPage() {
                   <ProductCard 
                     key={product.id} 
                     product={product} 
-                    onSave={toggleSave}
-                    isSaved={savedItems.some(i => i.id === product.id)}
                     onOpenDetail={handleOpenDetail}
                   />
                 ))}
@@ -599,40 +562,6 @@ export default function GeminiPage() {
         </div>
       </footer>
 
-      {/* Saved Items Sidebar */}
-      {isSavedListOpen && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="bg-black/50 flex-1" onClick={() => setIsSavedListOpen(false)} />
-          <div className="bg-white w-96 h-full overflow-y-auto shadow-2xl">
-            <div className="p-6 border-b border-slate-200 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-secondary">気になるリスト</h2>
-              <button onClick={() => setIsSavedListOpen(false)}>
-                <X className="w-6 h-6 text-slate-400" />
-              </button>
-            </div>
-            <div className="p-6">
-              {savedItems.length === 0 ? (
-                <p className="text-center text-slate-500 py-8">まだ保存した商品がありません</p>
-              ) : (
-                <div className="space-y-4">
-                  {savedItems.map(item => (
-                    <div key={item.id} className="border border-slate-200 rounded-lg p-4">
-                      <h3 className="font-bold text-sm text-secondary mb-2">{item.name}</h3>
-                      <p className="text-xs text-slate-500">保存日: {item.savedAt.toLocaleDateString()}</p>
-                      <button 
-                        onClick={() => removeSavedItem(item.id)}
-                        className="text-red-500 text-xs mt-2 hover:text-red-700"
-                      >
-                        削除
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* AI Diagnosis Modal */}
       <AIDiagnosisModal 
