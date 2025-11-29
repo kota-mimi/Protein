@@ -653,15 +653,10 @@ export default function GeminiPage() {
                         <option value="ALL">すべてのカテゴリ</option>
                         <option value="ranking_overall">人気ランキング総合</option>
                         <option value="cospa_ranking">コスパ最強ランキング</option>
-                        <option value="high_rating">高評価プロテイン</option>
-                        <option value="whey">ホエイプロテイン</option>
                         <option value="soy">ソイプロテイン</option>
-                        <option value="casein">カゼインプロテイン</option>
-                        <option value="wpi">WPIプロテイン</option>
-                        <option value="all_protein">プロテイン総合ランキング</option>
-                        <option value="savas">ザバス（SAVAS）</option>
-                        <option value="dns">DNS プロテイン</option>
-                        <option value="belegend">ビーレジェンド</option>
+                        <option value="bulk">大容量プロテイン</option>
+                        <option value="premium">プレミアムプロテイン</option>
+                        <option value="brand_haleo">HALEOプロテイン</option>
                       </select>
                     </div>
 

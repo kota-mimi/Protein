@@ -1,10 +1,11 @@
-import fs from 'fs'
-import path from 'path'
+// Server-side only imports
+const fs = typeof window === 'undefined' ? require('fs') : null
+const path = typeof window === 'undefined' ? require('path') : null
 
 const CACHE_KEY = 'featured-products'
 const CACHE_TIMESTAMP_KEY = 'featured-products-timestamp'
-const CACHE_DIR = path.join(process.cwd(), 'cache')
-const CACHE_FILE = path.join(CACHE_DIR, 'products.json')
+const CACHE_DIR = typeof window === 'undefined' ? path.join(process.cwd(), 'cache') : ''
+const CACHE_FILE = typeof window === 'undefined' ? path.join(CACHE_DIR, 'products.json') : ''
 
 // 開発環境用ファイルベース・本番環境用Vercel KVのハイブリッド対応
 export async function saveFeaturedProductsCache(data: any) {
