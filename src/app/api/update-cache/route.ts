@@ -1,27 +1,176 @@
 import { NextResponse } from 'next/server'
 import { saveFeaturedProductsCache } from '@/lib/cache'
 
-// 人気商品取得のための検索パターン
+// 楽天APIから取得する全プロテインカテゴリ
 const FEATURED_SEARCHES = [
+  // 基本プロテインタイプ
   {
     name: '人気ホエイプロテイン',
-    query: 'プロテイン ホエイ 人気',
-    category: 'whey'
+    query: 'ホエイプロテイン 人気 おすすめ',
+    category: 'whey',
+    hits: 10
   },
   {
-    name: '売れ筋ソイプロテイン',
-    query: 'プロテイン ソイ 女性',
-    category: 'soy'
+    name: 'ソイプロテイン（大豆）',
+    query: 'ソイプロテイン 大豆プロテイン',
+    category: 'soy',
+    hits: 8
   },
   {
-    name: 'コスパ最強',
-    query: 'プロテイン 安い コスパ',
-    category: 'budget'
+    name: 'カゼインプロテイン',
+    query: 'カゼインプロテイン 就寝前',
+    category: 'casein',
+    hits: 5
   },
   {
-    name: '高評価商品',
-    query: 'プロテイン 高評価 おすすめ',
-    category: 'premium'
+    name: 'WPIプロテイン',
+    query: 'WPI ホエイプロテインアイソレート',
+    category: 'wpi',
+    hits: 6
+  },
+  
+  // 人気ブランド別
+  {
+    name: 'ザバス（SAVAS）',
+    query: 'ザバス SAVAS プロテイン',
+    category: 'savas',
+    hits: 8
+  },
+  {
+    name: 'DNS プロテイン',
+    query: 'DNS プロテイン',
+    category: 'dns',
+    hits: 6
+  },
+  {
+    name: 'ビーレジェンド',
+    query: 'ビーレジェンド beLEGEND プロテイン',
+    category: 'belegend',
+    hits: 8
+  },
+  {
+    name: 'マイプロテイン',
+    query: 'マイプロテイン MyProtein',
+    category: 'myprotein',
+    hits: 6
+  },
+  {
+    name: 'アルプロン',
+    query: 'アルプロン ALPRON プロテイン',
+    category: 'alpron',
+    hits: 6
+  },
+  {
+    name: 'エクスプロージョン',
+    query: 'エクスプロージョン X-PLOSION',
+    category: 'xplosion',
+    hits: 5
+  },
+  {
+    name: 'VALX バルクス',
+    query: 'VALX バルクス プロテイン',
+    category: 'valx',
+    hits: 5
+  },
+  {
+    name: 'ゴールドジム',
+    query: 'ゴールドジム GOLDSGYM プロテイン',
+    category: 'goldsgym',
+    hits: 5
+  },
+  
+  // 用途別・目的別
+  {
+    name: 'ダイエット用プロテイン',
+    query: 'プロテイン ダイエット 減量 女性',
+    category: 'diet',
+    hits: 8
+  },
+  {
+    name: '筋トレ・筋肥大用',
+    query: 'プロテイン 筋トレ 筋肥大 バルクアップ',
+    category: 'muscle',
+    hits: 8
+  },
+  {
+    name: 'HMB配合プロテイン',
+    query: 'プロテイン HMB配合',
+    category: 'hmb',
+    hits: 5
+  },
+  {
+    name: '美容プロテイン',
+    query: 'プロテイン 美容 コラーゲン 女性',
+    category: 'beauty',
+    hits: 6
+  },
+  {
+    name: 'ジュニア・子供用',
+    query: 'プロテイン ジュニア 子供 成長',
+    category: 'junior',
+    hits: 5
+  },
+  
+  // 価格・コスパ重視
+  {
+    name: 'コスパ最強プロテイン',
+    query: 'プロテイン 安い コスパ 激安',
+    category: 'budget',
+    hits: 10
+  },
+  {
+    name: '大容量プロテイン',
+    query: 'プロテイン 大容量 5kg 3kg',
+    category: 'bulk',
+    hits: 6
+  },
+  
+  // フレーバー・味重視
+  {
+    name: 'チョコ味プロテイン',
+    query: 'プロテイン チョコレート ココア',
+    category: 'chocolate',
+    hits: 8
+  },
+  {
+    name: 'フルーツ味プロテイン',
+    query: 'プロテイン ストロベリー バナナ',
+    category: 'fruit',
+    hits: 6
+  },
+  {
+    name: '抹茶・和風味',
+    query: 'プロテイン 抹茶 きなこ 和風',
+    category: 'japanese',
+    hits: 4
+  },
+  
+  // 特殊カテゴリ
+  {
+    name: '無添加・オーガニック',
+    query: 'プロテイン 無添加 オーガニック 自然',
+    category: 'organic',
+    hits: 5
+  },
+  {
+    name: '国産プロテイン',
+    query: 'プロテイン 国産 日本製',
+    category: 'domestic',
+    hits: 6
+  },
+  {
+    name: '植物性プロテイン',
+    query: 'プロテイン 植物性 ピープロテイン',
+    category: 'plant',
+    hits: 5
+  },
+  
+  // 新商品・話題商品
+  {
+    name: '最新・話題のプロテイン',
+    query: 'プロテイン 新商品 話題 2024',
+    category: 'trending',
+    hits: 6
   }
 ]
 
@@ -59,7 +208,7 @@ export async function GET(request: Request) {
         const params = new URLSearchParams({
           applicationId: rakutenAppId,
           keyword: search.query,
-          hits: '5', // 各カテゴリから5件
+          hits: search.hits.toString(), // 各カテゴリごとに設定された件数
           page: '1',
           sort: '-reviewCount', // レビュー数順（人気順）
           formatVersion: '2'
@@ -81,7 +230,7 @@ export async function GET(request: Request) {
             const processedProducts = data.Items
               .map((item: any) => processRakutenProduct(item, search))
               .filter((product: any) => isValidProteinProduct(product))
-              .slice(0, 3) // 上位3件のみ
+              .slice(0, search.hits) // 各カテゴリごとに設定された件数を取得
             
             allProducts.push({
               category: search.category,
