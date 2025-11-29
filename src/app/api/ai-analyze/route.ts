@@ -205,7 +205,7 @@ function analyzePriceDistribution(products: any[]) {
 
 // ブランド分布分析
 function analyzeBrandDistribution(products: any[]) {
-  const brandStats = {}
+  const brandStats: { [key: string]: any } = {}
   
   products.forEach(product => {
     const brand = product.brand || 'その他'
