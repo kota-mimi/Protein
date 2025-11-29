@@ -1,32 +1,52 @@
 import { NextResponse } from 'next/server'
 import { saveFeaturedProductsCache } from '@/lib/cache'
 
-// 楽天APIから取得する全プロテインカテゴリ
+// 楽天APIから取得する全プロテインカテゴリ（大幅拡張版）
 const FEATURED_SEARCHES = [
-  // 基本プロテインタイプ
+  // 基本プロテインタイプ（件数大幅増）
   {
     name: '人気ホエイプロテイン',
-    query: 'ホエイプロテイン 人気 おすすめ',
+    query: 'ホエイプロテイン',
     category: 'whey',
-    hits: 10
+    hits: 30
   },
   {
     name: 'ソイプロテイン（大豆）',
-    query: 'ソイプロテイン 大豆プロテイン',
+    query: 'ソイプロテイン',
     category: 'soy',
-    hits: 8
+    hits: 25
   },
   {
     name: 'カゼインプロテイン',
-    query: 'カゼインプロテイン 就寝前',
+    query: 'カゼインプロテイン',
     category: 'casein',
-    hits: 5
+    hits: 15
   },
   {
     name: 'WPIプロテイン',
-    query: 'WPI ホエイプロテインアイソレート',
+    query: 'WPI プロテイン',
     category: 'wpi',
-    hits: 6
+    hits: 20
+  },
+  
+  // 総合プロテインカテゴリ（新規追加）
+  {
+    name: 'プロテイン総合ランキング',
+    query: 'プロテイン',
+    category: 'all_protein',
+    hits: 50
+  },
+  {
+    name: 'プロテイン人気商品',
+    query: 'プロテイン 人気',
+    category: 'popular_protein', 
+    hits: 40
+  },
+  {
+    name: 'プロテインおすすめ',
+    query: 'プロテイン おすすめ',
+    category: 'recommended_protein',
+    hits: 30
   },
   
   // 人気ブランド別
@@ -88,7 +108,7 @@ const FEATURED_SEARCHES = [
   },
   {
     name: '筋トレ・筋肥大用',
-    query: 'プロテイン 筋トレ 筋肥大 バルクアップ',
+    query: 'ホエイプロテイン 筋トレ',
     category: 'muscle',
     hits: 8
   },
@@ -114,13 +134,13 @@ const FEATURED_SEARCHES = [
   // 価格・コスパ重視
   {
     name: 'コスパ最強プロテイン',
-    query: 'プロテイン 安い コスパ 激安',
+    query: 'プロテイン 激安 格安',
     category: 'budget',
     hits: 10
   },
   {
     name: '大容量プロテイン',
-    query: 'プロテイン 大容量 5kg 3kg',
+    query: 'プロテイン 3kg 5kg',
     category: 'bulk',
     hits: 6
   },
@@ -140,7 +160,7 @@ const FEATURED_SEARCHES = [
   },
   {
     name: '抹茶・和風味',
-    query: 'プロテイン 抹茶 きなこ 和風',
+    query: 'プロテイン 抹茶 きなこ',
     category: 'japanese',
     hits: 4
   },
@@ -168,7 +188,7 @@ const FEATURED_SEARCHES = [
   // 新商品・話題商品
   {
     name: '最新・話題のプロテイン',
-    query: 'プロテイン 新商品 話題 2024',
+    query: 'プロテイン 新商品 人気',
     category: 'trending',
     hits: 6
   }

@@ -595,7 +595,7 @@ export default function GeminiPage() {
                     </>
                   ) : (
                     <>
-                      もっと見る（全160商品）
+                      もっと見る
                       <ChevronDown className="ml-2 h-5 w-5" />
                     </>
                   )}

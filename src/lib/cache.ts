@@ -34,6 +34,11 @@ export async function saveFeaturedProductsCache(data: any) {
 }
 
 // 商品データを読み込み（ハイブリッド対応）
+export async function getFeaturedProductsCache() {
+  return await loadFeaturedProductsCache()
+}
+
+// 商品データを読み込み（ハイブリッド対応）
 export async function loadFeaturedProductsCache() {
   try {
     // 本番環境ではVercel KV使用
