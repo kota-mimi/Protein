@@ -210,11 +210,7 @@ export default function GeminiPage() {
       <nav className={`fixed top-0 w-full z-40 transition-all duration-300 border-b ${isScrolled || currentView === 'GUIDE' ? 'bg-white/95 backdrop-blur-md border-slate-100 py-3 shadow-sm' : 'bg-transparent border-transparent py-6'}`}>
         <div className="container mx-auto px-4 flex justify-between items-center">
           {/* Logo */}
-          <div className="flex items-center space-x-2 cursor-pointer group" onClick={() => navigateTo('HOME')}>
-            {/* New Logo Mark: ScanSearch */}
-            <div className="bg-primary p-1.5 rounded-md shadow-[0_0_15px_rgba(0,90,156,0.3)] group-hover:shadow-[0_0_20px_rgba(0,90,156,0.5)] transition-all duration-300">
-               <ScanSearch className="w-6 h-6 text-white" />
-            </div>
+          <div className="flex items-center cursor-pointer group" onClick={() => navigateTo('HOME')}>
             <span className="text-xl md:text-2xl font-black tracking-widest text-secondary group-hover:text-primary transition-colors">
               MITSUKERU
             </span>
