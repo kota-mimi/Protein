@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Menu, Search, Dumbbell, Zap, TrendingUp, Filter, Sparkles, BookOpen, X, ChevronDown, ArrowUpDown, SlidersHorizontal, Trophy, Coins, Tag } from 'lucide-react';
+import Link from 'next/link';
+import { Menu, Search, Dumbbell, Zap, TrendingUp, Filter, Sparkles, BookOpen, X, ChevronDown, ArrowUpDown, SlidersHorizontal, Trophy, Coins, Tag, ShoppingBag } from 'lucide-react';
 import { Product } from '@/types';
 import { ProductCard } from '@/components/ProductCard';
 import { AIChatWidget } from '@/components/AIChatWidget';
@@ -213,7 +214,11 @@ export default function GeminiPage() {
           <div className="hidden md:flex items-center space-x-8 text-sm font-semibold tracking-wide text-slate-600">
             <button onClick={() => { navigateTo('HOME'); setIsDiagnosisOpen(true); }} className="hover:text-primary transition-colors flex items-center">AI診断</button>
             <button onClick={() => navigateTo('GUIDE')} className={`transition-colors flex items-center ${currentView === 'GUIDE' ? 'text-primary' : 'hover:text-secondary'}`}>初心者ガイド</button>
-            <button onClick={() => { navigateTo('HOME'); setTimeout(() => document.getElementById('ranking')?.scrollIntoView({behavior:'smooth'}), 100)}} className="hover:text-secondary transition-colors">商品一覧</button>
+            <Link href="/products" className="hover:text-secondary transition-colors flex items-center">
+              <ShoppingBag className="w-4 h-4 mr-1" />
+              全商品一覧
+            </Link>
+            <button onClick={() => { navigateTo('HOME'); setTimeout(() => document.getElementById('ranking')?.scrollIntoView({behavior:'smooth'}), 100)}} className="hover:text-secondary transition-colors">おすすめ</button>
           </div>
 
           {/* Actions */}
