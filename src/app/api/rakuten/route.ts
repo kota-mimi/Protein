@@ -162,27 +162,45 @@ function estimateServings(itemName: string): number {
   return 30 // デフォルト30回分
 }
 
-// プロテイン商品判定
+// プロテイン商品判定（厳格版 - プロテイン粉末のみ）
 function isProteinProduct(itemName: string): boolean {
-  const proteinKeywords = [
+  // 必須キーワード - これらのうち少なくとも1つが含まれている必要
+  const essentialKeywords = [
     'プロテイン', 'protein', 'ホエイ', 'whey', 'ソイ', 'soy', 
-    'カゼイン', 'casein', 'タンパク質', 'アミノ酸'
+    'カゼイン', 'casein'
   ]
   
+  // 除外キーワード - これらが含まれていたら除外
   const excludeKeywords = [
-    'シェイカー', 'ボトル', '容器', 'サプリメント', 'ビタミン',
-    'クレアチン', 'BCAA', 'HMB'
+    'シェイカー', 'ボトル', '容器', 'ドリンク', '飲料',
+    'サプリメント', 'ビタミン', 'ミネラル',
+    'クレアチン', 'BCAA', 'HMB', 'EAA', 'グルタミン',
+    'マルチビタミン', 'フィッシュオイル', 'オメガ',
+    'バー', '棒', 'クッキー', 'ウエハース', 'グミ',
+    'タブレット', '錠剤', 'カプセル',
+    'スプーン', 'ファンネル', '漏斗', 'メジャー',
+    'ケース', 'ケース付き', 'セット',
+    'アパレル', 'ウェア', 'タオル', '服',
+    'ダンベル', 'バーベル', '器具',
+    '本', 'DVD', 'ブック', 'マニュアル'
   ]
   
-  const hasProtein = proteinKeywords.some(keyword => 
-    itemName.toLowerCase().includes(keyword.toLowerCase())
+  const itemLower = itemName.toLowerCase()
+  
+  // 必須キーワードチェック
+  const hasEssential = essentialKeywords.some(keyword => 
+    itemLower.includes(keyword.toLowerCase())
   )
   
+  // 除外キーワードチェック
   const hasExcluded = excludeKeywords.some(keyword => 
     itemName.includes(keyword)
   )
   
-  return hasProtein && !hasExcluded
+  // 重量の記載があることを確認（プロテイン粉末には通常重量表記がある）
+  const hasWeight = /\d+(?:\.\d+)?(?:kg|g|キロ|グラム)/i.test(itemName)
+  
+  return hasEssential && !hasExcluded && hasWeight
 }
 
 // タグ抽出
