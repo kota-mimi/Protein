@@ -152,11 +152,6 @@ export default function GeminiPage() {
         setShowAllProducts(true);
         
         console.log(`✅ 全商品データを読み込み (${data.source}):`, flatProducts.length, '商品');
-        
-        // 商品一覧セクションにスクロール
-        setTimeout(() => {
-          document.getElementById('all-products')?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
       } else {
         console.error('❌ 全商品データ取得失敗:', data.error);
       }
@@ -210,7 +205,9 @@ export default function GeminiPage() {
         setSearchQuery('');
         setMinPrice('');
         setMaxPrice('');
-        loadAllProducts();
+        if (allProducts.length === 0) {
+          loadAllProducts();
+        }
       }
     }
   ];
@@ -226,9 +223,10 @@ export default function GeminiPage() {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       const matchName = p.name.toLowerCase().includes(query);
-      const matchDesc = p.description.toLowerCase().includes(query);
-      const matchTags = p.tags.some(t => t.toLowerCase().includes(query));
-      if (!matchName && !matchDesc && !matchTags) return false;
+      const matchDesc = (p.description || '').toLowerCase().includes(query);
+      const matchTags = (p.tags || []).some(t => t.toLowerCase().includes(query));
+      const matchBrand = (p.brand || '').toLowerCase().includes(query);
+      if (!matchName && !matchDesc && !matchTags && !matchBrand) return false;
     }
 
     // 2. Category Filter
