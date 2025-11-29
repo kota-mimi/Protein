@@ -8,26 +8,26 @@ import GoogleAnalytics from '@/components/GoogleAnalytics'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'プロテイン診断 | 最適なプロテインを無料で見つける | 価格比較',
-  description: '5つの質問に答えるだけで、あなたの目的・体質・好みにぴったりのプロテインを診断。複数のECサイトから最安値を検索して最適な商品を提案します。完全無料、登録不要。',
-  keywords: 'プロテイン,診断,楽天,価格比較,ホエイプロテイン,ソイプロテイン,筋トレ,ダイエット,栄養,サプリメント',
-  authors: [{ name: 'プロテイン診断サービス' }],
+  title: 'MITSUKERU | 最適なプロテインが見つかる',
+  description: 'あなたの「体質」と「目的」にベストマッチする商品をAIが分析。各ショップの価格をリアルタイム比較し、最安値で賢く手に入れよう。',
+  keywords: 'プロテイン,MITSUKERU,AI診断,楽天,価格比較,ホエイプロテイン,ソイプロテイン,筋トレ,ダイエット,栄養,サプリメント',
+  authors: [{ name: 'MITSUKERU' }],
   viewport: 'width=device-width, initial-scale=1',
   robots: 'index, follow',
   openGraph: {
-    title: 'プロテイン診断 | 最適なプロテインを無料で見つける',
-    description: '5つの質問に答えるだけで、あなたにぴったりのプロテインを診断。複数サイトの最安値で購入できます。',
+    title: 'MITSUKERU | 最適なプロテインが見つかる',
+    description: 'あなたの「体質」と「目的」にベストマッチする商品をAIが分析。各ショップの価格をリアルタイム比較し、最安値で賢く手に入れよう。',
     type: 'website',
     locale: 'ja_JP',
-    siteName: 'プロテイン診断サービス',
+    siteName: 'MITSUKERU',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'プロテイン診断 | 最適なプロテインを無料で見つける',
-    description: '5つの質問に答えるだけで、あなたにぴったりのプロテインを診断。複数サイトの最安値で購入できます。',
+    title: 'MITSUKERU | 最適なプロテインが見つかる',
+    description: 'あなたの「体質」と「目的」にベストマッチする商品をAIが分析。各ショップの価格をリアルタイム比較し、最安値で賢く手に入れよう。',
   },
   alternates: {
-    canonical: 'https://your-domain.vercel.app',
+    canonical: 'https://protein-ai-diagnosis.vercel.app',
   }
 }
 
@@ -38,16 +38,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
-      <body className={`${inter.className} min-h-screen flex flex-col bg-white font-sans text-gray-900`}>
+      <body className={`${inter.className} min-h-screen bg-white font-sans text-gray-900`}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebApplication",
-              "name": "プロテイン診断サービス",
-              "description": "あなたの目的・体質・好みにぴったりのプロテインを診断するサービス",
-              "url": "https://your-domain.vercel.app",
+              "name": "MITSUKERU",
+              "description": "あなたの体質と目的にベストマッチする商品をAIが分析",
+              "url": "https://protein-ai-diagnosis.vercel.app",
               "applicationCategory": "HealthApplication",
               "operatingSystem": "Web",
               "offers": {
@@ -56,20 +56,16 @@ export default function RootLayout({
                 "priceCurrency": "JPY"
               },
               "featureList": [
-                "5ステップでプロテイン診断",
+                "AIプロテイン診断",
                 "楽天商品価格比較",
-                "栄養成分分析",
+                "最安値検索",
                 "個人の目的に合わせた提案"
               ]
             })
           }}
         />
         <GoogleAnalytics trackingId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || ''} />
-        <Header />
-        <main className="flex-grow">
-          {children}
-        </main>
-        <Footer />
+        {children}
       </body>
     </html>
   )
