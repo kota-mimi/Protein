@@ -123,17 +123,29 @@ export default function GeminiPage() {
       if (data.success && data.categories) {
         // カテゴリから全商品を平坦化
         const flatProducts = data.categories.flatMap((cat: any) => 
-          cat.products.map((product: any) => ({
-            ...product,
-            categoryName: cat.name,
-            category: cat.category, // Add category field for filtering
-            // Map API field names to frontend expected names
-            image: product.imageUrl,
-            rating: product.reviewAverage || 0,
-            protein: product.nutrition?.protein || product.protein || 20,
-            calories: product.nutrition?.calories || product.calories || 110,
-            reviews: product.reviewCount || 0
-          }))
+          cat.products
+            .filter((product: any) => {
+              // プロテイン以外の商品を除外
+              const name = product.name.toLowerCase()
+              const excludeKeywords = [
+                'とろろ昆布', 'とろろ', '昆布', '烏龍茶', 'ウーロン茶', 'お茶', '茶', 
+                'オーツミルク', 'オーツ', '豆乳', '豆汁', 'ソイミルク', 'ミルク',
+                'ローファットミルク', '低脂肪乳', '野菜生活', '野菜ジュース', 'カゴメ', 
+                'コーヒー', '珈琲', 'ドリンク', 'ジュース', '飲料'
+              ]
+              return !excludeKeywords.some(keyword => name.includes(keyword))
+            })
+            .map((product: any) => ({
+              ...product,
+              categoryName: cat.name,
+              category: cat.category, // Add category field for filtering
+              // Map API field names to frontend expected names
+              image: product.imageUrl,
+              rating: product.reviewAverage || 0,
+              protein: product.nutrition?.protein || product.protein || 20,
+              calories: product.nutrition?.calories || product.calories || 110,
+              reviews: product.reviewCount || 0
+            }))
         );
         
         setAllProducts(flatProducts);

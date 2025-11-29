@@ -278,7 +278,11 @@ function isValidProteinProduct(product: any): boolean {
   )
   
   // 除外キーワード（追加）
-  const excludeKeywords = ['甘酒', 'あまざけ', 'シェイカー', 'ボトル', '計量', 'スプーン', 'サプリメント', 'ビタミン', 'シェーカー', '米麹', 'レジスタントプロテイン']
+  const excludeKeywords = [
+    '甘酒', 'あまざけ', 'シェイカー', 'ボトル', '計量', 'スプーン', 'サプリメント', 'ビタミン', 'シェーカー', '米麹', 'レジスタントプロテイン',
+    'とろろ昆布', 'とろろ', '昆布', '烏龍茶', 'ウーロン茶', 'お茶', '茶', 'オーツミルク', 'オーツ', '豆乳', '豆汁', 'ソイミルク', 'ミルク',
+    'ローファットミルク', '低脂肪乳', '野菜生活', '野菜ジュース', 'カゴメ', 'コーヒー', '珈琲', 'ドリンク', 'ジュース', '飲料'
+  ]
   const hasExcludeKeyword = excludeKeywords.some(keyword => 
     name.includes(keyword) || description.includes(keyword)
   )
