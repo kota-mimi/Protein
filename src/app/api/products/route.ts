@@ -16,23 +16,19 @@ export async function GET() {
         lastUpdated: cachedData.lastUpdated
       })
     } else {
-      // キャッシュが古い場合は楽天APIから直接取得
-      console.log('⏰ キャッシュが古いため、楽天APIから取得中...')
+      // キャッシュが古い場合、キャッシュデータがあれば古いデータでも返す
+      console.log('⏰ キャッシュが古いですが、利用可能なデータを返します')
       
-      // update-cacheエンドポイントを内部的に呼び出し
-      const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'
-      const response = await fetch(`${baseUrl}/api/update-cache?token=update-morning-8am`)
-      const data = await response.json()
-      
-      if (data.success && data.categories) {
+      if (cachedData && cachedData.categories) {
         return NextResponse.json({
           success: true,
-          categories: data.categories,
-          source: 'fresh',
-          lastUpdated: new Date().toISOString()
+          categories: cachedData.categories,
+          source: 'expired_cache',
+          lastUpdated: cachedData.lastUpdated,
+          note: 'Using expired cache data. Fresh data will be available after next update.'
         })
       } else {
-        throw new Error('Failed to fetch fresh data')
+        throw new Error('No cached data available and unable to fetch fresh data')
       }
     }
   } catch (error: any) {
