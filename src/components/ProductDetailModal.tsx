@@ -16,11 +16,11 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 }) => {
   if (!product || !isOpen) return null;
 
-  const minPrice = Math.min(...product.shops.map(s => s.price));
+  const minPrice = product.price || (product.shops && product.shops.length > 0 ? Math.min(...product.shops.map(s => s.price)) : 0);
   
   // タンパク質1gあたりの価格計算
   let pricePerProtein = 0;
-  if (product.specs.proteinRatio > 0 && product.specs.weightGrams > 0) {
+  if (product.specs && product.specs.proteinRatio > 0 && product.specs.weightGrams > 0) {
     const totalProtein = product.specs.weightGrams * (product.specs.proteinRatio / 100);
     pricePerProtein = Math.round((minPrice / totalProtein) * 10) / 10;
   }
@@ -152,7 +152,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             {/* Purchase Links */}
             <div className="mt-auto pt-4">
               <div className="space-y-2">
-                 {product.shops.map((shop) => (
+                 {product.shops && product.shops.length > 0 ? product.shops.map((shop) => (
                    <a 
                      key={shop.name}
                      href={shop.url}
@@ -169,7 +169,22 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                         <ExternalLink className="w-4 h-4 ml-2 text-slate-400 group-hover:text-primary" />
                      </span>
                    </a>
-                 ))}
+                 )) : (
+                   <a 
+                     href={product.affiliateUrl || '#'}
+                     target="_blank" 
+                     rel="noopener noreferrer"
+                     className="flex items-center justify-between w-full p-3 rounded bg-slate-50 hover:bg-slate-100 transition-all border border-slate-200 hover:border-slate-300 group shadow-sm"
+                   >
+                     <div className="flex items-center gap-2">
+                       <span className="w-2 h-2 rounded-full bg-[#BF0000]" />
+                       <span className="font-bold text-slate-700 text-sm">楽天で見る</span>
+                     </div>
+                     <span className="text-lg font-black text-slate-800 group-hover:text-slate-900">
+                       ¥{minPrice.toLocaleString()}
+                     </span>
+                   </a>
+                 )}
               </div>
             </div>
 

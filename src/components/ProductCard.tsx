@@ -10,12 +10,12 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenDetail }) => {
-  // 最安値を取得
-  const minPrice = Math.min(...product.shops.map(s => s.price));
+  // 最安値を取得（楽天APIからのpriceプロパティ優先）
+  const minPrice = product.price || (product.shops && product.shops.length > 0 ? Math.min(...product.shops.map(s => s.price)) : 0);
 
   // タンパク質1gあたりの価格計算 (簡易)
   let pricePerProtein = 0;
-  if (product.specs.proteinRatio > 0 && product.specs.weightGrams > 0) {
+  if (product.specs && product.specs.proteinRatio > 0 && product.specs.weightGrams > 0) {
     const totalProtein = product.specs.weightGrams * (product.specs.proteinRatio / 100);
     pricePerProtein = Math.round((minPrice / totalProtein) * 10) / 10;
   }
@@ -27,7 +27,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenDetail 
     >
       
       {/* Ranking/Badge (Accent Red - Jersey Number Color) */}
-      {product.tags.includes('ランキング1位') && (
+      {product.tags && product.tags.includes('ランキング1位') && (
         <div className="absolute top-0 left-0 z-10 bg-red-600 text-white font-black text-[10px] px-2 py-0.5 rounded-br-lg shadow-md">
           No.1 👑
         </div>
