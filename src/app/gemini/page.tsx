@@ -205,17 +205,17 @@ export default function GeminiPage() {
     }
 
     // 3. Price Range Filter
-    const productMinPrice = Math.min(...p.shops.map(s => s.price));
-    if (minPrice && productMinPrice < Number(minPrice)) return false;
-    if (maxPrice && productMinPrice > Number(maxPrice)) return false;
+    const productPrice = p.price || (p.shops && p.shops.length > 0 ? Math.min(...p.shops.map(s => s.price)) : 0);
+    if (minPrice && productPrice < Number(minPrice)) return false;
+    if (maxPrice && productPrice > Number(maxPrice)) return false;
     
     return true;
   });
 
   // Sorting Logic
   displayProducts.sort((a, b) => {
-    const minPriceA = Math.min(...a.shops.map(s => s.price));
-    const minPriceB = Math.min(...b.shops.map(s => s.price));
+    const minPriceA = a.price || (a.shops && a.shops.length > 0 ? Math.min(...a.shops.map(s => s.price)) : 0);
+    const minPriceB = b.price || (b.shops && b.shops.length > 0 ? Math.min(...b.shops.map(s => s.price)) : 0);
 
     if (sortBy === 'PRICE_ASC') return minPriceA - minPriceB;
     if (sortBy === 'PRICE_DESC') return minPriceB - minPriceA;
