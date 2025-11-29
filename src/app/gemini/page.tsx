@@ -197,9 +197,22 @@ export default function GeminiPage() {
       apply: () => {
         setSearchQuery('セール');
         setSelectedCategory('ALL');
-        setSortBy('RATING');
+        setMinPrice('');
+        setMaxPrice('');
       }
     },
+    { 
+      id: 'ALL_PRODUCTS', 
+      label: '全商品', 
+      apply: () => {
+        setSortBy('RATING');
+        setSelectedCategory('ALL');
+        setSearchQuery('');
+        setMinPrice('');
+        setMaxPrice('');
+        loadAllProducts();
+      }
+    }
   ];
 
   const handleQuickFilter = (id: string, applyFn: () => void) => {
@@ -208,7 +221,7 @@ export default function GeminiPage() {
   };
 
   // Logic for filtering
-  let displayProducts = products.filter(p => {
+  let displayProducts = (activeTabId === 'ALL_PRODUCTS' ? allProducts : products).filter(p => {
     // 1. Search Query Filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -599,227 +612,7 @@ export default function GeminiPage() {
               </div>
             )}
 
-            {/* Show More / All Products Section */}
-            <div className="text-center mt-12 mb-12">
-              {!showAllProducts ? (
-                <Button
-                  onClick={loadAllProducts}
-                  disabled={isLoadingAllProducts}
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-3 text-lg font-medium"
-                >
-                  {isLoadingAllProducts ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                      商品を読み込み中...
-                    </>
-                  ) : (
-                    <>
-                      もっと見る
-                      <ChevronDown className="ml-2 h-5 w-5" />
-                    </>
-                  )}
-                </Button>
-              ) : (
-                <Button
-                  onClick={() => setShowAllProducts(false)}
-                  variant="outline"
-                  className="border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-2"
-                >
-                  商品一覧を閉じる
-                  <X className="ml-2 h-4 w-4" />
-                </Button>
-              )}
-            </div>
           </main>
-
-          {/* All Products Section */}
-          {showAllProducts && (
-            <div id="all-products" className="bg-gray-50 py-12">
-              <div className="container mx-auto px-4">
-                <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">全商品一覧</h2>
-                  <p className="text-gray-600">楽天市場から厳選された{allProducts.length}商品を比較検討</p>
-                </div>
-
-                {/* Filter Bar */}
-                <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    {/* Search */}
-                    <div>
-                      <input
-                        type="text"
-                        placeholder="商品名・ブランド名で検索"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                      />
-                    </div>
-
-                    {/* Category Filter */}
-                    <div>
-                      <select 
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                      >
-                        <option value="ALL">すべてのカテゴリ</option>
-                        <option value="ranking_overall">人気ランキング総合</option>
-                        <option value="cospa_ranking">コスパ最強ランキング</option>
-                        <option value="soy">ソイプロテイン</option>
-                        <option value="bulk">大容量プロテイン</option>
-                        <option value="premium">プレミアムプロテイン</option>
-                        <option value="brand_haleo">HALEOプロテイン</option>
-                      </select>
-                    </div>
-
-                    {/* Sort */}
-                    <div>
-                      <select 
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value as any)}
-                      >
-                        <option value="RATING">評価が高い順</option>
-                        <option value="PRICE_ASC">価格が安い順</option>
-                        <option value="PRICE_DESC">価格が高い順</option>
-                      </select>
-                    </div>
-
-                    {/* Results Count */}
-                    <div>
-                      <div className="px-3 py-2 bg-blue-50 text-blue-700 rounded-md text-sm font-medium text-center">
-                        {(() => {
-                          let filteredProducts = allProducts;
-                          if (selectedCategory !== 'ALL') {
-                            filteredProducts = filteredProducts.filter(p => p.category === selectedCategory);
-                          }
-                          if (searchQuery) {
-                            filteredProducts = filteredProducts.filter(p => 
-                              p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                              (p.brand && p.brand.toLowerCase().includes(searchQuery.toLowerCase()))
-                            );
-                          }
-                          return `${filteredProducts.length}件表示中`;
-                        })()}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Products Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                  {(() => {
-                    let filteredProducts = allProducts;
-                    
-                    // Category filter
-                    if (selectedCategory !== 'ALL') {
-                      filteredProducts = filteredProducts.filter(p => p.category === selectedCategory);
-                    }
-                    
-                    // Search filter
-                    if (searchQuery) {
-                      filteredProducts = filteredProducts.filter(p => 
-                        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        (p.brand && p.brand.toLowerCase().includes(searchQuery.toLowerCase()))
-                      );
-                    }
-                    
-                    // Sort
-                    if (sortBy === 'PRICE_ASC') {
-                      filteredProducts.sort((a, b) => (a.price || 0) - (b.price || 0));
-                    } else if (sortBy === 'PRICE_DESC') {
-                      filteredProducts.sort((a, b) => (b.price || 0) - (a.price || 0));
-                    } else if (sortBy === 'RATING') {
-                      filteredProducts.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-                    }
-                    
-                    return filteredProducts.map((product) => (
-                      <div key={product.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border">
-                        <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden">
-                          <img
-                            src={product.image || '/placeholder-protein.jpg'}
-                            alt={product.name}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                            onError={(e) => {
-                              e.currentTarget.src = '/placeholder-protein.jpg'
-                            }}
-                          />
-                        </div>
-
-                        <div className="p-3">
-                          <div className="text-xs text-blue-600 font-medium mb-1">{product.brand || 'その他'}</div>
-                          
-                          <h3 className="font-medium text-sm text-gray-900 mb-2 line-clamp-2 h-10">
-                            {product.name}
-                          </h3>
-
-                          <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 mb-2">
-                            <div>タンパク質: {product.protein || 20}g</div>
-                            <div>カロリー: {product.calories || 110}kcal</div>
-                          </div>
-
-                          {product.rating > 0 && (
-                            <div className="flex items-center mb-2">
-                              <span className="text-yellow-400 text-sm">★{product.rating.toFixed(1)}</span>
-                              <span className="text-xs text-gray-500 ml-1">({product.reviewCount || product.reviews || 0})</span>
-                            </div>
-                          )}
-
-                          <div className="mb-3">
-                            <div className="text-lg font-bold text-gray-900">¥{(product.price || 0).toLocaleString()}</div>
-                            <div className="text-xs text-gray-500">1回分 ¥{product.pricePerServing || Math.round((product.price || 0) / 30)}</div>
-                          </div>
-
-                          <button
-                            onClick={() => handleOpenDetail(product)}
-                            className="block w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md text-center transition-colors"
-                          >
-                            詳細を見る
-                          </button>
-                        </div>
-                      </div>
-                    ));
-                  })()}
-                </div>
-
-                {/* No results message */}
-                {(() => {
-                  let filteredProducts = allProducts;
-                  if (selectedCategory !== 'ALL') {
-                    filteredProducts = filteredProducts.filter(p => p.category === selectedCategory);
-                  }
-                  if (searchQuery) {
-                    filteredProducts = filteredProducts.filter(p => 
-                      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      (p.brand && p.brand.toLowerCase().includes(searchQuery.toLowerCase()))
-                    );
-                  }
-                  
-                  if (filteredProducts.length === 0) {
-                    return (
-                      <div className="text-center py-20">
-                        <div className="inline-flex justify-center items-center w-20 h-20 bg-slate-100 rounded-full mb-6">
-                          <Search className="w-8 h-8 text-slate-300" />
-                        </div>
-                        <p className="text-lg font-bold text-gray-900 mb-2">条件に一致する商品が見つかりませんでした。</p>
-                        <p className="text-gray-600 mb-6">検索キーワードを変えるか、フィルターをリセットしてください。</p>
-                        <Button 
-                          variant="outline" 
-                          onClick={() => { 
-                            setSearchQuery(''); 
-                            setSelectedCategory('ALL'); 
-                          }}
-                        >
-                          フィルターをリセット
-                        </Button>
-                      </div>
-                    );
-                  }
-                  return null;
-                })()}
-              </div>
-            </div>
-          )}
         </>
       )}
 
