@@ -13,6 +13,7 @@ import { fetchProducts } from '@/lib/productService';
 
 export default function GeminiPage() {
   console.log('🔥 GeminiPage component rendering');
+  console.log('🔧 React useEffect import:', typeof useEffect);
   const [currentView, setCurrentView] = useState<'HOME' | 'GUIDE'>('HOME');
   
   const [isInitialized, setIsInitialized] = useState(false);
@@ -478,15 +479,22 @@ export default function GeminiPage() {
     return () => clearTimeout(timeoutId);
   }, [searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 最初から全商品を読み込み
+  // 最初から全商品を読み込み - 強制実行
   useEffect(() => {
-    if (!isInitialized) {
-      loadAllProducts().catch((error) => {
-        console.error('全商品読み込みエラー:', error);
-      });
-      setIsInitialized(true);
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    console.log('🚀 強制useEffect実行中!');
+    
+    const executeLoad = async () => {
+      try {
+        console.log('🔄 loadAllProducts開始...');
+        await loadAllProducts();
+        console.log('✅ loadAllProducts完了!');
+      } catch (error) {
+        console.error('❌ loadAllProductsエラー:', error);
+      }
+    };
+    
+    executeLoad();
+  }, []); // 空の依存配列で確実に1回だけ実行
 
   // allProductsが更新された時にフィルタリングを実行
   useEffect(() => {
@@ -888,7 +896,7 @@ export default function GeminiPage() {
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                {displayProducts.map(product => {
+                {displayProducts.map((product, index) => {
                   // 商品データの基本的な検証
                   if (!product || !product.id) {
                     console.warn('不正な商品データ:', product);
@@ -898,7 +906,7 @@ export default function GeminiPage() {
                   try {
                     return (
                       <ProductCard 
-                        key={product.id} 
+                        key={`${product.id}-${index}-${product.name?.slice(0, 10) || 'unknown'}`} 
                         product={product} 
                         onOpenDetail={handleOpenDetail}
                       />
@@ -906,7 +914,7 @@ export default function GeminiPage() {
                   } catch (cardError) {
                     console.error('ProductCard描画エラー:', cardError, product);
                     return (
-                      <div key={product.id} className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                      <div key={`error-${product.id}-${index}`} className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
                         <p className="text-xs text-red-600">商品データエラー</p>
                       </div>
                     );
