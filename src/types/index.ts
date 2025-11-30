@@ -17,6 +17,7 @@ export interface Product {
   name: string;
   description: string;
   image: string;
+  imageUrl?: string; // キャッシュデータ用
   category: 'WHEY' | 'CASEIN' | 'VEGAN' | 'BCAA' | 'ACCESSORIES' | string;
   rating: number;
   reviews: number;

@@ -103,7 +103,7 @@ export default function GeminiPage() {
     };
 
     loadInitialProducts();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load products
   useEffect(() => {
@@ -469,7 +469,7 @@ export default function GeminiPage() {
     }, 800); // 800ms後に検索実行
     
     return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
+  }, [searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 最初から全商品を読み込み
   useEffect(() => {
@@ -478,7 +478,7 @@ export default function GeminiPage() {
     loadAllProducts().catch((error) => {
       console.error('全商品読み込みエラー:', error);
     });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleQuickFilter = async (id: string, applyFn: () => void | Promise<void>) => {
     setActiveTabId(id);
