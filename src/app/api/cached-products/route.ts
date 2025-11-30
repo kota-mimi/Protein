@@ -227,9 +227,11 @@ export async function GET() {
           sort: 'reviewCount'
         })
         
-        console.log(`🔍 取得中: ${keyword}`)
+        console.log(`🔍 取得中: ${keyword}`, `${rakutenApiUrl}?${params}`)
         
         const response = await fetch(`${rakutenApiUrl}?${params}`)
+        console.log(`📡 ${keyword} レスポンス:`, response.status, response.statusText)
+        
         if (response.ok) {
           const data = await response.json()
           if (data.Items?.length > 0) {
@@ -270,6 +272,9 @@ export async function GET() {
             
             rakutenProducts.push(...convertedProducts)
           }
+        } else {
+          const errorText = await response.text()
+          console.log(`❌ ${keyword} API失敗:`, response.status, response.statusText, errorText)
         }
       } catch (error) {
         console.error(`❌ ${keyword}の取得エラー:`, error)
