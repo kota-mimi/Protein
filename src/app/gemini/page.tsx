@@ -15,6 +15,9 @@ export default function GeminiPage() {
   console.log('🔥 GeminiPage component rendering');
   const [currentView, setCurrentView] = useState<'HOME' | 'GUIDE'>('HOME');
   
+  // 強制的にマウント時に実行
+  const [isInitialized, setIsInitialized] = useState(false);
+  
   // Modal States
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -156,10 +159,11 @@ export default function GeminiPage() {
       console.log('🎯 loadAllProducts実行開始');
       setIsLoadingAllProducts(true);
       
-      console.log('📖 キャッシュデータから商品を読み込み中...');
+      // SSR/クライアント対応のbaseURL
+      const baseUrl = typeof window !== 'undefined' ? '' : 'http://localhost:3002';
       
-      // キャッシュデータを取得
-      const cacheResponse = await fetch('/api/cached-products');
+      console.log('📖 キャッシュデータから商品を読み込み中...');
+      const cacheResponse = await fetch(`${baseUrl}/api/cached-products`);
       
       if (cacheResponse.ok) {
         const cacheData = await cacheResponse.json();
@@ -192,7 +196,7 @@ export default function GeminiPage() {
       for (const keyword of searchTerms) {
         try {
           for (let page = 1; page <= 2; page++) {
-            const response = await fetch(`/api/rakuten?keyword=${encodeURIComponent(keyword)}&page=${page}`);
+            const response = await fetch(`${baseUrl}/api/rakuten?keyword=${encodeURIComponent(keyword)}&page=${page}`);
             if (response.ok) {
               const data = await response.json();
               if (data.success && data.products && data.products.length > 0) {
@@ -219,7 +223,7 @@ export default function GeminiPage() {
       }
       
       // 上記が失敗した場合の従来のフォールバック処理
-      const rakutenResponse = await fetch('/api/rakuten?keyword=プロテイン&page=1');
+      const rakutenResponse = await fetch(`${baseUrl}/api/rakuten?keyword=プロテイン&page=1`);
       
       if (!rakutenResponse.ok) {
         throw new Error(`Rakuten API Error: ${rakutenResponse.status} ${rakutenResponse.statusText}`);
@@ -264,7 +268,7 @@ export default function GeminiPage() {
       
       // 楽天APIが失敗した場合、キャッシュAPIにフォールバック
       console.log('⚠️ 楽天API失敗、キャッシュAPIにフォールバック');
-      const response = await fetch('/api/products');
+      const response = await fetch(`${baseUrl}/api/products`);
       
       if (!response.ok) {
         throw new Error(`API Error: ${response.status} ${response.statusText}`);
@@ -372,11 +376,12 @@ export default function GeminiPage() {
     
     try {
       console.log(`🔍 楽天検索開始: "${keyword}" (最大${maxPages}ページ)`);
+      const baseUrl = typeof window !== 'undefined' ? '' : 'http://localhost:3002';
       
       // 複数ページから商品を取得
       for (let page = 1; page <= maxPages; page++) {
         try {
-          const response = await fetch(`/api/rakuten?keyword=${encodeURIComponent(keyword)}&page=${page}`);
+          const response = await fetch(`${baseUrl}/api/rakuten?keyword=${encodeURIComponent(keyword)}&page=${page}`);
           if (response.ok) {
             const data = await response.json();
             if (data.success && data.products && data.products.length > 0) {
@@ -471,13 +476,26 @@ export default function GeminiPage() {
     return () => clearTimeout(timeoutId);
   }, [searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 最初から全商品を読み込み
-  useEffect(() => {
-    console.log('🚀 useEffect実行 - allProducts.length:', allProducts.length);
+  // 強制的にマウント時に一回だけ実行
+  if (!isInitialized) {
+    console.log('🚀 初期化開始 - allProducts.length:', allProducts.length);
     console.log('📦 loadAllProducts呼び出し開始');
     loadAllProducts().catch((error) => {
       console.error('全商品読み込みエラー:', error);
     });
+    setIsInitialized(true);
+  }
+
+  // 最初から全商品を読み込み
+  useEffect(() => {
+    console.log('🚀 useEffect実行 - allProducts.length:', allProducts.length);
+    if (!isInitialized) {
+      console.log('📦 useEffect内でloadAllProducts呼び出し');
+      loadAllProducts().catch((error) => {
+        console.error('全商品読み込みエラー:', error);
+      });
+      setIsInitialized(true);
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleQuickFilter = async (id: string, applyFn: () => void | Promise<void>) => {
