@@ -15,7 +15,6 @@ export default function GeminiPage() {
   console.log('🔥 GeminiPage component rendering');
   const [currentView, setCurrentView] = useState<'HOME' | 'GUIDE'>('HOME');
   
-  // 強制的にマウント時に実行
   const [isInitialized, setIsInitialized] = useState(false);
   
   // Modal States
@@ -175,16 +174,11 @@ export default function GeminiPage() {
           productsLength: cacheData.products?.length,
           hasProducts: !!(cacheData.products && cacheData.products.length > 0)
         });
-        console.log('🔍 キャッシュデータ全体構造:', cacheData);
-        console.log('🔍 現在のallProducts.length:', allProducts.length);
         
         if (cacheData.success && cacheData.products && cacheData.products.length > 0) {
           console.log('🎯 allProductsにセット開始...');
-          console.log('🔍 setAllProducts前のallProducts.length:', allProducts.length);
-          console.log('🔍 セットするデータ例（最初の2件）:', cacheData.products.slice(0, 2));
           setAllProducts(cacheData.products);
           setShowAllProducts(true);
-          console.log('🔍 setAllProducts直後のallProducts.length:', allProducts.length);
           console.log(`✅ キャッシュから商品データを読み込み完了:`, cacheData.products.length, '商品');
           console.log(`📅 最終更新: ${cacheData.lastUpdated}`);
           return;
@@ -334,10 +328,8 @@ export default function GeminiPage() {
             .filter(Boolean); // null値を除去
         });
         
-        console.log(`📦 setAllProducts実行前: allProducts.length=${allProducts.length}, 新しいデータ件数=${flatProducts.length}`);
         setAllProducts(flatProducts);
         setShowAllProducts(true);
-        console.log(`📦 setAllProducts実行後 (非同期): allProducts.length=${allProducts.length}`);
         
         console.log(`✅ 全商品データを読み込み (${data.source}):`, flatProducts.length, '商品');
       } else {
@@ -486,13 +478,9 @@ export default function GeminiPage() {
     return () => clearTimeout(timeoutId);
   }, [searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 強制初期化は削除 - useEffectのみで初期化を行う
-
   // 最初から全商品を読み込み
   useEffect(() => {
-    console.log('🚀 useEffect実行 - allProducts.length:', allProducts.length);
     if (!isInitialized) {
-      console.log('📦 useEffect内でloadAllProducts呼び出し');
       loadAllProducts().catch((error) => {
         console.error('全商品読み込みエラー:', error);
       });
