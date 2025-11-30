@@ -322,6 +322,15 @@ export async function GET() {
     // キャッシュからデータを取得
     const cacheData = await loadFeaturedProductsCache()
     
+    // デバッグ情報を追加
+    console.log('🔍 キャッシュデータチェック:', {
+      hasData: !!cacheData,
+      dataType: typeof cacheData,
+      dataKeys: cacheData ? Object.keys(cacheData) : 'none',
+      hasCategories: cacheData?.categories ? 'yes' : 'no',
+      categoriesLength: cacheData?.categories?.length || 0
+    })
+    
     if (!cacheData) {
       console.log('⚠️ キャッシュデータが見つかりません - フォールバックデータを使用')
       return NextResponse.json({
