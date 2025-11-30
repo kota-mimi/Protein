@@ -336,7 +336,10 @@ export async function GET() {
       
       // 楽天APIから直接取得を試行
       try {
-        const rakutenResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://protein-lyart.vercel.app'}/api/rakuten?keyword=プロテイン&page=1`)
+        const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://protein-lyart.vercel.app'
+        const rakutenUrl = `${baseUrl}/api/rakuten?keyword=プロテイン&page=1`
+        console.log('🌐 楽天API緊急取得URL:', rakutenUrl)
+        const rakutenResponse = await fetch(rakutenUrl)
         if (rakutenResponse.ok) {
           const rakutenData = await rakutenResponse.json()
           if (rakutenData.success && rakutenData.products?.length > 0) {
