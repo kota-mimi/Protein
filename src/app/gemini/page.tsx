@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/Button';
 import { fetchProducts } from '@/lib/productService';
 
 export default function GeminiPage() {
+  console.log('🔥 GeminiPage component rendering');
   const [currentView, setCurrentView] = useState<'HOME' | 'GUIDE'>('HOME');
   
   // Modal States
@@ -152,6 +153,7 @@ export default function GeminiPage() {
   // Load all products from cache - キャッシュから取得（1週間に1回更新）
   const loadAllProducts = async () => {
     try {
+      console.log('🎯 loadAllProducts実行開始');
       setIsLoadingAllProducts(true);
       
       console.log('📖 キャッシュデータから商品を読み込み中...');
@@ -161,10 +163,17 @@ export default function GeminiPage() {
       
       if (cacheResponse.ok) {
         const cacheData = await cacheResponse.json();
+        console.log('🔍 キャッシュデータ詳細:', {
+          success: cacheData.success,
+          productsLength: cacheData.products?.length,
+          hasProducts: !!(cacheData.products && cacheData.products.length > 0)
+        });
+        
         if (cacheData.success && cacheData.products && cacheData.products.length > 0) {
+          console.log('🎯 allProductsにセット開始...');
           setAllProducts(cacheData.products);
           setShowAllProducts(true);
-          console.log(`✅ キャッシュから商品データを読み込み:`, cacheData.products.length, '商品');
+          console.log(`✅ キャッシュから商品データを読み込み完了:`, cacheData.products.length, '商品');
           console.log(`📅 最終更新: ${cacheData.lastUpdated}`);
           return;
         }
@@ -464,11 +473,11 @@ export default function GeminiPage() {
 
   // 最初から全商品を読み込み
   useEffect(() => {
-    if (allProducts.length === 0) {
-      loadAllProducts().catch((error) => {
-        console.error('全商品読み込みエラー:', error);
-      });
-    }
+    console.log('🚀 useEffect実行 - allProducts.length:', allProducts.length);
+    console.log('📦 loadAllProducts呼び出し開始');
+    loadAllProducts().catch((error) => {
+      console.error('全商品読み込みエラー:', error);
+    });
   }, []);
 
   const handleQuickFilter = async (id: string, applyFn: () => void | Promise<void>) => {

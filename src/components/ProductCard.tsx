@@ -50,7 +50,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenDetail 
       {/* Image */}
       <div className="aspect-[4/3] overflow-hidden relative bg-slate-50">
         <img 
-          src={product.image || '/placeholder-protein.svg'} 
+          src={product.image || product.imageUrl || '/placeholder-protein.svg'} 
           alt={product.name || 'プロテイン商品'} 
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           onError={(e) => {
