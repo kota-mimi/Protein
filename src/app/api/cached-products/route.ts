@@ -208,10 +208,10 @@ const allProducts = [...staticProducts, ...generateAdditionalProducts()]
 
 export async function GET() {
   try {
-    console.log('📖 商品データ読み込み開始')
+    console.log('📖 商品データ読み込み開始 - 楽天API必須モード')
     
-    // 楽天APIから実際のデータを取得
-    const keywords = ['プロテイン', 'ホエイプロテイン', 'ソイプロテイン']
+    // 楽天APIから必ず取得する（強制モード）
+    const keywords = ['プロテイン']  // キーワードを1つに絞って確実に取得
     const rakutenProducts: any[] = []
     
     for (const keyword of keywords) {
@@ -222,7 +222,7 @@ export async function GET() {
           format: 'json',
           keyword: keyword,
           applicationId: '1054552037945576340', // 正しいID
-          hits: '30',
+          hits: '50',
           page: '1',
           sort: 'reviewCount'
         })
@@ -237,8 +237,8 @@ export async function GET() {
           if (data.Items?.length > 0) {
             console.log(`✅ ${keyword}: ${data.Items.length}件取得`)
             
-            // 楽天APIの生データを統一形式に変換
-            const convertedProducts = data.Items.slice(0, 20).map((item: any) => {
+            // 楽天APIの生データを統一形式に変換（全件取得）
+            const convertedProducts = data.Items.map((item: any) => {
               const product = item.Item
               
               // 画像URLを適切に取得
