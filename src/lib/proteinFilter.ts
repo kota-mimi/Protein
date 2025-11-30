@@ -18,19 +18,19 @@ export function isValidProteinProduct(itemName: string, description?: string): b
   // 必須キーワード - これらのうち少なくとも1つが含まれている必要
   const essentialKeywords = [
     'プロテイン', 'protein', 'ホエイ', 'whey', 'ソイ', 'soy', 
-    'カゼイン', 'casein', '大豆プロテイン'
+    'カゼイン', 'casein', '大豆プロテイン', 'bcaa', 'eaa', 'アミノ酸'
   ];
   
   // 除外キーワード - これらが含まれていたら除外
   const excludeKeywords = [
     // 関連商品（プロテイン以外）
     'シェイカー', 'ボトル', '容器', 'ドリンク', '飲料水', '飲み物',
-    'クレアチン', 'bcaa', 'eaa', 'hmb', 'グルタミン',
+    'クレアチン', 'hmb', 'グルタミン',
     'マルチビタミン', 'フィッシュオイル', 'オメガ',
     
     // 加工食品
     'バー', '棒', 'クッキー', 'ウエハース', 'グミ', 'ゼリー',
-    'タブレット', '錠剤', 'カプセル', 'サプリメント',
+    'タブレット', '錠剤', 'カプセル',
     
     // アクセサリ
     'スプーン', 'ファンネル', '漏斗', 'メジャー', '計量',
@@ -55,10 +55,12 @@ export function isValidProteinProduct(itemName: string, description?: string): b
     fullText.includes(keyword.toLowerCase())
   );
   
-  // 重量の記載があることを確認（プロテイン粉末には通常重量表記がある）
+  // BCAAやアミノ酸の場合は重量チェックを緩和
+  const isBCAA = fullText.includes('bcaa') || fullText.includes('eaa') || fullText.includes('アミノ酸');
   const hasWeight = /\d+(?:\.\d+)?(?:kg|g|キロ|グラム)/i.test(itemName);
   
-  return hasEssential && !hasExcluded && hasWeight;
+  // BCAAの場合は重量チェック不要、プロテインの場合は重量チェック必須
+  return hasEssential && !hasExcluded && (isBCAA || hasWeight);
 }
 
 // プロテイン種類抽出（統一版）

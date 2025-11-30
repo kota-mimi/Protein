@@ -137,7 +137,7 @@ export default function GeminiPage() {
       setIsLoadingAllProducts(true);
       
       // 複数キーワードで検索して網羅的にデータ取得
-      const keywords = ['プロテイン', 'ホエイプロテイン', 'ソイプロテイン'];
+      const keywords = ['プロテイン', 'ホエイプロテイン', 'ソイプロテイン', 'casein', 'bcaa', 'アミノ酸'];
       let allProducts: any[] = [];
       
       for (const keyword of keywords) {
