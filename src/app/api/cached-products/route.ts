@@ -238,11 +238,20 @@ export async function GET() {
             // 楽天APIの生データを統一形式に変換
             const convertedProducts = data.Items.slice(0, 20).map((item: any) => {
               const product = item.Item
+              
+              // 画像URLを適切に取得
+              let imageUrl = '/placeholder-protein.svg'
+              if (product.mediumImageUrls && product.mediumImageUrls.length > 0) {
+                imageUrl = product.mediumImageUrls[0].imageUrl
+              } else if (product.smallImageUrls && product.smallImageUrls.length > 0) {
+                imageUrl = product.smallImageUrls[0].imageUrl
+              }
+              
               return {
                 id: `rakuten_${product.shopCode}_${product.itemCode}`,
                 name: product.itemName,
-                description: product.itemCaption || product.itemName,
-                image: product.mediumImageUrls?.[0]?.imageUrl || product.smallImageUrls?.[0]?.imageUrl || '/placeholder-protein.svg',
+                description: (product.itemCaption || product.itemName).substring(0, 200) + '...',
+                image: imageUrl,
                 category: keyword.includes('ソイ') ? 'VEGAN' : 'WHEY',
                 rating: product.reviewAverage || 0,
                 reviews: product.reviewCount || 0,
