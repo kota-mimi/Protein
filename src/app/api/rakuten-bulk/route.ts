@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { isValidProteinProduct, extractProteinTypes, extractBrand, extractNutrition } from '@/lib/proteinFilter'
+import { isValidProteinProduct, extractProteinTypes, extractBrand, extractNutrition, extractCategory } from '@/lib/proteinFilter'
 
 // 楽天市場の全プロテイン商品を一括取得
 export async function GET(request: NextRequest) {
@@ -64,6 +64,7 @@ export async function GET(request: NextRequest) {
             affiliateUrl: product.affiliateUrl || product.itemUrl || '',
             tags: ['楽天', 'プロテイン'],
             type: extractProteinTypes(itemName),
+            category: extractCategory(itemName),
             features: nutrition,
             source: 'rakuten',
             lastUpdated: new Date().toISOString()

@@ -74,6 +74,19 @@ export function extractProteinTypes(itemName: string): string[] {
   return types.length > 0 ? types : ['その他'];
 }
 
+// プロテイン種類からカテゴリIDへのマッピング（統一版）
+export function extractCategory(itemName: string): string {
+  const name = itemName.toLowerCase();
+  
+  if (name.includes('ホエイ') || name.includes('whey')) return 'WHEY';
+  if (name.includes('ソイ') || name.includes('soy') || name.includes('大豆') || name.includes('植物性')) return 'VEGAN';
+  if (name.includes('カゼイン') || name.includes('casein')) return 'CASEIN';
+  if (name.includes('bcaa') || name.includes('eaa') || name.includes('アミノ酸')) return 'BCAA';
+  if (name.includes('シェイカー') || name.includes('ボトル') || name.includes('容器')) return 'ACCESSORIES';
+  
+  return 'WHEY'; // デフォルトはホエイとする
+}
+
 // ブランド抽出（統一版）
 export function extractBrand(itemName: string): string {
   const name = itemName.toLowerCase();

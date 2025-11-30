@@ -175,7 +175,8 @@ export default function GeminiPage() {
         const rakutenProducts = rakutenData.products.map((product: any) => ({
           ...product,
           categoryName: 'プロテイン商品',
-          category: 'PROTEIN',
+          // APIで設定されたcategoryを保持、ない場合はデフォルトをWHEY
+          category: product.category || 'WHEY',
           // Map API field names to frontend expected names
           image: product.imageUrl || product.image || '/placeholder-protein.svg',
           rating: product.reviewAverage || product.rating || 0,
