@@ -53,6 +53,23 @@ export async function GET(request: NextRequest) {
       const description = product.itemCaption?.replace(/<[^>]*>/g, '') || ''
       const nutrition = extractNutrition(product.itemName, description)
       
+      // 検索キーワードベースでカテゴリを決定（商品名で判定できない場合）
+      let category = extractCategory(product.itemName)
+      if (keyword.includes('ソイ') && category === 'WHEY') {
+        category = 'VEGAN'
+      }
+      if (keyword.includes('ホエイ') && category !== 'VEGAN') {
+        category = 'WHEY'
+      }
+      if (keyword.includes('カゼイン') && category === 'WHEY') {
+        category = 'CASEIN'
+      }
+      
+      // デバッグ用ログ（最初の5商品のみ）
+      if (Math.random() < 0.1) { // 10%の確率でログ出力
+        console.log(`📦 商品: ${product.itemName} → カテゴリ: ${category} (検索: ${keyword})`)
+      }
+      
       return {
         id: product.itemCode,
         name: product.itemName,
@@ -68,7 +85,7 @@ export async function GET(request: NextRequest) {
         affiliateUrl: product.affiliateUrl,
         tags: ['楽天', 'プロテイン'],
         type: extractProteinTypes(product.itemName),
-        category: extractCategory(product.itemName),
+        category: category,
         features: nutrition,
         source: 'rakuten',
         lastUpdated: new Date().toISOString()
