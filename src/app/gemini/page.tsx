@@ -428,11 +428,7 @@ export default function GeminiPage() {
       if (!matchName && !matchDesc && !matchTags && !matchBrand) return false;
     }
 
-    // 2. Category Filter
-    if (selectedCategory !== 'ALL' && p.category !== selectedCategory) {
-      console.log(`🔍 カテゴリフィルタ除外: 商品「${p.name}」のカテゴリ「${p.category}」が選択カテゴリ「${selectedCategory}」と一致しません`);
-      return false;
-    }
+    // カテゴリフィルタリングは不要（直接検索するため）
 
     // 3. Price Range Filter
     const productPrice = p.price || (p.shops && p.shops.length > 0 ? Math.min(...p.shops.map(s => s.price)) : 0);
@@ -657,9 +653,27 @@ export default function GeminiPage() {
                         {categories.map(cat => (
                           <button
                             key={cat.id}
-                            onClick={() => {
+                            onClick={async () => {
                               setSelectedCategory(cat.id);
                               setActiveTabId('CUSTOM');
+                              
+                              // カテゴリに応じて適切なキーワードで商品を取得
+                              if (cat.id === 'VEGAN') {
+                                setIsLoading(true);
+                                const products = await searchRakutenProducts('ソイプロテイン', 3);
+                                setAllProducts(products);
+                                setIsLoading(false);
+                              } else if (cat.id === 'WHEY') {
+                                setIsLoading(true);
+                                const products = await searchRakutenProducts('ホエイプロテイン', 3);
+                                setAllProducts(products);
+                                setIsLoading(false);
+                              } else if (cat.id === 'CASEIN') {
+                                setIsLoading(true);
+                                const products = await searchRakutenProducts('カゼインプロテイン', 3);
+                                setAllProducts(products);
+                                setIsLoading(false);
+                              }
                             }}
                             className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
                               selectedCategory === cat.id
