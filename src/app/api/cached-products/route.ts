@@ -208,15 +208,87 @@ const allProducts = [...staticProducts, ...generateAdditionalProducts()]
 
 export async function GET() {
   try {
-    console.log('✅ 静的商品データを返します:', allProducts.length, '件')
+    console.log('📖 商品データ読み込み開始')
     
+    // 楽天APIから実際のデータを取得
+    const keywords = ['プロテイン', 'ホエイプロテイン', 'ソイプロテイン']
+    const rakutenProducts: any[] = []
+    
+    for (const keyword of keywords) {
+      try {
+        // 楽天APIを直接呼び出し（環境変数なしで動作）
+        const rakutenApiUrl = 'https://app.rakuten.co.jp/services/api/IchibaItem/Search/20220601'
+        const params = new URLSearchParams({
+          format: 'json',
+          keyword: keyword,
+          applicationId: '1054552037945576340', // 正しいID
+          hits: '30',
+          page: '1',
+          sort: 'reviewCount'
+        })
+        
+        console.log(`🔍 取得中: ${keyword}`)
+        
+        const response = await fetch(`${rakutenApiUrl}?${params}`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.Items?.length > 0) {
+            console.log(`✅ ${keyword}: ${data.Items.length}件取得`)
+            
+            // 楽天APIの生データを統一形式に変換
+            const convertedProducts = data.Items.slice(0, 20).map((item: any) => {
+              const product = item.Item
+              return {
+                id: `rakuten_${product.shopCode}_${product.itemCode}`,
+                name: product.itemName,
+                description: product.itemCaption || product.itemName,
+                image: product.mediumImageUrls?.[0]?.imageUrl || product.smallImageUrls?.[0]?.imageUrl || '/placeholder-protein.svg',
+                category: keyword.includes('ソイ') ? 'VEGAN' : 'WHEY',
+                rating: product.reviewAverage || 0,
+                reviews: product.reviewCount || 0,
+                tags: ['楽天', keyword],
+                price: product.itemPrice || 0,
+                protein: 20, // デフォルト値
+                calories: 110, // デフォルト値
+                servings: 30, // デフォルト値
+                shops: [{
+                  name: 'Rakuten' as const,
+                  price: product.itemPrice || 0,
+                  url: product.itemUrl || '#'
+                }]
+              }
+            })
+            
+            rakutenProducts.push(...convertedProducts)
+          }
+        }
+      } catch (error) {
+        console.error(`❌ ${keyword}の取得エラー:`, error)
+      }
+    }
+    
+    // 楽天APIから取得できた場合はそれを返す
+    if (rakutenProducts.length > 0) {
+      console.log(`🎉 合計${rakutenProducts.length}件の商品を楽天APIから取得成功`)
+      return NextResponse.json({
+        success: true,
+        products: rakutenProducts,
+        totalCount: rakutenProducts.length,
+        lastUpdated: new Date().toISOString(),
+        source: 'rakuten-api',
+        message: `楽天API取得: ${rakutenProducts.length}件`
+      })
+    }
+    
+    // 楽天APIが失敗した場合は静的データを返す
+    console.log('⚠️ 楽天API失敗 - 静的データ使用')
     return NextResponse.json({
       success: true,
       products: allProducts,
       totalCount: allProducts.length,
       lastUpdated: new Date().toISOString(),
-      source: 'static',
-      message: `静的データ: ${allProducts.length}件の商品`
+      source: 'static-fallback',
+      message: `静的フォールバックデータ: ${allProducts.length}件`
     })
     
   } catch (error: any) {
