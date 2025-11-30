@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { isValidProteinProduct, extractProteinTypes, extractBrand, extractNutrition } from '@/lib/proteinFilter'
 
 // 楽天商品検索API統合
 export async function GET(request: NextRequest) {
@@ -49,34 +50,33 @@ export async function GET(request: NextRequest) {
         return null
       }
       
+      const description = product.itemCaption?.replace(/<[^>]*>/g, '') || ''
+      const nutrition = extractNutrition(product.itemName, description)
+      
       return {
         id: product.itemCode,
         name: product.itemName,
         brand: extractBrand(product.itemName),
         price: product.itemPrice,
-        pricePerServing: Math.round(product.itemPrice / estimateServings(product.itemName)),
+        pricePerServing: Math.round(product.itemPrice / nutrition.servings),
         imageUrl: getHighQualityImageUrl(product.mediumImageUrls?.[0] || product.smallImageUrls?.[0] || ''),
         shopName: product.shopName,
         reviewCount: product.reviewCount,
         reviewAverage: product.reviewAverage,
-        description: product.itemCaption?.replace(/<[^>]*>/g, '').substring(0, 200) + '...',
+        description: description.substring(0, 200) + '...',
         url: product.itemUrl,
         affiliateUrl: product.affiliateUrl,
-        tags: extractTags(product.itemName),
-        type: extractProteinType(product.itemName),
-        features: {
-          protein: extractProteinContent(product.itemName),
-          calories: extractCalories(product.itemName),
-          servings: estimateServings(product.itemName)
-        },
+        tags: ['楽天', 'プロテイン'],
+        type: extractProteinTypes(product.itemName),
+        features: nutrition,
         source: 'rakuten',
         lastUpdated: new Date().toISOString()
       }
     }).filter(Boolean) || [] // null値を除外
 
-    // プロテイン関連商品のみフィルタリング
+    // プロテイン関連商品のみフィルタリング（統一フィルター使用）
     const filteredProteins = proteins.filter((protein: any) => 
-      protein && isProteinProduct(protein.name)
+      protein && isValidProteinProduct(protein.name, protein.description)
     )
 
     return NextResponse.json({
@@ -110,128 +110,3 @@ function getHighQualityImageUrl(originalUrl: string): string {
   return originalUrl;
 }
 
-// ブランド名抽出
-function extractBrand(itemName: string): string {
-  const brands = [
-    'SAVAS', 'ザバス', 'DNS', 'beLEGEND', 'ビーレジェンド',
-    'Myprotein', 'マイプロテイン', 'ALPRON', 'アルプロン',
-    'GOLD\'S GYM', 'ゴールドジム', 'X-PLOSION', 'エクスプロージョン',
-    'WELINA', 'ウェリナ', 'VALX', 'バルクス'
-  ]
-  
-  for (const brand of brands) {
-    if (itemName.includes(brand)) {
-      return brand
-    }
-  }
-  
-  // ブランド名が見つからない場合は最初の単語を返す
-  return itemName.split(/[\s　]+/)[0] || 'その他'
-}
-
-// プロテイン種類抽出
-function extractProteinType(itemName: string): string[] {
-  const types = []
-  
-  if (itemName.match(/ホエイ|whey/i)) types.push('ホエイ')
-  if (itemName.match(/ソイ|soy|大豆/i)) types.push('ソイ')
-  if (itemName.match(/カゼイン|casein/i)) types.push('カゼイン')
-  if (itemName.match(/植物性|ピープロテイン/i)) types.push('植物性')
-  
-  return types.length > 0 ? types : ['その他']
-}
-
-// タンパク質含有量抽出
-function extractProteinContent(itemName: string): number {
-  const match = itemName.match(/(\d+)g.*タンパク質|タンパク質.*(\d+)g|protein.*(\d+)g/i)
-  if (match) {
-    return parseInt(match[1] || match[2] || match[3])
-  }
-  
-  // デフォルト値（ホエイプロテインの平均）
-  if (itemName.includes('ホエイ') || itemName.includes('whey')) return 21
-  if (itemName.includes('ソイ') || itemName.includes('soy')) return 16
-  
-  return 20 // 平均値
-}
-
-// カロリー抽出
-function extractCalories(itemName: string): number {
-  const match = itemName.match(/(\d+)kcal|(\d+)カロリー/i)
-  if (match) {
-    return parseInt(match[1] || match[2])
-  }
-  
-  return 110 // 平均値
-}
-
-// 服用回数推定
-function estimateServings(itemName: string): number {
-  const weightMatch = itemName.match(/(\d+(?:\.\d+)?)kg|(\d+)g/i)
-  if (weightMatch) {
-    const weight = parseFloat(weightMatch[1] || weightMatch[2])
-    if (weight > 10) { // kgの場合
-      return Math.round((weight * 1000) / 30) // 1回30g想定
-    } else if (weight > 100) { // gの場合
-      return Math.round(weight / 30)
-    }
-  }
-  
-  return 30 // デフォルト30回分
-}
-
-// プロテイン商品判定（厳格版 - プロテイン粉末のみ）
-function isProteinProduct(itemName: string): boolean {
-  // 必須キーワード - これらのうち少なくとも1つが含まれている必要
-  const essentialKeywords = [
-    'プロテイン', 'protein', 'ホエイ', 'whey', 'ソイ', 'soy', 
-    'カゼイン', 'casein'
-  ]
-  
-  // 除外キーワード - これらが含まれていたら除外
-  const excludeKeywords = [
-    'シェイカー', 'ボトル', '容器', 'ドリンク', '飲料',
-    'サプリメント', 'ビタミン', 'ミネラル',
-    'クレアチン', 'BCAA', 'HMB', 'EAA', 'グルタミン',
-    'マルチビタミン', 'フィッシュオイル', 'オメガ',
-    'バー', '棒', 'クッキー', 'ウエハース', 'グミ',
-    'タブレット', '錠剤', 'カプセル',
-    'スプーン', 'ファンネル', '漏斗', 'メジャー',
-    'ケース', 'ケース付き', 'セット',
-    'アパレル', 'ウェア', 'タオル', '服',
-    'ダンベル', 'バーベル', '器具',
-    '本', 'DVD', 'ブック', 'マニュアル'
-  ]
-  
-  const itemLower = itemName.toLowerCase()
-  
-  // 必須キーワードチェック
-  const hasEssential = essentialKeywords.some(keyword => 
-    itemLower.includes(keyword.toLowerCase())
-  )
-  
-  // 除外キーワードチェック
-  const hasExcluded = excludeKeywords.some(keyword => 
-    itemName.includes(keyword)
-  )
-  
-  // 重量の記載があることを確認（プロテイン粉末には通常重量表記がある）
-  const hasWeight = /\d+(?:\.\d+)?(?:kg|g|キロ|グラム)/i.test(itemName)
-  
-  return hasEssential && !hasExcluded && hasWeight
-}
-
-// タグ抽出
-function extractTags(itemName: string): string[] {
-  const tags = []
-  
-  if (itemName.match(/ダイエット|減量|脂肪燃焼/i)) tags.push('ダイエット')
-  if (itemName.match(/筋肉|筋トレ|ボディビル/i)) tags.push('筋トレ')
-  if (itemName.match(/美容|コラーゲン|ヒアルロン酸/i)) tags.push('美容')
-  if (itemName.match(/国産|日本製/i)) tags.push('国産')
-  if (itemName.match(/無添加|人工甘味料不使用/i)) tags.push('無添加')
-  if (itemName.match(/初心者|ビギナー/i)) tags.push('初心者向け')
-  if (itemName.match(/プロ|アスリート|本格/i)) tags.push('本格')
-  
-  return tags
-}

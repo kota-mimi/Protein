@@ -287,8 +287,6 @@ export default function GeminiPage() {
     
     if (name.includes('ザバス') || name.includes('savas')) tags.push('人気ブランド');
     if (name.includes('マイプロテイン') || name.includes('myprotein')) tags.push('海外ブランド');
-    if (name.includes('激安') || name.includes('コスパ') || name.includes('安い')) tags.push('コスパ最強');
-    if (name.includes('セール') || name.includes('特価') || name.includes('割引')) tags.push('セール中');
     if (name.includes('wpi') || name.includes('アイソレート')) tags.push('高品質');
     if (name.includes('3kg') || name.includes('大容量')) tags.push('大容量');
     if (name.includes('1kg') && !name.includes('3kg')) tags.push('標準サイズ');
@@ -366,44 +364,13 @@ export default function GeminiPage() {
       label: '人気ランキング', 
       apply: async () => {
         setIsLoading(true);
-        const products = await searchRakutenProducts('プロテイン 人気', 5); // 5ページ取得
+        const products = await searchRakutenProducts('プロテイン', 5); // 5ページ取得
         // 評価順でソート
         const sortedProducts = products.sort((a: any, b: any) => (b.rating || 0) - (a.rating || 0));
         setRecommendedProducts(sortedProducts.slice(0, 50));
         setSortBy('RATING');
         setSelectedCategory('ALL');
         setSearchQuery('');
-        setMinPrice('');
-        setMaxPrice('');
-        setIsLoading(false);
-      }
-    },
-    { 
-      id: 'COSPHA', 
-      label: 'コスパ最強', 
-      apply: async () => {
-        setIsLoading(true);
-        const products = await searchRakutenProducts('プロテイン 激安', 5); // 5ページ取得
-        // 価格でソート（安い順）
-        const sortedProducts = products.sort((a: any, b: any) => (a.price || 99999) - (b.price || 99999));
-        setRecommendedProducts(sortedProducts.slice(0, 50));
-        setSortBy('PRICE_ASC');
-        setSelectedCategory('ALL');
-        setSearchQuery('');
-        setMinPrice('');
-        setMaxPrice('');
-        setIsLoading(false);
-      }
-    },
-    { 
-      id: 'SALE', 
-      label: 'セール中', 
-      apply: async () => {
-        setIsLoading(true);
-        const products = await searchRakutenProducts('プロテイン セール', 5); // 5ページ取得
-        setRecommendedProducts(products.slice(0, 50));
-        setSearchQuery('セール');
-        setSelectedCategory('ALL');
         setMinPrice('');
         setMaxPrice('');
         setIsLoading(false);
