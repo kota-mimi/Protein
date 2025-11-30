@@ -108,7 +108,7 @@ export async function loadFeaturedProductsCache() {
   }
 }
 
-// キャッシュの有効性をチェック（24時間以内かどうか・ハイブリッド対応）
+// キャッシュの有効性をチェック（1週間以内かどうか・ハイブリッド対応）
 export async function isCacheValid() {
   try {
     let timestamp = null
@@ -137,7 +137,7 @@ export async function isCacheValid() {
     
     if (timestamp) {
       const cacheAge = Date.now() - Number(timestamp)
-      const maxAge = 24 * 60 * 60 * 1000 // 24時間
+      const maxAge = 7 * 24 * 60 * 60 * 1000 // 1週間
       return cacheAge < maxAge
     }
     return false
@@ -145,7 +145,7 @@ export async function isCacheValid() {
     // エラーの場合、メモリキャッシュのタイムスタンプで最終確認
     if (global.memoryCacheTimestamp) {
       const cacheAge = Date.now() - Number(global.memoryCacheTimestamp)
-      const maxAge = 24 * 60 * 60 * 1000
+      const maxAge = 7 * 24 * 60 * 60 * 1000 // 1週間
       return cacheAge < maxAge
     }
     return false

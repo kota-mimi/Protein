@@ -135,49 +135,34 @@ export default function GeminiPage() {
     }, 100);
   };
 
-  // Load all products from API - 楽天APIから直接取得
+  // Load all products from cache - キャッシュから取得（1週間に1回更新）
   const loadAllProducts = async () => {
     try {
       setIsLoadingAllProducts(true);
       
-      // 複数キーワードで検索して網羅的にデータ取得（プロテインのみ）
-      const keywords = [
-        'プロテイン', 'ホエイプロテイン', 'ソイプロテイン', 'casein',
-        // 味系検索キーワード追加
-        'チョコ プロテイン', 'バニラ プロテイン', 'ストロベリー プロテイン', 
-        'ココア プロテイン', 'いちご プロテイン', 'バナナ プロテイン'
-      ];
-      let allProducts: any[] = [];
+      console.log('📖 キャッシュデータから商品を読み込み中...');
       
-      for (const keyword of keywords) {
-        const products = await searchRakutenProducts(keyword, 3);
-        allProducts.push(...products);
-        
-        // API制限回避のため少し待機
-        await new Promise(resolve => setTimeout(resolve, 300));
+      // キャッシュデータを取得
+      const cacheResponse = await fetch('/api/cached-products');
+      
+      if (cacheResponse.ok) {
+        const cacheData = await cacheResponse.json();
+        if (cacheData.success && cacheData.products && cacheData.products.length > 0) {
+          setAllProducts(cacheData.products);
+          setShowAllProducts(true);
+          console.log(`✅ キャッシュから商品データを読み込み:`, cacheData.products.length, '商品');
+          console.log(`📅 最終更新: ${cacheData.lastUpdated}`);
+          return;
+        }
       }
       
-      // 重複除去（商品IDベース）
-      const uniqueProducts = allProducts.filter((product, index, self) => 
-        index === self.findIndex(p => p.id === product.id)
-      );
-      
-      console.log(`🎯 複数キーワード検索完了: ${uniqueProducts.length}商品（重複除去後）`);
-      
-      if (uniqueProducts.length > 0) {
-        setAllProducts(uniqueProducts);
-        setShowAllProducts(true);
-        console.log(`✅ 楽天から商品データを読み込み:`, uniqueProducts.length, '商品');
-        return;
-      }
-      
-      // フォールバック: 楽天API失敗時も基本のAPIを試す
-      console.log('⚠️ 楽天API検索結果が0件、基本検索を試行');
+      // キャッシュが空の場合のフォールバック
+      console.log('⚠️ キャッシュデータが見つかりません、緊急時のみ基本検索を実行');
       const basicResponse = await fetch('/api/rakuten?keyword=プロテイン&page=1');
       if (basicResponse.ok) {
         const basicData = await basicResponse.json();
         if (basicData.success && basicData.products && basicData.products.length > 0) {
-          console.log('✅ 基本検索で商品取得:', basicData.products.length, '件');
+          console.log('✅ 緊急フォールバック検索で商品取得:', basicData.products.length, '件');
           setAllProducts(basicData.products);
           setShowAllProducts(true);
           return;

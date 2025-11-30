@@ -194,7 +194,7 @@ const FEATURED_SEARCHES = [
   }
 ]
 
-// 毎日朝8時に実行される自動更新API
+// 1週間に1回実行される自動更新API（元朝8時システム）
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const authToken = searchParams.get('token')
@@ -217,7 +217,7 @@ export async function GET(request: Request) {
       })
     }
 
-    console.log('🕐 朝8時の自動更新を開始します...', new Date().toLocaleString('ja-JP'))
+    console.log('📅 週次商品データ更新を開始します...', new Date().toLocaleString('ja-JP'))
     const allProducts = []
 
     // 各カテゴリから商品を取得
