@@ -198,6 +198,10 @@ export default function GeminiPage() {
         setShowAllProducts(true);
         
         console.log(`✅ 楽天から商品データを読み込み:`, rakutenProducts.length, '商品');
+        console.log('🏷️ カテゴリ分布:', rakutenProducts.reduce((acc: any, p: any) => {
+          acc[p.category] = (acc[p.category] || 0) + 1;
+          return acc;
+        }, {}));
         return;
       }
       
@@ -422,6 +426,7 @@ export default function GeminiPage() {
 
     // 2. Category Filter
     if (selectedCategory !== 'ALL' && p.category !== selectedCategory) {
+      console.log(`🔍 カテゴリフィルタ除外: 商品「${p.name}」のカテゴリ「${p.category}」が選択カテゴリ「${selectedCategory}」と一致しません`);
       return false;
     }
 
