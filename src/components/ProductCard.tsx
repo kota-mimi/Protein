@@ -23,10 +23,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenDetail 
     // 最安値を取得（楽天APIからのpriceプロパティ優先）
     const minPrice = product.price || (product.shops && product.shops.length > 0 ? Math.min(...product.shops.map(s => s.price || 0)) : 0);
 
-    // タンパク質1gあたりの価格計算 (簡易)
+    // タンパク質1gあたりの価格計算 (楽天APIデータ対応)
     let pricePerProtein = 0;
-    if (product.specs && product.specs.proteinRatio > 0 && product.specs.weightGrams > 0) {
-      const totalProtein = product.specs.weightGrams * (product.specs.proteinRatio / 100);
+    const proteinPerServing = product.protein || (product.features?.protein) || 20; // 1回分のタンパク質
+    const servings = product.servings || (product.features?.servings) || 30; // 総回数
+    const totalProtein = proteinPerServing * servings; // 総タンパク質量
+    
+    if (totalProtein > 0) {
       pricePerProtein = Math.round((minPrice / totalProtein) * 10) / 10;
     }
 
@@ -129,7 +132,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenDetail 
               </a>
             )) : (
               <a 
-                href={product.affiliateUrl || '#'}
+                href={product.affiliateUrl || product.url || '#'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-between p-1 pl-2 rounded bg-white border border-slate-200 hover:border-primary/50 transition-all group/btn shadow-sm"

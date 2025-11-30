@@ -319,17 +319,21 @@ export default function GeminiPage() {
               const mappedProducts = data.products.map((product: any) => ({
                 ...product,
                 categoryName: 'プロテイン商品',
-                // APIで設定されたcategoryを保持する！
                 category: product.category || 'WHEY',
                 image: product.imageUrl || '/placeholder-protein.svg',
                 rating: product.reviewAverage || 0,
                 reviews: product.reviewCount || 0,
                 tags: ['楽天', ...extractProteinTags(product.name)].filter(Boolean),
                 description: product.description || '',
+                // 正しい商品情報をマッピング
+                protein: product.features?.protein || 20, // タンパク質量
+                calories: product.features?.calories || 110, // カロリー
+                servings: product.features?.servings || 30, // 回数
+                pricePerServing: product.pricePerServing || Math.round((product.price || 0) / 30), // 1回あたり価格
                 shops: [{
                   name: 'Rakuten' as const,
                   price: product.price || 0,
-                  url: product.affiliateUrl || '#'
+                  url: product.affiliateUrl || product.url || '#' // affiliateUrlまたはurlを使用
                 }]
               }));
               
