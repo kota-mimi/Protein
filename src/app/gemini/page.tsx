@@ -50,6 +50,9 @@ export default function GeminiPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [showAllProducts, setShowAllProducts] = useState(false);
   const [isLoadingAllProducts, setIsLoadingAllProducts] = useState(false);
+  
+  // フィルタリングされた商品の状態管理
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
 
   // Handle scroll for navbar styling
   useEffect(() => {
@@ -172,11 +175,16 @@ export default function GeminiPage() {
           productsLength: cacheData.products?.length,
           hasProducts: !!(cacheData.products && cacheData.products.length > 0)
         });
+        console.log('🔍 キャッシュデータ全体構造:', cacheData);
+        console.log('🔍 現在のallProducts.length:', allProducts.length);
         
         if (cacheData.success && cacheData.products && cacheData.products.length > 0) {
           console.log('🎯 allProductsにセット開始...');
+          console.log('🔍 setAllProducts前のallProducts.length:', allProducts.length);
+          console.log('🔍 セットするデータ例（最初の2件）:', cacheData.products.slice(0, 2));
           setAllProducts(cacheData.products);
           setShowAllProducts(true);
+          console.log('🔍 setAllProducts直後のallProducts.length:', allProducts.length);
           console.log(`✅ キャッシュから商品データを読み込み完了:`, cacheData.products.length, '商品');
           console.log(`📅 最終更新: ${cacheData.lastUpdated}`);
           return;
@@ -326,8 +334,10 @@ export default function GeminiPage() {
             .filter(Boolean); // null値を除去
         });
         
+        console.log(`📦 setAllProducts実行前: allProducts.length=${allProducts.length}, 新しいデータ件数=${flatProducts.length}`);
         setAllProducts(flatProducts);
         setShowAllProducts(true);
+        console.log(`📦 setAllProducts実行後 (非同期): allProducts.length=${allProducts.length}`);
         
         console.log(`✅ 全商品データを読み込み (${data.source}):`, flatProducts.length, '商品');
       } else {
@@ -476,15 +486,7 @@ export default function GeminiPage() {
     return () => clearTimeout(timeoutId);
   }, [searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 強制的にマウント時に一回だけ実行
-  if (!isInitialized) {
-    console.log('🚀 初期化開始 - allProducts.length:', allProducts.length);
-    console.log('📦 loadAllProducts呼び出し開始');
-    loadAllProducts().catch((error) => {
-      console.error('全商品読み込みエラー:', error);
-    });
-    setIsInitialized(true);
-  }
+  // 強制初期化は削除 - useEffectのみで初期化を行う
 
   // 最初から全商品を読み込み
   useEffect(() => {
@@ -498,6 +500,56 @@ export default function GeminiPage() {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // allProductsが更新された時にフィルタリングを実行
+  useEffect(() => {
+    console.log('🔄 フィルタリング用useEffect実行: allProducts.length=', allProducts.length);
+    if (allProducts.length > 0) {
+      console.log('🎯 フィルタリング実行開始 - ソース商品数:', allProducts.length);
+      
+      // フィルタリングロジック
+      const sourceProducts = searchQuery && searchResults.length > 0 ? searchResults : allProducts;
+      let displayProducts = sourceProducts.filter(p => {
+        // 1. Search Query Filter
+        if (searchQuery) {
+          const query = searchQuery.toLowerCase();
+          const matchName = p.name.toLowerCase().includes(query);
+          const matchDesc = (p.description || '').toLowerCase().includes(query);
+          const matchTags = (p.tags || []).some(t => t.toLowerCase().includes(query));
+          const matchBrand = (p.brand || '').toLowerCase().includes(query);
+          if (!matchName && !matchDesc && !matchTags && !matchBrand) return false;
+        }
+
+        // 2. Category Filter
+        if (selectedCategory !== 'ALL' && p.category !== selectedCategory) {
+          return false;
+        }
+
+        // 3. Price Range Filter
+        const productPrice = p.price || (p.shops && p.shops.length > 0 ? Math.min(...p.shops.map(s => s.price)) : 0);
+        if (minPrice && productPrice < Number(minPrice)) return false;
+        if (maxPrice && productPrice > Number(maxPrice)) return false;
+        
+        return true;
+      });
+
+      // Sorting Logic
+      displayProducts.sort((a, b) => {
+        const minPriceA = a.price || (a.shops && a.shops.length > 0 ? Math.min(...a.shops.map(s => s.price)) : 0);
+        const minPriceB = b.price || (b.shops && b.shops.length > 0 ? Math.min(...b.shops.map(s => s.price)) : 0);
+
+        if (sortBy === 'PRICE_ASC') return minPriceA - minPriceB;
+        if (sortBy === 'PRICE_DESC') return minPriceB - minPriceA;
+        return b.rating - a.rating; // Default RATING
+      });
+
+      console.log('✅ フィルタリング完了:', displayProducts.length, '商品');
+      setFilteredProducts(displayProducts);
+    } else {
+      console.log('⚠️ allProductsが空なのでフィルタリングスキップ');
+      setFilteredProducts([]);
+    }
+  }, [allProducts, selectedCategory, searchQuery, searchResults, minPrice, maxPrice, sortBy]);
+
   const handleQuickFilter = async (id: string, applyFn: () => void | Promise<void>) => {
     setActiveTabId(id);
     try {
@@ -507,46 +559,9 @@ export default function GeminiPage() {
     }
   };
 
-  // Logic for filtering - リアルタイム検索結果または既存商品を使用
-  const sourceProducts = searchQuery && searchResults.length > 0 ? searchResults : allProducts;
-  const isUsingSearchResults = searchQuery && searchResults.length > 0;
-  console.log(`🔍 フィルタリング開始: ソース商品数=${sourceProducts.length}, 選択カテゴリ=${selectedCategory}, 検索結果使用=${isUsingSearchResults}`);
-  
-  let displayProducts = sourceProducts.filter(p => {
-    // 1. Search Query Filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      const matchName = p.name.toLowerCase().includes(query);
-      const matchDesc = (p.description || '').toLowerCase().includes(query);
-      const matchTags = (p.tags || []).some(t => t.toLowerCase().includes(query));
-      const matchBrand = (p.brand || '').toLowerCase().includes(query);
-      if (!matchName && !matchDesc && !matchTags && !matchBrand) return false;
-    }
-
-    // 2. Category Filter
-    if (selectedCategory !== 'ALL' && p.category !== selectedCategory) {
-      return false;
-    }
-
-    // 3. Price Range Filter
-    const productPrice = p.price || (p.shops && p.shops.length > 0 ? Math.min(...p.shops.map(s => s.price)) : 0);
-    if (minPrice && productPrice < Number(minPrice)) return false;
-    if (maxPrice && productPrice > Number(maxPrice)) return false;
-    
-    return true;
-  });
-
-  console.log(`🎯 フィルタリング結果: ${displayProducts.length}商品`);
-
-  // Sorting Logic
-  displayProducts.sort((a, b) => {
-    const minPriceA = a.price || (a.shops && a.shops.length > 0 ? Math.min(...a.shops.map(s => s.price)) : 0);
-    const minPriceB = b.price || (b.shops && b.shops.length > 0 ? Math.min(...b.shops.map(s => s.price)) : 0);
-
-    if (sortBy === 'PRICE_ASC') return minPriceA - minPriceB;
-    if (sortBy === 'PRICE_DESC') return minPriceB - minPriceA;
-    return b.rating - a.rating; // Default RATING
-  });
+  // 新しいフィルタリングシステムを使用
+  const displayProducts = filteredProducts;
+  console.log(`🎯 表示商品数: ${displayProducts.length}商品`);
 
   const categories = [
     { id: 'ALL', label: 'すべて' },
