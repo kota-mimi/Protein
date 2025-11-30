@@ -80,36 +80,48 @@ export async function GET() {
     
     for (const keyword of keywords) {
       try {
-        const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://protein-lyart.vercel.app'
-        const rakutenUrl = `${baseUrl}/api/rakuten?keyword=${encodeURIComponent(keyword)}&page=1`
+        // 直接楽天APIを呼び出し（内部API経由を避ける）
+        const rakutenApiUrl = 'https://app.rakuten.co.jp/services/api/IchibaItem/Search/20220601'
+        const params = new URLSearchParams({
+          format: 'json',
+          keyword: keyword,
+          applicationId: process.env.RAKUTEN_APPLICATION_ID || '1069064056043226144',
+          hits: '30',
+          page: '1',
+          sort: 'reviewCount'
+        })
+        const rakutenUrl = `${rakutenApiUrl}?${params}`
         console.log(`🔍 取得中: ${keyword}`, rakutenUrl)
         
         const response = await fetch(rakutenUrl)
         if (response.ok) {
           const data = await response.json()
-          if (data.success && data.products?.length > 0) {
-            console.log(`✅ ${keyword}: ${data.products.length}件取得`)
+          if (data.Items?.length > 0) {
+            console.log(`✅ ${keyword}: ${data.Items.length}件取得`)
             
-            // 楽天APIデータを統一形式に変換
-            const convertedProducts = data.products.map((product: any) => ({
-              id: product.id,
-              name: product.name,
-              description: product.description || '',
-              image: product.imageUrl || '/placeholder-protein.svg',
-              category: keyword.includes('ソイ') ? 'VEGAN' : 'WHEY',
-              rating: product.reviewAverage || 0,
-              reviews: product.reviewCount || 0,
-              tags: ['楽天', keyword],
-              price: product.price || 0,
-              protein: product.nutrition?.protein || 20,
-              calories: product.nutrition?.calories || 110,
-              servings: product.nutrition?.servings || 30,
-              shops: [{
-                name: 'Rakuten' as const,
-                price: product.price || 0,
-                url: product.affiliateUrl || '#'
-              }]
-            }))
+            // 楽天APIの生データを統一形式に変換
+            const convertedProducts = data.Items.map((item: any) => {
+              const product = item.Item
+              return {
+                id: `rakuten_${product.shopCode}_${product.itemCode}`,
+                name: product.itemName,
+                description: product.itemCaption || product.itemName,
+                image: product.mediumImageUrls?.[0]?.imageUrl || product.smallImageUrls?.[0]?.imageUrl || '/placeholder-protein.svg',
+                category: keyword.includes('ソイ') ? 'VEGAN' : 'WHEY',
+                rating: product.reviewAverage || 0,
+                reviews: product.reviewCount || 0,
+                tags: ['楽天', keyword],
+                price: product.itemPrice || 0,
+                protein: 20, // デフォルト値
+                calories: 110, // デフォルト値
+                servings: 30, // デフォルト値
+                shops: [{
+                  name: 'Rakuten' as const,
+                  price: product.itemPrice || 0,
+                  url: product.itemUrl || '#'
+                }]
+              }
+            })
             
             allProducts.push(...convertedProducts)
           }
