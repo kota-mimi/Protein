@@ -332,7 +332,52 @@ export async function GET() {
     })
     
     if (!cacheData) {
-      console.log('⚠️ キャッシュデータが見つかりません - フォールバックデータを使用')
+      console.log('⚠️ キャッシュデータが見つかりません - 楽天APIから直接取得を試行')
+      
+      // 楽天APIから直接取得を試行
+      try {
+        const rakutenResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://protein-lyart.vercel.app'}/api/rakuten?keyword=プロテイン&page=1`)
+        if (rakutenResponse.ok) {
+          const rakutenData = await rakutenResponse.json()
+          if (rakutenData.success && rakutenData.products?.length > 0) {
+            console.log(`✅ 楽天APIから${rakutenData.products.length}件取得 - 緊急代替データとして使用`)
+            
+            // 楽天APIデータを統一形式に変換
+            const convertedProducts = rakutenData.products.map((product: any) => ({
+              id: product.id,
+              name: product.name,
+              description: product.description || '',
+              image: product.imageUrl || '/placeholder-protein.svg',
+              category: 'WHEY',
+              rating: product.reviewAverage || 0,
+              reviews: product.reviewCount || 0,
+              tags: ['楽天', '直接取得'],
+              price: product.price || 0,
+              protein: product.nutrition?.protein || 20,
+              calories: product.nutrition?.calories || 110,
+              servings: product.nutrition?.servings || 30,
+              shops: [{
+                name: 'Rakuten' as const,
+                price: product.price || 0,
+                url: product.affiliateUrl || '#'
+              }]
+            }))
+            
+            return NextResponse.json({
+              success: true,
+              products: convertedProducts,
+              totalCount: convertedProducts.length,
+              lastUpdated: new Date().toISOString(),
+              source: 'rakuten-api-emergency',
+              message: `楽天API緊急取得: ${convertedProducts.length}件`
+            })
+          }
+        }
+      } catch (apiError) {
+        console.error('🚨 楽天API緊急取得も失敗:', apiError)
+      }
+      
+      console.log('💾 最終手段：フォールバックデータを使用')
       return NextResponse.json({
         success: true,
         products: fallbackProducts,
