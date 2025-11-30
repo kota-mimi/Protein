@@ -319,7 +319,8 @@ export default function GeminiPage() {
               const mappedProducts = data.products.map((product: any) => ({
                 ...product,
                 categoryName: 'プロテイン商品',
-                category: 'PROTEIN',
+                // APIで設定されたcategoryを保持する！
+                category: product.category || 'WHEY',
                 image: product.imageUrl || '/placeholder-protein.svg',
                 rating: product.reviewAverage || 0,
                 reviews: product.reviewCount || 0,
