@@ -213,31 +213,132 @@ export async function GET(request: Request) {
     if (!rakutenAppId || rakutenAppId === 'your_rakuten_app_id_here') {
       console.log('⚠️ 楽天API ID未設定 - フォールバックデータでキャッシュ初期化')
       
-      // フォールバック用のサンプルデータでキャッシュを初期化
+      // フォールバック用の豊富なサンプルデータでキャッシュを初期化
       const fallbackCacheData = {
         success: true,
-        categories: [{
-          category: 'whey',
-          categoryName: 'ホエイプロテイン',
-          products: [{
-            id: 'fallback_whey_001',
-            name: 'ザバス ホエイプロテイン100 リッチショコラ味',
-            brand: 'ザバス',
-            imageUrl: '/placeholder-protein.svg',
-            reviewAverage: 4.5,
-            reviewCount: 1500,
-            description: '本格的なホエイプロテイン100%。トレーニング後の栄養補給に最適。',
-            nutrition: { protein: 20, calories: 110, servings: 30, servingSize: 30 },
-            type: 'ホエイ',
-            flavor: 'チョコレート',
-            price: 4500,
-            pricePerServing: 150,
-            shopName: '楽天サンプル',
-            affiliateUrl: '#',
-            category: 'whey'
-          }]
-        }],
-        totalCategories: 1,
+        categories: [
+          {
+            category: 'whey',
+            categoryName: 'ホエイプロテイン',
+            products: [
+              {
+                id: 'fallback_whey_001',
+                name: 'ザバス ホエイプロテイン100 リッチショコラ味 980g',
+                brand: 'ザバス',
+                imageUrl: '/placeholder-protein.svg',
+                reviewAverage: 4.6,
+                reviewCount: 2500,
+                description: 'ホエイプロテイン100%使用。水でもしっかりおいしく、7種のビタミンB群配合。',
+                nutrition: { protein: 19.5, calories: 110, servings: 33, servingSize: 30 },
+                type: 'ホエイ',
+                flavor: 'チョコレート',
+                price: 4815,
+                pricePerServing: 146,
+                shopName: '楽天',
+                affiliateUrl: '#',
+                category: 'whey'
+              },
+              {
+                id: 'fallback_whey_002',
+                name: 'ビーレジェンド ホエイプロテイン 激うまチョコ風味 1kg',
+                brand: 'ビーレジェンド',
+                imageUrl: '/placeholder-protein.svg',
+                reviewAverage: 4.7,
+                reviewCount: 12000,
+                description: '圧倒的な美味しさとコスパを実現。国内製造で安心安全。',
+                nutrition: { protein: 21.0, calories: 118, servings: 33, servingSize: 30 },
+                type: 'ホエイ',
+                flavor: 'チョコレート',
+                price: 3980,
+                pricePerServing: 121,
+                shopName: '楽天',
+                affiliateUrl: '#',
+                category: 'whey'
+              },
+              {
+                id: 'fallback_whey_003',
+                name: 'VALX ホエイプロテイン チョコレート風味 1kg',
+                brand: 'VALX',
+                imageUrl: '/placeholder-protein.svg',
+                reviewAverage: 4.8,
+                reviewCount: 3200,
+                description: '山本義徳監修。高品質ホエイプロテインで理想のボディメイクを。',
+                nutrition: { protein: 21.8, calories: 120, servings: 33, servingSize: 30 },
+                type: 'ホエイ',
+                flavor: 'チョコレート',
+                price: 4980,
+                pricePerServing: 151,
+                shopName: '楽天',
+                affiliateUrl: '#',
+                category: 'whey'
+              }
+            ]
+          },
+          {
+            category: 'soy',
+            categoryName: 'ソイプロテイン（大豆）',
+            products: [
+              {
+                id: 'fallback_soy_001',
+                name: 'ソイプロテイン 大豆プロテイン ココア味 1kg',
+                brand: 'その他',
+                imageUrl: '/placeholder-protein.svg',
+                reviewAverage: 4.3,
+                reviewCount: 2100,
+                description: '植物性プロテインで美容と健康をサポート。女性にも人気。',
+                nutrition: { protein: 18.5, calories: 105, servings: 33, servingSize: 30 },
+                type: 'ソイ',
+                flavor: 'ココア',
+                price: 3280,
+                pricePerServing: 99,
+                shopName: '楽天',
+                affiliateUrl: '#',
+                category: 'soy'
+              },
+              {
+                id: 'fallback_soy_002',
+                name: 'アストリション ジュニアプロテイン ココア味 600g',
+                brand: 'アストリション',
+                imageUrl: '/placeholder-protein.svg',
+                reviewAverage: 4.7,
+                reviewCount: 5000,
+                description: '砂糖・人工甘味料無添加。成長期のお子様の栄養補給に。',
+                nutrition: { protein: 17.2, calories: 98, servings: 20, servingSize: 30 },
+                type: 'ソイ',
+                flavor: 'ココア',
+                price: 4380,
+                pricePerServing: 219,
+                shopName: '楽天',
+                affiliateUrl: '#',
+                category: 'soy'
+              }
+            ]
+          },
+          {
+            category: 'casein',
+            categoryName: 'カゼインプロテイン',
+            products: [
+              {
+                id: 'fallback_casein_001',
+                name: 'カゼインミセルプロテイン プレーン味 500g',
+                brand: 'その他',
+                imageUrl: '/placeholder-protein.svg',
+                reviewAverage: 4.3,
+                reviewCount: 180,
+                description: '就寝前に最適。ゆっくり吸収されるミルクプロテイン。',
+                nutrition: { protein: 24.0, calories: 115, servings: 17, servingSize: 30 },
+                type: 'カゼイン',
+                flavor: 'プレーン',
+                price: 1899,
+                pricePerServing: 112,
+                shopName: '楽天',
+                affiliateUrl: '#',
+                category: 'casein'
+              }
+            ]
+          }
+        ],
+        totalCategories: 3,
         lastUpdated: new Date().toISOString(),
         updateTime: 'フォールバック初期化'
       }
