@@ -44,8 +44,8 @@ export async function GET(request: Request) {
                 sampleCategory: parsed.categories?.[0]?.categoryName || 'none',
                 sampleProductCount: parsed.categories?.[0]?.products?.length || 0
               }
-            } catch (parseError) {
-              debugInfo.cacheContent = { parseError: parseError.message }
+            } catch (parseError: any) {
+              debugInfo.cacheContent = { parseError: parseError?.message || 'パースエラー' }
             }
           }
         } else if (action === 'test') {
