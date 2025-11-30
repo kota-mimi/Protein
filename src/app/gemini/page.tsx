@@ -72,14 +72,28 @@ export default function GeminiPage() {
     }
   }, []);
 
-  // 初期データを楽天APIから取得
+  // 初期データを楽天APIから取得 - より多くの商品を表示
   useEffect(() => {
     const loadInitialProducts = async () => {
       try {
         setIsLoading(true);
-        const products = await searchRakutenProducts('プロテイン', 3); // 3ページ取得
-        setRecommendedProducts(products.slice(0, 30)); // 30商品表示
-        console.log('✅ 初期商品データを楽天APIから読み込み:', products.length, '商品');
+        
+        // 複数キーワードで商品を大量取得
+        const allProducts = [];
+        const keywords = ['ホエイプロテイン', 'ソイプロテイン', 'プロテイン 人気'];
+        
+        for (const keyword of keywords) {
+          const products = await searchRakutenProducts(keyword, 2); // 各2ページずつ
+          allProducts.push(...products);
+        }
+        
+        // 重複除去
+        const uniqueProducts = allProducts.filter((product, index, self) =>
+          index === self.findIndex(p => p.id === product.id)
+        );
+        
+        setRecommendedProducts(uniqueProducts.slice(0, 50)); // 50商品表示に増量
+        console.log('✅ 初期商品データを楽天APIから読み込み:', uniqueProducts.length, '商品');
       } catch (error) {
         console.error('❌ 初期データ読み込みエラー:', error);
       } finally {
@@ -156,17 +170,43 @@ export default function GeminiPage() {
         }
       }
       
-      // キャッシュが空の場合のフォールバック
-      console.log('⚠️ キャッシュデータが見つかりません、緊急時のみ基本検索を実行');
-      const basicResponse = await fetch('/api/rakuten?keyword=プロテイン&page=1');
-      if (basicResponse.ok) {
-        const basicData = await basicResponse.json();
-        if (basicData.success && basicData.products && basicData.products.length > 0) {
-          console.log('✅ 緊急フォールバック検索で商品取得:', basicData.products.length, '件');
-          setAllProducts(basicData.products);
-          setShowAllProducts(true);
-          return;
+      // キャッシュが空の場合のフォールバック - 楽天APIから大量取得
+      console.log('⚠️ キャッシュデータが見つかりません、楽天APIから大量データを取得します');
+      
+      const allRakutenProducts = [];
+      const searchTerms = [
+        'ホエイプロテイン', 'ソイプロテイン', 'カゼインプロテイン', 'WPIプロテイン',
+        'ザバス プロテイン', 'DNS プロテイン', 'ビーレジェンド', 'マイプロテイン',
+        'アルプロン プロテイン', 'プロテイン 人気', 'プロテイン おすすめ'
+      ];
+      
+      for (const keyword of searchTerms) {
+        try {
+          for (let page = 1; page <= 2; page++) {
+            const response = await fetch(`/api/rakuten?keyword=${encodeURIComponent(keyword)}&page=${page}`);
+            if (response.ok) {
+              const data = await response.json();
+              if (data.success && data.products && data.products.length > 0) {
+                allRakutenProducts.push(...data.products);
+                console.log(`📦 ${keyword} ページ${page}: ${data.products.length}商品追加`);
+              }
+            }
+            await new Promise(resolve => setTimeout(resolve, 500)); // API制限対応
+          }
+        } catch (error) {
+          console.error(`❌ ${keyword} 取得エラー:`, error);
         }
+      }
+      
+      if (allRakutenProducts.length > 0) {
+        // 重複商品を除去
+        const uniqueProducts = allRakutenProducts.filter((product, index, self) =>
+          index === self.findIndex(p => p.id === product.id)
+        );
+        console.log(`✅ 楽天APIから大量データ取得完了: ${uniqueProducts.length}商品 (重複除去後)`);
+        setAllProducts(uniqueProducts);
+        setShowAllProducts(true);
+        return;
       }
       
       // 上記が失敗した場合の従来のフォールバック処理
