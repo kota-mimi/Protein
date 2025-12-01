@@ -234,7 +234,7 @@ export default function GeminiPage() {
     }, 500);
     
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, allProducts]);
+  }, [searchQuery, allProducts, performSearch]);
 
 
   // allProductsが更新された時にフィルタリングを実行

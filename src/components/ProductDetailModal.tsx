@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Star, ExternalLink, TrendingUp, Droplets, User } from 'lucide-react';
+import { X, Star, ExternalLink, User } from 'lucide-react';
 import { Product } from '@/types';
 import { Button } from './ui/Button';
 
@@ -91,19 +91,6 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               {product.description}
             </p>
 
-            {/* Flavor Profile */}
-            {product.flavorProfile && (
-              <div className="mb-8 bg-slate-50 p-5 rounded-xl border border-slate-100">
-                <h3 className="text-sm font-bold text-secondary mb-4 flex items-center">
-                  <Droplets className="w-4 h-4 mr-2 text-primary" />
-                  味覚・特徴チャート
-                </h3>
-                <FlavorBar label="甘さ" value={product.flavorProfile.sweetness} />
-                <FlavorBar label="酸味" value={product.flavorProfile.acidity} />
-                <FlavorBar label="濃厚さ" value={product.flavorProfile.richness} />
-                <FlavorBar label="溶けやすさ" value={product.flavorProfile.solubility} />
-              </div>
-            )}
 
             {/* Reviews Snippet */}
             {product.reviewList && product.reviewList.length > 0 && (
