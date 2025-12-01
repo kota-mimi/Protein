@@ -125,11 +125,29 @@ export async function GET() {
                     id: `rakuten_${product.shopCode}_${product.itemCode}`,
                     name: product.itemName,
                     description: (product.itemCaption || product.itemName || '').substring(0, 200) + '...',
-                    image: product.largeImageUrls && product.largeImageUrls.length > 0 ? product.largeImageUrls[0].imageUrl :
-                            (product.mediumImageUrls && product.mediumImageUrls.length > 0 ? product.mediumImageUrls[0].imageUrl : 
-                            (product.smallImageUrls && product.smallImageUrls.length > 0 ? product.smallImageUrls[0].imageUrl : 
-                            'https://placehold.co/400x400?text=プロテイン')),
-                    category: product.itemName && product.itemName.toLowerCase().includes('ソイ') ? 'VEGAN' : 'WHEY',
+                    image: (() => {
+                      let imageUrl = '';
+                      if (product.mediumImageUrls && product.mediumImageUrls.length > 0) {
+                        imageUrl = product.mediumImageUrls[0].imageUrl;
+                      } else if (product.smallImageUrls && product.smallImageUrls.length > 0) {
+                        imageUrl = product.smallImageUrls[0].imageUrl;
+                      } else {
+                        return 'https://placehold.co/400x400?text=プロテイン';
+                      }
+                      
+                      // 高画質化: サイズ制限を除去して400x400に変更
+                      return imageUrl.replace(/\?_ex=\d+x\d+/, '?_ex=400x400');
+                    })(),
+                    category: (() => {
+                      const name = product.itemName ? product.itemName.toLowerCase() : '';
+                      if (name.includes('ソイ') || name.includes('soy') || name.includes('植物性') || name.includes('大豆')) {
+                        return 'VEGAN';
+                      } else if (name.includes('カゼイン') || name.includes('casein')) {
+                        return 'CASEIN';
+                      } else {
+                        return 'WHEY';
+                      }
+                    })(),
                     rating: product.reviewAverage || 0,
                     reviews: product.reviewCount || 0,
                     tags: ['楽天', 'プロテイン'],
