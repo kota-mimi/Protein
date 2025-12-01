@@ -79,53 +79,63 @@ export default function GeminiPage() {
     }
   }, []);
 
-  // 初期データを楽天APIから取得 - より多くの商品を表示
+  // 初期データはキャッシュから高速読み込み
   useEffect(() => {
-    const loadInitialProducts = async () => {
+    const loadInitialProductsFromCache = async () => {
       try {
-        setIsLoading(true);
+        console.log('🚀 キャッシュから初期商品データを高速読み込み開始');
         
-        // 複数キーワードで商品を大量取得
-        const allProducts = [];
-        const keywords = ['ホエイプロテイン', 'ソイプロテイン', 'プロテイン 人気'];
+        // キャッシュから商品データを取得
+        const baseUrl = typeof window !== 'undefined' ? '' : 'http://localhost:3002';
+        const cacheResponse = await fetch(`${baseUrl}/api/cached-products`);
         
-        for (const keyword of keywords) {
-          const products = await searchRakutenProducts(keyword, 2); // 各2ページずつ
-          allProducts.push(...products);
+        if (cacheResponse.ok) {
+          const cacheData = await cacheResponse.json();
+          
+          if (cacheData.success && cacheData.products && cacheData.products.length > 0) {
+            // キャッシュから人気商品を選択（最初の50商品）
+            const popularProducts = cacheData.products.slice(0, 50);
+            setRecommendedProducts(popularProducts);
+            setProducts(popularProducts.slice(0, 30)); // 基本表示用
+            console.log('✅ キャッシュから初期商品データを高速読み込み完了:', popularProducts.length, '商品');
+            return;
+          }
         }
         
-        // 重複除去
-        const uniqueProducts = allProducts.filter((product, index, self) =>
-          index === self.findIndex(p => p.id === product.id)
-        );
+        // キャッシュが空の場合のフォールバック（静的データ）
+        console.log('⚠️ キャッシュが空、フォールバックデータを使用');
+        const fallbackProducts = [
+          {
+            id: 'fb001',
+            name: 'エクスプロージョン ホエイプロテイン ミルクチョコレート味 3kg',
+            description: '大容量3kgでコスパ最強。筋力トレーニングに最適なプロテイン。',
+            image: 'https://thumbnail.image.rakuten.co.jp/@0_mall/x-plosion/cabinet/yec/11362306/241227_10000019.jpg?_ex=500x500',
+            category: 'WHEY',
+            rating: 4.5,
+            reviews: 1988,
+            tags: ['大容量', 'コスパ'],
+            price: 8399,
+            protein: 20.0,
+            calories: 110,
+            servings: 100,
+            shops: [{ name: 'Rakuten' as const, price: 8399, url: 'https://item.rakuten.co.jp/x-plosion/10000019/' }]
+          }
+        ];
         
-        setRecommendedProducts(uniqueProducts.slice(0, 50)); // 50商品表示に増量
-        console.log('✅ 初期商品データを楽天APIから読み込み:', uniqueProducts.length, '商品');
+        setRecommendedProducts(fallbackProducts);
+        setProducts(fallbackProducts);
+        
       } catch (error) {
         console.error('❌ 初期データ読み込みエラー:', error);
+        // エラー時も空配列で初期化して画面を壊さない
+        setRecommendedProducts([]);
+        setProducts([]);
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadInitialProducts();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Load products
-  useEffect(() => {
-    const loadProducts = async () => {
-      setIsLoading(true);
-      try {
-        const productData = await fetchProducts({ keyword: 'プロテイン', page: 1 });
-        setProducts(productData);
-      } catch (error) {
-        console.error('Failed to load products:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadProducts();
+    loadInitialProductsFromCache();
   }, []);
 
 
@@ -186,159 +196,72 @@ export default function GeminiPage() {
         }
       }
       
-      // キャッシュが空の場合のフォールバック - 楽天APIから大量取得
-      console.log('⚠️ キャッシュデータが見つかりません、楽天APIから大量データを取得します');
+      // キャッシュが空の場合のフォールバック - 最小限のデータ取得＋バックグラウンド更新
+      console.log('⚠️ キャッシュデータが見つかりません、最小限のデータ取得＋バックグラウンド更新');
       
-      const allRakutenProducts = [];
-      const searchTerms = [
-        'ホエイプロテイン', 'ソイプロテイン', 'カゼインプロテイン', 'WPIプロテイン',
-        'ザバス プロテイン', 'DNS プロテイン', 'ビーレジェンド', 'マイプロテイン',
-        'アルプロン プロテイン', 'プロテイン 人気', 'プロテイン おすすめ'
+      try {
+        // バックグラウンドでキャッシュ更新をトリガー（ユーザーを待たせない）
+        fetch(`${baseUrl}/api/update-cache`, { 
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        })
+          .then(() => console.log('🔄 バックグラウンドでキャッシュ更新開始'))
+          .catch(err => console.log('⚠️ キャッシュ更新エラー:', err));
+          
+        // 最小限の楽天APIデータを取得（1回だけ）
+        const response = await fetch(`${baseUrl}/api/cached-products`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.products && data.products.length > 0) {
+            console.log(`✅ 基本データ取得完了: ${data.products.length}商品`);
+            setAllProducts(data.products);
+            setShowAllProducts(true);
+            return;
+          }
+        }
+      } catch (error) {
+        console.error(`❌ 最小限データ取得エラー:`, error);
+      }
+      
+      // 上記が失敗した場合のフォールバック処理（静的データ）
+      console.log('⚠️ 全て失敗、静的データにフォールバック');
+      // 静的フォールバックデータ
+      const fallbackProducts = [
+        {
+          id: 'fb001',
+          name: 'エクスプロージョン ホエイプロテイン ミルクチョコレート味 3kg',
+          description: '大容量3kgでコスパ最強。筋力トレーニングに最適なプロテイン。',
+          image: 'https://thumbnail.image.rakuten.co.jp/@0_mall/x-plosion/cabinet/yec/11362306/241227_10000019.jpg?_ex=500x500',
+          category: 'WHEY',
+          rating: 4.5,
+          reviews: 1988,
+          tags: ['大容量', 'コスパ'],
+          price: 8399,
+          protein: 20.0,
+          calories: 110,
+          servings: 100,
+          shops: [{ name: 'Rakuten' as const, price: 8399, url: 'https://item.rakuten.co.jp/x-plosion/10000019/' }]
+        },
+        {
+          id: 'fb002', 
+          name: 'ザバス ホエイプロテイン100 ココア味 1050g',
+          description: '明治の定番プロテイン。初心者にもおすすめの飲みやすいココア味。',
+          image: '/placeholder-protein.svg',
+          category: 'WHEY',
+          rating: 4.2,
+          reviews: 1542,
+          tags: ['定番', '飲みやすい'],
+          price: 4580,
+          protein: 20.9,
+          calories: 83,
+          servings: 50,
+          shops: [{ name: 'Amazon' as const, price: 4580, url: '#' }]
+        }
       ];
       
-      for (const keyword of searchTerms) {
-        try {
-          for (let page = 1; page <= 2; page++) {
-            const response = await fetch(`${baseUrl}/api/rakuten?keyword=${encodeURIComponent(keyword)}&page=${page}`);
-            if (response.ok) {
-              const data = await response.json();
-              if (data.success && data.products && data.products.length > 0) {
-                allRakutenProducts.push(...data.products);
-                console.log(`📦 ${keyword} ページ${page}: ${data.products.length}商品追加`);
-              }
-            }
-            await new Promise(resolve => setTimeout(resolve, 500)); // API制限対応
-          }
-        } catch (error) {
-          console.error(`❌ ${keyword} 取得エラー:`, error);
-        }
-      }
-      
-      if (allRakutenProducts.length > 0) {
-        // 重複商品を除去
-        const uniqueProducts = allRakutenProducts.filter((product, index, self) =>
-          index === self.findIndex(p => p.id === product.id)
-        );
-        console.log(`✅ 楽天APIから大量データ取得完了: ${uniqueProducts.length}商品 (重複除去後)`);
-        setAllProducts(uniqueProducts);
-        setShowAllProducts(true);
-        return;
-      }
-      
-      // 上記が失敗した場合の従来のフォールバック処理
-      const rakutenResponse = await fetch(`${baseUrl}/api/rakuten?keyword=プロテイン&page=1`);
-      
-      if (!rakutenResponse.ok) {
-        throw new Error(`Rakuten API Error: ${rakutenResponse.status} ${rakutenResponse.statusText}`);
-      }
-      
-      const rakutenData = await rakutenResponse.json();
-      
-      if (rakutenData.success && rakutenData.products && Array.isArray(rakutenData.products)) {
-        // 楽天商品データを直接使用
-        const rakutenProducts = rakutenData.products.map((product: any) => ({
-          ...product,
-          categoryName: 'プロテイン商品',
-          // APIで設定されたcategoryを保持、ない場合はデフォルトをWHEY
-          category: product.category || 'WHEY',
-          // Map API field names to frontend expected names
-          image: product.imageUrl || product.image || '/placeholder-protein.svg',
-          rating: product.reviewAverage || product.rating || 0,
-          protein: product.features?.protein || product.nutrition?.protein || product.protein || 20,
-          calories: product.features?.calories || product.nutrition?.calories || product.calories || 110,
-          reviews: product.reviewCount || product.reviews || 0,
-          // 必須フィールドのデフォルト値を設定
-          tags: ['楽天', ...extractProteinTags(product.name)].filter(Boolean),
-          description: product.description || '',
-          name: product.name || 'Unknown Product',
-          shops: product.shops || [{
-            name: 'Rakuten' as const,
-            price: product.price || 0,
-            url: product.affiliateUrl || product.url || '#'
-          }]
-        }));
-        
-        setAllProducts(rakutenProducts);
-        setShowAllProducts(true);
-        
-        console.log(`✅ 楽天から商品データを読み込み:`, rakutenProducts.length, '商品');
-        console.log('🏷️ カテゴリ分布:', rakutenProducts.reduce((acc: any, p: any) => {
-          acc[p.category] = (acc[p.category] || 0) + 1;
-          return acc;
-        }, {}));
-        return;
-      }
-      
-      // 楽天APIが失敗した場合、キャッシュAPIにフォールバック
-      console.log('⚠️ 楽天API失敗、キャッシュAPIにフォールバック');
-      const response = await fetch(`${baseUrl}/api/products`);
-      
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      
-      if (data.success && data.categories && Array.isArray(data.categories)) {
-        // カテゴリから全商品を平坦化
-        const flatProducts = data.categories.flatMap((cat: any) => {
-          if (!cat || !Array.isArray(cat.products)) {
-            console.warn('カテゴリデータが不正:', cat);
-            return [];
-          }
-          
-          return cat.products
-            .filter((product: any) => {
-              // 基本的な必須フィールドチェック
-              if (!product || !product.name || !product.id) {
-                return false;
-              }
-              
-              // プロテイン以外の商品を除外
-              const name = product.name.toLowerCase()
-              const excludeKeywords = [
-                'とろろ昆布', 'とろろ', '昆布', '烏龍茶', 'ウーロン茶', 'お茶', '茶', 
-                'オーツミルク', 'オーツ', '豆乳', '豆汁', 'ソイミルク', 'ミルク',
-                'ローファットミルク', '低脂肪乳', '野菜生活', '野菜ジュース', 'カゴメ', 
-                'コーヒー', '珈琲', 'ドリンク', 'ジュース', '飲料'
-              ]
-              return !excludeKeywords.some(keyword => name.includes(keyword))
-            })
-            .map((product: any) => {
-              try {
-                return {
-                  ...product,
-                  categoryName: cat.name || 'その他',
-                  category: cat.category || 'OTHER',
-                  // Map API field names to frontend expected names
-                  image: product.imageUrl || product.image || '/placeholder-protein.svg',
-                  rating: product.reviewAverage || product.rating || 0,
-                  protein: product.nutrition?.protein || product.protein || 20,
-                  calories: product.nutrition?.calories || product.calories || 110,
-                  reviews: product.reviewCount || product.reviews || 0,
-                  // 必須フィールドのデフォルト値を設定
-                  tags: product.tags || [],
-                  description: product.description || '',
-                  name: product.name || 'Unknown Product'
-                };
-              } catch (mapError) {
-                console.warn('商品データマッピングエラー:', mapError, product);
-                return null;
-              }
-            })
-            .filter(Boolean); // null値を除去
-        });
-        
-        setAllProducts(flatProducts);
-        setShowAllProducts(true);
-        
-        console.log(`✅ 全商品データを読み込み (${data.source}):`, flatProducts.length, '商品');
-      } else {
-        console.error('❌ 全商品データ取得失敗:', data);
-        // フォールバック: 空配列を設定
-        setAllProducts([]);
-        setShowAllProducts(true);
-      }
+      setAllProducts(fallbackProducts);
+      setShowAllProducts(true);
+      console.log(`✅ フォールバックデータを使用: ${fallbackProducts.length}商品`);
     } catch (error) {
       console.error('❌ 全商品データ取得エラー:', error);
       // エラー時は空配列を設定して画面を壊さない
@@ -439,8 +362,8 @@ export default function GeminiPage() {
     }
   };
 
-  // リアルタイム検索機能
-  const performRealTimeSearch = async (query: string) => {
+  // キャッシュベース検索機能（高速）
+  const performCacheBasedSearch = async (query: string) => {
     if (!query || query.trim().length < 2) {
       setSearchResults([]);
       setIsSearching(false);
@@ -449,35 +372,56 @@ export default function GeminiPage() {
     
     setIsSearching(true);
     try {
-      console.log(`🔍 リアルタイム検索: "${query}"`);
+      console.log(`🔍 キャッシュベース検索: "${query}"`);
       
-      // プロテイン関連キーワードを追加して検索精度向上
-      const searchKeyword = query.includes('プロテイン') ? query : `${query} プロテイン`;
-      const products = await searchRakutenProducts(searchKeyword, 2); // 2ページまで
-      
-      setSearchResults(products);
-      console.log(`✅ リアルタイム検索完了: ${products.length}件`);
+      // キャッシュされた全商品から検索
+      if (allProducts.length > 0) {
+        const filteredProducts = allProducts.filter(product => {
+          const searchTerm = query.toLowerCase();
+          const matchName = product.name.toLowerCase().includes(searchTerm);
+          const matchDescription = (product.description || '').toLowerCase().includes(searchTerm);
+          const matchTags = (product.tags || []).some(tag => tag.toLowerCase().includes(searchTerm));
+          const matchBrand = (product.brand || '').toLowerCase().includes(searchTerm);
+          
+          return matchName || matchDescription || matchTags || matchBrand;
+        });
+        
+        // 関連度でソート（名前マッチを優先）
+        filteredProducts.sort((a, b) => {
+          const aNameMatch = a.name.toLowerCase().includes(query.toLowerCase());
+          const bNameMatch = b.name.toLowerCase().includes(query.toLowerCase());
+          if (aNameMatch && !bNameMatch) return -1;
+          if (!aNameMatch && bNameMatch) return 1;
+          return b.rating - a.rating; // 評価順
+        });
+        
+        setSearchResults(filteredProducts);
+        console.log(`✅ キャッシュベース検索完了: ${filteredProducts.length}件`);
+      } else {
+        setSearchResults([]);
+        console.log('⚠️ キャッシュデータが空です');
+      }
     } catch (error) {
-      console.error('リアルタイム検索エラー:', error);
+      console.error('キャッシュベース検索エラー:', error);
       setSearchResults([]);
     } finally {
       setIsSearching(false);
     }
   };
 
-  // 検索のデバウンス処理
+  // 検索のデバウンス処理（高速化）
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (searchQuery) {
-        performRealTimeSearch(searchQuery);
+        performCacheBasedSearch(searchQuery);
       } else {
         setSearchResults([]);
         setIsSearching(false);
       }
-    }, 800); // 800ms後に検索実行
+    }, 300); // 300msに短縮（キャッシュベースなので高速）
     
     return () => clearTimeout(timeoutId);
-  }, [searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [searchQuery, allProducts]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 最初から全商品を読み込み - 強制実行
   useEffect(() => {
