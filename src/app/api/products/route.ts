@@ -94,6 +94,10 @@ export async function GET() {
                     'プロテインバー', 'バー', 'ウエハース', 'チョコバー', 'スナックバー',
                     'ゼリー', 'グミ', 'ドリンク', '飲料', '青汁', 'あおじる',
                     
+                    // ペット・動物用商品（重要追加）
+                    '犬', 'ペット', 'ドッグ', 'dog', 'pet', 'キャット', 'cat', '愛犬', '愛猫',
+                    'ペティオ', 'おやつ', 'デンタル', '犬用', '猫用', 'ペット用', '動物用',
+                    
                     // サプリメント・医薬品
                     'サプリ', 'supplement', '錠剤', 'タブレット', 'カプセル', 'ビタミン', 'マルチ',
                     'コラーゲン', 'アミノ酸のみ', 'クレアチンのみ', 'カルニチン',
@@ -152,9 +156,6 @@ export async function GET() {
                     reviews: product.reviewCount || 0,
                     tags: ['楽天', 'プロテイン'],
                     price: product.itemPrice || 0,
-                    protein: 20,
-                    calories: 110,
-                    servings: 30,
                     shops: [{
                       name: 'Rakuten' as const,
                       price: product.itemPrice || 0,

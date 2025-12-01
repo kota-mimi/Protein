@@ -18,27 +18,6 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
   const minPrice = product.price || (product.shops && product.shops.length > 0 ? Math.min(...product.shops.map(s => s.price)) : 0);
   
-  // タンパク質1gあたりの価格計算
-  let pricePerProtein = 0;
-  if (product.specs && product.specs.proteinRatio > 0 && product.specs.weightGrams > 0) {
-    const totalProtein = product.specs.weightGrams * (product.specs.proteinRatio / 100);
-    pricePerProtein = Math.round((minPrice / totalProtein) * 10) / 10;
-  }
-
-  // Flavor Bar Component
-  const FlavorBar = ({ label, value }: { label: string, value: number }) => (
-    <div className="flex items-center text-xs sm:text-sm mb-2">
-      <span className="w-20 text-slate-500 font-bold">{label}</span>
-      <div className="flex-1 flex gap-1">
-        {[1, 2, 3, 4, 5].map((level) => (
-          <div 
-            key={level} 
-            className={`h-2 flex-1 rounded-sm ${level <= value ? 'bg-primary' : 'bg-slate-200'}`}
-          />
-        ))}
-      </div>
-    </div>
-  );
 
   return (
     <div className="fixed inset-0 bg-secondary/30 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={onClose}>
