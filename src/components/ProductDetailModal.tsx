@@ -72,14 +72,6 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 <div className="text-slate-500 text-xs mb-1">最安値目安</div>
                 <div className="text-2xl font-bold text-slate-900 px-2 rounded inline-block font-mono">¥{minPrice.toLocaleString()}</div>
               </div>
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 relative overflow-hidden">
-                <div className="text-slate-500 text-xs mb-1">タンパク質1g単価</div>
-                {pricePerProtein > 0 ? (
-                  <div className="text-2xl font-bold text-primary px-2 rounded inline-block font-mono">¥{pricePerProtein}<span className="text-sm text-slate-500 font-normal">/g</span></div>
-                ) : (
-                  <div className="text-xl font-bold text-slate-400">-</div>
-                )}
-              </div>
             </div>
 
             <p className="text-slate-600 text-sm leading-relaxed mb-6">
