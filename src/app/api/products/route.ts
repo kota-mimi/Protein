@@ -24,21 +24,27 @@ export async function GET() {
     const rakutenApiUrl = 'https://app.rakuten.co.jp/services/api/IchibaItem/Search/20220601'
     const allProducts = []
     
-    // プロテイン関連キーワード
+    // プロテイン関連キーワードを大幅拡張
     const keywords = [
       'ホエイプロテイン',
-      'ソイプロテイン', 
+      'ソイプロテイン',
+      'カゼインプロテイン',
       'プロテイン',
       'ザバス',
       'ビーレジェンド',
-      'マイプロテイン'
+      'マイプロテイン',
+      'エクスプロージョン',
+      'DNS',
+      'アルプロン',
+      'ウイダー',
+      'ケンタイ'
     ]
     
     console.log(`🔍 ${keywords.length}個のキーワードで検索開始`)
     
-    // 各キーワードで少ないページ数で取得（API制限対応）
+    // 各キーワードで4ページまで取得（より多くの商品を収集）
     for (const keyword of keywords) {
-      for (let page = 1; page <= 2; page++) {
+      for (let page = 1; page <= 4; page++) {
         try {
           const params = new URLSearchParams({
             format: 'json',
@@ -75,14 +81,16 @@ export async function GET() {
                   // プロテイン商品のみを厳密にフィルタ
                   const isProtein = name.includes('プロテイン') || name.includes('protein')
                   
-                  // 除外すべき商品（甘酒、クッキー、サプリ、薬など）
+                  // 除外すべき商品（甘酒、クッキー、サプリ、薬、シェイカーなど）
                   const excludeTerms = [
                     '甘酒', 'あまざけ', 'クッキー', 'cookie', 'ビスケット', '煎餅', 'せんべい',
                     'サプリ', 'supplement', '錠剤', 'タブレット', 'カプセル', 'ビタミン', 'マルチ',
                     '青汁', 'あおじる', 'コラーゲン', 'ゼリー', 'グミ', 'ドリンク', '飲料',
                     '化粧品', 'コスメ', 'シャンプー', '石鹸', 'せっけん', 'ソープ', 'クリーム',
                     'アミノ酸のみ', 'bcaaのみ', 'eaaのみ', 'クレアチンのみ', 'カルニチン',
-                    'シェイカーのみ', 'ボトルのみ', 'プロテインバー', 'バー', 'ウエハース'
+                    'シェイカー', 'shaker', 'ボトル', 'bottle', 'カップ', 'コップ', 'タンブラー',
+                    'プロテインバー', 'バー', 'ウエハース', 'チョコバー', 'スナックバー',
+                    'スプーン', 'spoon', 'ファンネル', 'ピルケース', 'ケース', 'ピルボックス'
                   ]
                   
                   const isExcluded = excludeTerms.some(term => name.includes(term))
