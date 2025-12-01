@@ -73,11 +73,6 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 <div className="text-2xl font-bold text-slate-900 px-2 rounded inline-block font-mono">¥{minPrice.toLocaleString()}</div>
               </div>
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 relative overflow-hidden">
-                {pricePerProtein > 0 && (
-                   <div className="absolute top-0 right-0 bg-primary/10 p-1.5 rounded-bl-lg">
-                      <TrendingUp className="w-4 h-4 text-primary" />
-                   </div>
-                )}
                 <div className="text-slate-500 text-xs mb-1">タンパク質1g単価</div>
                 {pricePerProtein > 0 ? (
                   <div className="text-2xl font-bold text-primary px-2 rounded inline-block font-mono">¥{pricePerProtein}<span className="text-sm text-slate-500 font-normal">/g</span></div>

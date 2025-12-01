@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Menu, Search, Dumbbell, Zap, TrendingUp, Filter, Sparkles, BookOpen, X, ChevronDown, ChevronUp, ArrowUpDown, SlidersHorizontal, Trophy, Coins, Tag } from 'lucide-react';
 import { Product } from '@/types';
 import { ProductCard } from '@/components/ProductCard';
@@ -195,7 +195,7 @@ export default function GeminiPage() {
   };
 
   // シンプルな検索機能
-  const performSearch = async (query: string) => {
+  const performSearch = useCallback(async (query: string) => {
     if (!query || query.trim().length < 2) {
       setSearchResults([]);
       setIsSearching(false);
@@ -220,7 +220,7 @@ export default function GeminiPage() {
     }
     
     setIsSearching(false);
-  };
+  }, [allProducts]);
 
   // 検索のデバウンス処理
   useEffect(() => {
@@ -234,7 +234,7 @@ export default function GeminiPage() {
     }, 500);
     
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, allProducts, performSearch]);
+  }, [searchQuery, performSearch]);
 
 
   // allProductsが更新された時にフィルタリングを実行
