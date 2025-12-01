@@ -125,15 +125,24 @@ export default function GeminiPage() {
     setCurrentView('HOME');
     setIsDiagnosisOpen(false);
     
-    // 診断結果に基づいて推薦商品を選択（最大10個）
+    // 診断結果に基づいて推薦商品を厳選（5個）
     const filteredProducts = products.filter(product => {
       if (recommendedType === 'WHEY') return product.category === 'WHEY';
       if (recommendedType === 'VEGAN') return product.category === 'VEGAN';
+      if (recommendedType === 'CASEIN') return product.category === 'CASEIN';
       return true; // ALL の場合
     });
     
-    // 10個に制限して推薦商品を設定
-    const recommended = filteredProducts.slice(0, 10);
+    // 評価とレビュー数でソートして上位5個を選択
+    const sortedProducts = filteredProducts.sort((a, b) => {
+      // 評価が高く、レビュー数も多い商品を優先
+      const scoreA = (a.rating || 0) * Math.log(a.reviews || 1);
+      const scoreB = (b.rating || 0) * Math.log(b.reviews || 1);
+      return scoreB - scoreA;
+    });
+    
+    // 5個に制限して推薦商品を設定
+    const recommended = sortedProducts.slice(0, 5);
     setRecommendedProducts(recommended);
     setShowRecommendations(true);
     

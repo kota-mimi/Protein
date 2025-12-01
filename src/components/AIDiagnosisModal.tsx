@@ -59,13 +59,63 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
   const analyze = async (finalAnswers: {[key: number]: string}) => {
     setIsAnalyzing(true);
     
-    // 簡易ロジックで推奨フィルターを決定
-    let recommendedType = 'ALL';
-    if (finalAnswers[1].includes("筋肥大")) recommendedType = 'WHEY';
-    else if (finalAnswers[1].includes("ダイエット")) recommendedType = 'VEGAN';
-    else if (finalAnswers[4].includes("価格")) recommendedType = 'WHEY';
+    // 詳細な分析ロジックでユーザーにぴったりの推奨タイプを決定
+    let recommendedType = 'WHEY'; // デフォルト
     
-    // 短い遅延後に直接完了処理
+    const gender = finalAnswers[0];
+    const purpose = finalAnswers[1];
+    const frequency = finalAnswers[2];
+    const taste = finalAnswers[3];
+    const priority = finalAnswers[4];
+    
+    // 目的を最優先に、他の要因も考慮
+    if (purpose.includes("ダイエット") || purpose.includes("引き締め")) {
+      // ダイエット・引き締め目的
+      if (gender.includes("女性") || taste.includes("人工甘味料なし")) {
+        recommendedType = 'VEGAN'; // ソイプロテイン（女性・ナチュラル志向）
+      } else {
+        recommendedType = 'WHEY'; // ホエイプロテイン（男性ダイエット）
+      }
+    } else if (purpose.includes("筋肥大") || purpose.includes("バルクアップ")) {
+      // 筋肥大目的
+      if (frequency.includes("週4回以上")) {
+        recommendedType = 'WHEY'; // 高頻度トレーニング → ホエイ
+      } else {
+        recommendedType = 'CASEIN'; // 低頻度 → 持続型カゼイン
+      }
+    } else if (purpose.includes("健康維持") || purpose.includes("栄養補給")) {
+      // 健康維持目的
+      if (gender.includes("女性") || gender.includes("50代以上")) {
+        recommendedType = 'VEGAN'; // 年配・女性 → 消化に優しいソイ
+      } else if (frequency.includes("ほぼしない")) {
+        recommendedType = 'CASEIN'; // 運動しない → ゆっくり吸収カゼイン
+      } else {
+        recommendedType = 'WHEY'; // その他健康維持
+      }
+    } else if (purpose.includes("スポーツ") || purpose.includes("パフォーマンス")) {
+      // スポーツパフォーマンス目的
+      if (frequency.includes("週4回以上")) {
+        recommendedType = 'WHEY'; // 高頻度 → 即効性ホエイ
+      } else {
+        recommendedType = 'CASEIN'; // 持続型でパフォーマンスサポート
+      }
+    }
+    
+    // 特別な条件での調整
+    if (priority.includes("価格") && !purpose.includes("筋肥大")) {
+      recommendedType = 'WHEY'; // コスパ重視 → ホエイ
+    }
+    
+    if (taste.includes("人工甘味料なし")) {
+      // ナチュラル志向
+      if (purpose.includes("筋肥大")) {
+        recommendedType = 'WHEY'; // 筋肥大 + ナチュラル
+      } else {
+        recommendedType = Math.random() > 0.5 ? 'VEGAN' : 'CASEIN'; // その他はソイかカゼイン
+      }
+    }
+    
+    // 短い遅延後に完了処理
     setTimeout(() => {
       setIsAnalyzing(false);
       onComplete(recommendedType);
