@@ -79,63 +79,39 @@ export default function GeminiPage() {
     }
   }, []);
 
-  // 初期データはキャッシュから高速読み込み
+  // 商品データを新しいシンプルAPIから取得
   useEffect(() => {
-    const loadInitialProductsFromCache = async () => {
+    const loadProducts = async () => {
       try {
-        console.log('🚀 キャッシュから初期商品データを高速読み込み開始');
+        setIsLoading(true);
+        console.log('🚀 商品データ取得開始');
         
-        // キャッシュから商品データを取得
-        const baseUrl = typeof window !== 'undefined' ? '' : 'http://localhost:3002';
-        const cacheResponse = await fetch(`${baseUrl}/api/cached-products`);
+        const response = await fetch('/api/products');
+        const data = await response.json();
         
-        if (cacheResponse.ok) {
-          const cacheData = await cacheResponse.json();
-          
-          if (cacheData.success && cacheData.products && cacheData.products.length > 0) {
-            // キャッシュから人気商品を選択（最初の50商品）
-            const popularProducts = cacheData.products.slice(0, 50);
-            setRecommendedProducts(popularProducts);
-            setProducts(popularProducts.slice(0, 30)); // 基本表示用
-            console.log('✅ キャッシュから初期商品データを高速読み込み完了:', popularProducts.length, '商品');
-            return;
-          }
+        if (data.success && data.products) {
+          console.log(`✅ 商品取得完了: ${data.products.length}件`);
+          setProducts(data.products);
+          setAllProducts(data.products);
+          setFilteredProducts(data.products);
+          setRecommendedProducts(data.products.slice(0, 50));
+        } else {
+          console.error('❌ 商品取得失敗:', data);
+          setProducts([]);
+          setAllProducts([]);
+          setFilteredProducts([]);
         }
-        
-        // キャッシュが空の場合のフォールバック（静的データ）
-        console.log('⚠️ キャッシュが空、フォールバックデータを使用');
-        const fallbackProducts = [
-          {
-            id: 'fb001',
-            name: 'エクスプロージョン ホエイプロテイン ミルクチョコレート味 3kg',
-            description: '大容量3kgでコスパ最強。筋力トレーニングに最適なプロテイン。',
-            image: 'https://thumbnail.image.rakuten.co.jp/@0_mall/x-plosion/cabinet/yec/11362306/241227_10000019.jpg?_ex=500x500',
-            category: 'WHEY',
-            rating: 4.5,
-            reviews: 1988,
-            tags: ['大容量', 'コスパ'],
-            price: 8399,
-            protein: 20.0,
-            calories: 110,
-            servings: 100,
-            shops: [{ name: 'Rakuten' as const, price: 8399, url: 'https://item.rakuten.co.jp/x-plosion/10000019/' }]
-          }
-        ];
-        
-        setRecommendedProducts(fallbackProducts);
-        setProducts(fallbackProducts);
-        
       } catch (error) {
-        console.error('❌ 初期データ読み込みエラー:', error);
-        // エラー時も空配列で初期化して画面を壊さない
-        setRecommendedProducts([]);
+        console.error('❌ 商品取得エラー:', error);
         setProducts([]);
+        setAllProducts([]);
+        setFilteredProducts([]);
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadInitialProductsFromCache();
+    loadProducts();
   }, []);
 
 
@@ -166,105 +142,27 @@ export default function GeminiPage() {
     }, 100);
   };
 
-  // Load all products from cache - キャッシュから取得（1週間に1回更新）
+  // シンプルに全商品を表示する関数
   const loadAllProducts = async () => {
-    try {
-      console.log('🎯 loadAllProducts実行開始');
-      setIsLoadingAllProducts(true);
-      
-      // SSR/クライアント対応のbaseURL
-      const baseUrl = typeof window !== 'undefined' ? '' : 'http://localhost:3002';
-      
-      console.log('📖 キャッシュデータから商品を読み込み中...');
-      const cacheResponse = await fetch(`${baseUrl}/api/cached-products`);
-      
-      if (cacheResponse.ok) {
-        const cacheData = await cacheResponse.json();
-        console.log('🔍 キャッシュデータ詳細:', {
-          success: cacheData.success,
-          productsLength: cacheData.products?.length,
-          hasProducts: !!(cacheData.products && cacheData.products.length > 0)
-        });
-        
-        if (cacheData.success && cacheData.products && cacheData.products.length > 0) {
-          console.log('🎯 allProductsにセット開始...');
-          setAllProducts(cacheData.products);
-          setShowAllProducts(true);
-          console.log(`✅ キャッシュから商品データを読み込み完了:`, cacheData.products.length, '商品');
-          console.log(`📅 最終更新: ${cacheData.lastUpdated}`);
-          return;
-        }
-      }
-      
-      // キャッシュが空の場合のフォールバック - 最小限のデータ取得＋バックグラウンド更新
-      console.log('⚠️ キャッシュデータが見つかりません、最小限のデータ取得＋バックグラウンド更新');
-      
-      try {
-        // バックグラウンドでキャッシュ更新をトリガー（ユーザーを待たせない）
-        fetch(`${baseUrl}/api/update-cache`, { 
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        })
-          .then(() => console.log('🔄 バックグラウンドでキャッシュ更新開始'))
-          .catch(err => console.log('⚠️ キャッシュ更新エラー:', err));
-          
-        // 最小限の楽天APIデータを取得（1回だけ）
-        const response = await fetch(`${baseUrl}/api/cached-products`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.products && data.products.length > 0) {
-            console.log(`✅ 基本データ取得完了: ${data.products.length}商品`);
-            setAllProducts(data.products);
-            setShowAllProducts(true);
-            return;
-          }
-        }
-      } catch (error) {
-        console.error(`❌ 最小限データ取得エラー:`, error);
-      }
-      
-      // 上記が失敗した場合のフォールバック処理（静的データ）
-      console.log('⚠️ 全て失敗、静的データにフォールバック');
-      // 静的フォールバックデータ
-      const fallbackProducts = [
-        {
-          id: 'fb001',
-          name: 'エクスプロージョン ホエイプロテイン ミルクチョコレート味 3kg',
-          description: '大容量3kgでコスパ最強。筋力トレーニングに最適なプロテイン。',
-          image: 'https://thumbnail.image.rakuten.co.jp/@0_mall/x-plosion/cabinet/yec/11362306/241227_10000019.jpg?_ex=500x500',
-          category: 'WHEY',
-          rating: 4.5,
-          reviews: 1988,
-          tags: ['大容量', 'コスパ'],
-          price: 8399,
-          protein: 20.0,
-          calories: 110,
-          servings: 100,
-          shops: [{ name: 'Rakuten' as const, price: 8399, url: 'https://item.rakuten.co.jp/x-plosion/10000019/' }]
-        },
-        {
-          id: 'fb002', 
-          name: 'ザバス ホエイプロテイン100 ココア味 1050g',
-          description: '明治の定番プロテイン。初心者にもおすすめの飲みやすいココア味。',
-          image: '/placeholder-protein.svg',
-          category: 'WHEY',
-          rating: 4.2,
-          reviews: 1542,
-          tags: ['定番', '飲みやすい'],
-          price: 4580,
-          protein: 20.9,
-          calories: 83,
-          servings: 50,
-          shops: [{ name: 'Amazon' as const, price: 4580, url: '#' }]
-        }
-      ];
-      
-      setAllProducts(fallbackProducts);
+    if (allProducts.length > 0) {
       setShowAllProducts(true);
-      console.log(`✅ フォールバックデータを使用: ${fallbackProducts.length}商品`);
+      console.log(`✅ 既に読み込み済み: ${allProducts.length}商品を表示`);
+      return;
+    }
+    
+    // まだ読み込んでいない場合は商品を取得
+    try {
+      setIsLoadingAllProducts(true);
+      const response = await fetch('/api/products');
+      const data = await response.json();
+      
+      if (data.success && data.products) {
+        setAllProducts(data.products);
+        setShowAllProducts(true);
+        console.log(`✅ 全商品取得完了: ${data.products.length}件`);
+      }
     } catch (error) {
-      console.error('❌ 全商品データ取得エラー:', error);
-      // エラー時は空配列を設定して画面を壊さない
+      console.error('❌ 全商品取得エラー:', error);
       setAllProducts([]);
       setShowAllProducts(true);
     } finally {
@@ -296,74 +194,8 @@ export default function GeminiPage() {
     return tags;
   };
 
-  // 楽天APIから商品検索（複数ページ対応）
-  const searchRakutenProducts = async (keyword: string, maxPages = 3) => {
-    const allProducts = [];
-    
-    try {
-      console.log(`🔍 楽天検索開始: "${keyword}" (最大${maxPages}ページ)`);
-      const baseUrl = typeof window !== 'undefined' ? '' : 'http://localhost:3002';
-      
-      // 複数ページから商品を取得
-      for (let page = 1; page <= maxPages; page++) {
-        try {
-          const response = await fetch(`${baseUrl}/api/rakuten?keyword=${encodeURIComponent(keyword)}&page=${page}`);
-          if (response.ok) {
-            const data = await response.json();
-            if (data.success && data.products && data.products.length > 0) {
-              const mappedProducts = data.products.map((product: any) => ({
-                ...product,
-                categoryName: 'プロテイン商品',
-                category: product.category || 'WHEY',
-                image: product.imageUrl || '/placeholder-protein.svg',
-                rating: product.reviewAverage || 0,
-                reviews: product.reviewCount || 0,
-                tags: ['楽天', ...extractProteinTags(product.name)].filter(Boolean),
-                description: product.description || '',
-                // 正しい商品情報をマッピング
-                protein: product.features?.protein || 20, // タンパク質量
-                calories: product.features?.calories || 110, // カロリー
-                servings: product.features?.servings || 30, // 回数
-                pricePerServing: product.pricePerServing || Math.round((product.price || 0) / 30), // 1回あたり価格
-                shops: [{
-                  name: 'Rakuten' as const,
-                  price: product.price || 0,
-                  url: product.affiliateUrl || product.url || '#' // affiliateUrlまたはurlを使用
-                }]
-              }));
-              
-              allProducts.push(...mappedProducts);
-              console.log(`📦 ページ${page}: ${data.products.length}商品取得 (累計${allProducts.length}商品)`);
-              
-              // 少し間隔を空けてAPI制限を回避
-              if (page < maxPages) {
-                await new Promise(resolve => setTimeout(resolve, 500));
-              }
-            } else {
-              console.log(`⚠️ ページ${page}: データなし、検索終了`);
-              break;
-            }
-          } else {
-            console.warn(`⚠️ ページ${page}: API呼び出し失敗 (${response.status})`);
-            break;
-          }
-        } catch (pageError) {
-          console.error(`❌ ページ${page}取得エラー:`, pageError);
-          break;
-        }
-      }
-      
-      console.log(`✅ 楽天検索完了: ${allProducts.length}商品取得`);
-      return allProducts;
-      
-    } catch (error) {
-      console.error('楽天検索エラー:', error);
-      return [];
-    }
-  };
-
-  // キャッシュベース検索機能（高速）
-  const performCacheBasedSearch = async (query: string) => {
+  // シンプルな検索機能
+  const performSearch = async (query: string) => {
     if (!query || query.trim().length < 2) {
       setSearchResults([]);
       setIsSearching(false);
@@ -371,74 +203,39 @@ export default function GeminiPage() {
     }
     
     setIsSearching(true);
-    try {
-      console.log(`🔍 キャッシュベース検索: "${query}"`);
+    
+    // 既に読み込んだ商品から検索
+    if (allProducts.length > 0) {
+      const filteredProducts = allProducts.filter(product => {
+        const searchTerm = query.toLowerCase();
+        const matchName = product.name.toLowerCase().includes(searchTerm);
+        const matchTags = (product.tags || []).some(tag => tag.toLowerCase().includes(searchTerm));
+        return matchName || matchTags;
+      });
       
-      // キャッシュされた全商品から検索
-      if (allProducts.length > 0) {
-        const filteredProducts = allProducts.filter(product => {
-          const searchTerm = query.toLowerCase();
-          const matchName = product.name.toLowerCase().includes(searchTerm);
-          const matchDescription = (product.description || '').toLowerCase().includes(searchTerm);
-          const matchTags = (product.tags || []).some(tag => tag.toLowerCase().includes(searchTerm));
-          const matchBrand = (product.brand || '').toLowerCase().includes(searchTerm);
-          
-          return matchName || matchDescription || matchTags || matchBrand;
-        });
-        
-        // 関連度でソート（名前マッチを優先）
-        filteredProducts.sort((a, b) => {
-          const aNameMatch = a.name.toLowerCase().includes(query.toLowerCase());
-          const bNameMatch = b.name.toLowerCase().includes(query.toLowerCase());
-          if (aNameMatch && !bNameMatch) return -1;
-          if (!aNameMatch && bNameMatch) return 1;
-          return b.rating - a.rating; // 評価順
-        });
-        
-        setSearchResults(filteredProducts);
-        console.log(`✅ キャッシュベース検索完了: ${filteredProducts.length}件`);
-      } else {
-        setSearchResults([]);
-        console.log('⚠️ キャッシュデータが空です');
-      }
-    } catch (error) {
-      console.error('キャッシュベース検索エラー:', error);
+      setSearchResults(filteredProducts);
+      console.log(`🔍 検索完了: "${query}" - ${filteredProducts.length}件`);
+    } else {
       setSearchResults([]);
-    } finally {
-      setIsSearching(false);
     }
+    
+    setIsSearching(false);
   };
 
-  // 検索のデバウンス処理（高速化）
+  // 検索のデバウンス処理
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (searchQuery) {
-        performCacheBasedSearch(searchQuery);
+        performSearch(searchQuery);
       } else {
         setSearchResults([]);
         setIsSearching(false);
       }
-    }, 300); // 300msに短縮（キャッシュベースなので高速）
+    }, 500);
     
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, allProducts]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [searchQuery, allProducts]);
 
-  // 最初から全商品を読み込み - 強制実行
-  useEffect(() => {
-    console.log('🚀 強制useEffect実行中!');
-    
-    const executeLoad = async () => {
-      try {
-        console.log('🔄 loadAllProducts開始...');
-        await loadAllProducts();
-        console.log('✅ loadAllProducts完了!');
-      } catch (error) {
-        console.error('❌ loadAllProductsエラー:', error);
-      }
-    };
-    
-    executeLoad();
-  }, []); // 空の依存配列で確実に1回だけ実行
 
   // allProductsが更新された時にフィルタリングを実行
   useEffect(() => {
