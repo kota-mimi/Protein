@@ -1,9 +1,112 @@
 import { NextResponse } from 'next/server'
+import { loadFeaturedProductsCache } from '@/lib/cache'
 
 export async function GET() {
   try {
-    console.log('🎯 楽天API直接呼び出し開始')
+    console.log('🎯 キャッシュから商品データを取得開始')
     
+    // キャッシュからデータを読み込み
+    const cacheData = await loadFeaturedProductsCache()
+    
+    if (!cacheData) {
+      console.log('⚠️ キャッシュデータなし - 楽天API直接呼び出し')
+      return await fallbackToRakutenAPI()
+    }
+
+    // キャッシュデータの形式確認
+    console.log('🔍 キャッシュデータ構造:', {
+      hasCategories: !!(cacheData.categories),
+      categoriesLength: cacheData.categories?.length || 0,
+      isArray: Array.isArray(cacheData.categories)
+    })
+
+    if (cacheData.categories && Array.isArray(cacheData.categories)) {
+      // カテゴリから全商品を平坦化して変換
+      const allProducts = cacheData.categories.flatMap((category: any) => {
+        if (!category.products || !Array.isArray(category.products)) {
+          console.warn('カテゴリに商品がありません:', category.categoryName || 'unknown')
+          return []
+        }
+
+        return category.products.map((product: any) => {
+          try {
+            return {
+              id: product.id,
+              name: product.name,
+              description: product.description || '',
+              image: product.imageUrl || product.image || '/placeholder-protein.svg',
+              category: mapCategory(product.type || category.category || 'WHEY'),
+              rating: product.reviewAverage || product.rating || 0,
+              reviews: product.reviewCount || product.reviews || 0,
+              tags: extractTags(product),
+              price: product.price || 0,
+              protein: product.nutrition?.protein || 20,
+              calories: product.nutrition?.calories || 110,
+              servings: product.nutrition?.servings || 30,
+              shops: [{
+                name: 'Rakuten' as const,
+                price: product.price || 0,
+                url: product.affiliateUrl || '#'
+              }]
+            }
+          } catch (error) {
+            console.warn('商品変換エラー:', error, product.name || 'unknown')
+            return null
+          }
+        }).filter(Boolean) // null除去
+      })
+
+      console.log(`✅ キャッシュから商品データを取得完了: ${allProducts.length}商品`)
+
+      return NextResponse.json({
+        success: true,
+        products: allProducts,
+        totalCount: allProducts.length,
+        lastUpdated: cacheData.lastUpdated || new Date().toISOString(),
+        source: 'cache',
+        message: `キャッシュから${allProducts.length}商品を取得`
+      })
+    }
+
+    // キャッシュ形式が不正な場合は楽天APIにフォールバック
+    console.log('⚠️ キャッシュ形式が不正 - 楽天APIにフォールバック')
+    return await fallbackToRakutenAPI()
+
+  } catch (error: any) {
+    console.error('❌ キャッシュ読み込みエラー:', error)
+    return await fallbackToRakutenAPI()
+  }
+}
+
+// カテゴリマッピング
+function mapCategory(type: string): string {
+  const typeStr = type.toLowerCase()
+  if (typeStr.includes('whey') || typeStr.includes('ホエイ')) return 'WHEY'
+  if (typeStr.includes('soy') || typeStr.includes('ソイ') || typeStr.includes('大豆')) return 'VEGAN'
+  if (typeStr.includes('casein') || typeStr.includes('カゼイン')) return 'CASEIN'
+  return 'WHEY' // デフォルト
+}
+
+// タグ抽出
+function extractTags(product: any): string[] {
+  const tags = ['プロテイン']
+  const name = (product.name || '').toLowerCase()
+  
+  if (product.brand) tags.push(product.brand)
+  if (name.includes('ザバス')) tags.push('ザバス')
+  if (name.includes('dns')) tags.push('DNS')
+  if (name.includes('ビーレジェンド')) tags.push('ビーレジェンド')
+  if (name.includes('3kg')) tags.push('大容量')
+  if (name.includes('チョコ')) tags.push('チョコ味')
+  if (name.includes('バニラ')) tags.push('バニラ味')
+  if (name.includes('ストロベリー') || name.includes('いちご')) tags.push('ストロベリー味')
+  
+  return tags
+}
+
+// 楽天APIフォールバック
+async function fallbackToRakutenAPI() {
+  try {
     const rakutenApiUrl = 'https://app.rakuten.co.jp/services/api/IchibaItem/Search/20220601'
     const params = new URLSearchParams({
       format: 'json',
@@ -14,8 +117,6 @@ export async function GET() {
       sort: 'reviewCount'
     })
     
-    console.log('🔍 楽天API呼び出し:', `${rakutenApiUrl}?${params}`)
-    
     const response = await fetch(`${rakutenApiUrl}?${params}`, {
       method: 'GET',
       headers: {
@@ -23,16 +124,11 @@ export async function GET() {
       }
     })
     
-    console.log('📡 レスポンス状況:', response.status, response.statusText)
-    
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error('❌ API失敗:', response.status, errorText)
       throw new Error(`楽天API失敗: ${response.status}`)
     }
     
     const data = await response.json()
-    console.log('✅ 楽天APIデータ取得:', data.Items?.length || 0, '件')
     
     if (!data.Items || data.Items.length === 0) {
       throw new Error('楽天APIで商品が見つかりません')
@@ -61,21 +157,21 @@ export async function GET() {
       }
     })
     
-    console.log('🎉 成功:', products.length, '件の楽天商品を返します')
+    console.log(`✅ 楽天APIフォールバック: ${products.length}商品`)
     
     return NextResponse.json({
       success: true,
       products: products,
       totalCount: products.length,
       lastUpdated: new Date().toISOString(),
-      source: 'rakuten-api',
+      source: 'rakuten-fallback',
       message: `楽天API直接取得: ${products.length}件`
     })
     
   } catch (error: any) {
-    console.error('❌ エラー:', error.message)
+    console.error('❌ 楽天APIフォールバックも失敗:', error)
     
-    // 楽天APIが失敗した場合のフォールバック
+    // 最終フォールバック
     const fallbackProducts = [
       {
         id: 'fb001',
@@ -91,6 +187,21 @@ export async function GET() {
         calories: 110,
         servings: 100,
         shops: [{ name: 'Rakuten' as const, price: 8399, url: 'https://item.rakuten.co.jp/x-plosion/10000019/' }]
+      },
+      {
+        id: 'fb002',
+        name: 'ザバス ホエイプロテイン100 ココア味 1050g',
+        description: '明治の定番プロテイン。初心者にもおすすめの飲みやすいココア味。',
+        image: '/placeholder-protein.svg',
+        category: 'WHEY',
+        rating: 4.2,
+        reviews: 1542,
+        tags: ['定番', '飲みやすい'],
+        price: 4580,
+        protein: 20.9,
+        calories: 83,
+        servings: 50,
+        shops: [{ name: 'Amazon' as const, price: 4580, url: '#' }]
       }
     ]
     
@@ -101,7 +212,7 @@ export async function GET() {
       lastUpdated: new Date().toISOString(),
       source: 'error-fallback',
       error: error.message,
-      message: 'エラー時フォールバック'
+      message: 'エラー時最終フォールバック'
     })
   }
 }
