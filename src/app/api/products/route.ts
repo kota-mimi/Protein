@@ -175,8 +175,8 @@ export async function GET() {
             console.error(`エラー詳細:`, errorText.substring(0, 200))
           }
           
-          // API制限回避（間隔を長く）
-          await new Promise(resolve => setTimeout(resolve, 500))
+          // API制限回避（楽天APIは1秒に1回まで）
+          await new Promise(resolve => setTimeout(resolve, 1100))
         } catch (error) {
           console.error(`❌ ${keyword} ページ${page} エラー:`, error)
         }
