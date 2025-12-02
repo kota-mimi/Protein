@@ -157,7 +157,7 @@ export default function GeminiPage() {
         filteredProducts = filteredProducts.filter(p => (p.price || 0) <= 3000);
         console.log(`💰 予算フィルター: 3000円以下 → ${filteredProducts.length}件 (${originalCount - filteredProducts.length}件除外)`);
       } else if (budget === "3000-5000円") {
-        filteredProducts = filteredProducts.filter(p => (p.price || 0) > 3000 && (p.price || 0) <= 5000);
+        filteredProducts = filteredProducts.filter(p => (p.price || 0) >= 3000 && (p.price || 0) <= 5000);
         console.log(`💰 予算フィルター: 3000-5000円 → ${filteredProducts.length}件 (${originalCount - filteredProducts.length}件除外)`);
       } else if (budget === "5000-8000円") {
         filteredProducts = filteredProducts.filter(p => (p.price || 0) > 5000 && (p.price || 0) <= 8000);
@@ -240,12 +240,12 @@ export default function GeminiPage() {
     // 価格帯別に分散して選択（高品質・中品質・コスパ）
     const highEnd = sortedProducts.slice(0, 10); // 上位10個から2個
     const midRange = sortedProducts.slice(10, 25); // 中間から2個  
-    const budget = sortedProducts.slice(25); // 残りから1個
+    const budgetRange = sortedProducts.slice(25); // 残りから1個
     
     const diverseRecommendation = [
       ...shuffleArray(highEnd).slice(0, 2),
       ...shuffleArray(midRange).slice(0, 2), 
-      ...shuffleArray(budget).slice(0, 1)
+      ...shuffleArray(budgetRange).slice(0, 1)
     ];
     
     // 5個に制限して推薦商品を設定

@@ -297,6 +297,36 @@ export async function GET() {
         shops: [{ name: 'Rakuten' as const, price: 2800, url: '#' }]
       },
       {
+        id: 'test_6_2',
+        name: 'SAVAS ソイプロテイン100 ココア味 1050g',
+        description: '明治のソイプロテイン。ダイエットに最適なココア味で美味しく続けられる。',
+        image: '/placeholder-protein.svg',
+        category: 'VEGAN',
+        rating: 4.3,
+        reviews: 950,
+        tags: ['植物性', 'ダイエット', '美味しい'],
+        price: 4200,
+        protein: 19.5,
+        calories: 79,
+        servings: 45,
+        shops: [{ name: 'Amazon' as const, price: 4200, url: '#' }]
+      },
+      {
+        id: 'test_6_3',
+        name: 'DNS ソイプロテイン スムースチョコレート味 1000g',
+        description: '高品質なソイプロテイン。チョコレート味で女性にも人気。',
+        image: '/placeholder-protein.svg',
+        category: 'VEGAN',
+        rating: 4.4,
+        reviews: 800,
+        tags: ['植物性', 'ダイエット', '女性人気'],
+        price: 3580,
+        protein: 20.2,
+        calories: 81,
+        servings: 40,
+        shops: [{ name: 'Rakuten' as const, price: 3580, url: '#' }]
+      },
+      {
         id: 'test_7',
         name: 'ゴールドスタンダード 100% ホエイ ダブルリッチチョコレート 907g',
         description: '世界で愛される高品質プロテイン。プロアスリートも愛用。',
