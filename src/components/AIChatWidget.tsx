@@ -22,10 +22,10 @@ export const AIChatWidget: React.FC = () => {
 
   // クイック返信オプション
   const quickReplies = [
-    { icon: Dumbbell, text: '筋肉をつけたい', color: 'from-blue-500 to-blue-600' },
-    { icon: Target, text: 'ダイエット中', color: 'from-blue-600 to-blue-700' },
-    { icon: Zap, text: 'おすすめプロテイン', color: 'from-blue-500 to-blue-700' },
-    { icon: Sparkles, text: '初心者です', color: 'from-blue-400 to-blue-600' }
+    { icon: Dumbbell, text: '筋肉をつけたい', color: 'bg-blue-600' },
+    { icon: Target, text: 'ダイエット中', color: 'bg-blue-600' },
+    { icon: Zap, text: 'おすすめプロテイン', color: 'bg-blue-600' },
+    { icon: Sparkles, text: '初心者です', color: 'bg-blue-600' }
   ];
 
   const scrollToBottom = () => {
@@ -81,49 +81,43 @@ export const AIChatWidget: React.FC = () => {
     <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end">
       {/* Chat Window */}
       {isOpen && (
-        <div className="mb-4 w-[350px] md:w-[400px] h-[500px] backdrop-blur-xl bg-white/90 border border-white/20 rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-slide-up ring-1 ring-white/30">
+        <div className="mb-4 w-[350px] md:w-[400px] h-[500px] bg-white border border-gray-200 rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-slide-up">
           {/* Header with Gradient */}
-          <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 p-4 border-b border-white/10 flex justify-between items-center shadow-lg z-10 relative overflow-hidden">
-            {/* 背景パターン */}
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 via-blue-500/20 to-blue-600/20"></div>
-            <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
-            <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full blur-lg"></div>
+          <div className="bg-blue-600 p-4 border-b border-gray-100 flex justify-between items-center shadow-lg">
             
-            <div className="flex items-center space-x-3 relative z-10">
-              <div className="bg-white/20 p-2 rounded-full backdrop-blur-sm border border-white/30">
+            <div className="flex items-center space-x-3">
+              <div className="bg-white/20 p-2 rounded-full">
                 <Bot className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-white text-sm flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" />
-                  AI プロテインアドバイザー
+                <h3 className="font-bold text-white text-sm">
+                  💬 AI プロテインアドバイザー
                 </h3>
-                <span className="text-[10px] text-white/90 flex items-center">
-                  <span className="w-1.5 h-1.5 bg-green-400 rounded-full mr-1 animate-pulse shadow-sm"></span>
-                  ONLINE • 24/7 サポート
+                <span className="text-[10px] text-white/90">
+                  オンライン中
                 </span>
               </div>
             </div>
             <button 
               onClick={() => setIsOpen(false)} 
-              className="text-white/70 hover:text-white hover:bg-white/20 p-1 rounded-full transition-all relative z-10"
+              className="text-white/70 hover:text-white hover:bg-white/20 p-1 rounded-full transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-slate-50/50 to-white/80 backdrop-blur-sm">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
             {messages.map((msg) => (
               <div
                 key={msg.id}
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-lg backdrop-blur-sm ${
+                  className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
                     msg.role === 'user'
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-tr-none font-medium border border-white/20'
-                      : 'bg-white/90 text-gray-800 rounded-tl-none font-medium border border-slate-200/50'
+                      ? 'bg-blue-600 text-white rounded-tr-none font-medium'
+                      : 'bg-white text-gray-800 rounded-tl-none font-medium border border-gray-200'
                   }`}
                   style={{ 
                     whiteSpace: 'pre-wrap' 
@@ -145,7 +139,7 @@ export const AIChatWidget: React.FC = () => {
                       <button
                         key={index}
                         onClick={() => handleQuickReply(reply.text)}
-                        className={`bg-gradient-to-r ${reply.color} hover:scale-105 text-white text-xs font-medium p-3 rounded-xl shadow-md transition-all duration-200 flex items-center gap-1.5 backdrop-blur-sm border border-white/20`}
+                        className={`${reply.color} hover:bg-blue-700 text-white text-xs font-medium p-3 rounded-xl shadow-sm transition-colors duration-200 flex items-center gap-1.5`}
                       >
                         <Icon className="w-3 h-3" />
                         {reply.text}
@@ -158,7 +152,7 @@ export const AIChatWidget: React.FC = () => {
             
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-white/90 rounded-2xl rounded-tl-none px-4 py-3 border border-slate-200/50 shadow-lg backdrop-blur-sm">
+                <div className="bg-white rounded-2xl rounded-tl-none px-4 py-3 border border-gray-200 shadow-sm">
                   <div className="flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
                     <span className="text-xs text-gray-500">AI が回答中...</span>
@@ -170,7 +164,7 @@ export const AIChatWidget: React.FC = () => {
           </div>
 
           {/* Input */}
-          <div className="p-4 bg-white/80 backdrop-blur-sm border-t border-white/20">
+          <div className="p-4 bg-white border-t border-gray-200">
             <div className="flex space-x-2">
               <div className="flex-1 relative">
                 <input
@@ -179,7 +173,7 @@ export const AIChatWidget: React.FC = () => {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                   placeholder="何でも聞いてください..."
-                  className="w-full bg-white/90 text-gray-800 text-sm rounded-2xl px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-400 border border-slate-200/50 placeholder-gray-400 shadow-sm backdrop-blur-sm"
+                  className="w-full bg-white text-gray-800 text-sm rounded-2xl px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-400 border border-gray-300 placeholder-gray-400 shadow-sm"
                 />
                 <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors">
                   <Mic className="w-4 h-4" />
@@ -188,7 +182,7 @@ export const AIChatWidget: React.FC = () => {
               <button
                 onClick={handleSend}
                 disabled={isLoading || !input.trim()}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white p-3 rounded-2xl transition-all disabled:opacity-50 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+                className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-2xl transition-colors disabled:opacity-50 shadow-sm"
               >
                 <Send className="w-5 h-5" />
               </button>
@@ -200,31 +194,22 @@ export const AIChatWidget: React.FC = () => {
       {/* Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`group relative flex items-center justify-center w-16 h-16 rounded-2xl shadow-2xl transition-all duration-500 overflow-hidden ${
+        className={`group relative flex items-center justify-center w-16 h-16 rounded-2xl shadow-xl transition-all duration-300 ${
           isOpen 
-            ? 'bg-gradient-to-r from-gray-600 to-gray-700 rotate-180 scale-90' 
-            : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 hover:scale-110 hover:rotate-12'
+            ? 'bg-gray-600 rotate-180 scale-90' 
+            : 'bg-blue-600 hover:bg-blue-700 hover:scale-105'
         }`}
       >
-        {/* 背景エフェクト */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-400/30 via-blue-500/30 to-blue-600/30 blur-sm"></div>
-        <div className="absolute top-0 right-0 w-8 h-8 bg-white/20 rounded-full blur-lg"></div>
-        <div className="absolute bottom-0 left-0 w-6 h-6 bg-white/10 rounded-full blur-md"></div>
-        
-        {/* アイコン */}
-        <div className="relative z-10">
+        <div>
           {isOpen ? (
             <X className="w-6 h-6 text-white transition-transform duration-300" />
           ) : (
             <div className="relative">
-              <MessageSquare className="w-7 h-7 text-white transition-all duration-300 group-hover:scale-110" />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse border-2 border-white shadow-sm"></div>
+              <MessageSquare className="w-7 h-7 text-white transition-transform duration-300 group-hover:scale-110" />
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
             </div>
           )}
         </div>
-        
-        {/* ホバー時のリング */}
-        <div className="absolute inset-0 rounded-2xl border-2 border-white/0 group-hover:border-white/30 transition-all duration-300"></div>
       </button>
     </div>
   );
