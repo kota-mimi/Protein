@@ -83,15 +83,65 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [showSubQuestions, setShowSubQuestions] = useState(false);
+  const [customInput, setCustomInput] = useState("");
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [currentSubStep, setCurrentSubStep] = useState<'taste' | 'budget' | null>(null);
 
   const handleAnswer = (answer: string) => {
     const newAnswers = { ...answers, [step]: answer };
     setAnswers(newAnswers);
     
+    // アレルギーの「その他」選択時
+    if (step === 3 && answer === "その他") {
+      setShowCustomInput(true);
+      return;
+    }
+    
+    // 最後の質問（味の好みと予算）でサブ質問に進む
+    if (step === QUESTIONS.length - 1 && QUESTIONS[step].hasSubQuestions) {
+      setShowSubQuestions(true);
+      setCurrentSubStep('taste');
+      return;
+    }
+    
     if (step < QUESTIONS.length - 1) {
       setStep(step + 1);
     } else {
       analyze(newAnswers);
+    }
+  };
+
+  const handleSubAnswer = (subQuestionType: 'taste' | 'budget', answer: string) => {
+    if (subQuestionType === 'taste') {
+      if (answer === "その他") {
+        setShowCustomInput(true);
+        setSubAnswers(prev => ({...prev, taste: answer}));
+        return;
+      }
+      setSubAnswers(prev => ({...prev, taste: answer}));
+      setCurrentSubStep('budget');
+    } else if (subQuestionType === 'budget') {
+      setSubAnswers(prev => ({...prev, budget: answer}));
+      // 全ての質問完了、分析開始
+      analyze(answers);
+    }
+  };
+
+  const handleCustomInput = (inputType: 'allergy' | 'taste') => {
+    if (inputType === 'allergy') {
+      setSubAnswers(prev => ({...prev, allergyOther: customInput}));
+      setShowCustomInput(false);
+      setCustomInput("");
+      if (step < QUESTIONS.length - 1) {
+        setStep(step + 1);
+      } else {
+        analyze(answers);
+      }
+    } else if (inputType === 'taste') {
+      setSubAnswers(prev => ({...prev, customTaste: customInput}));
+      setShowCustomInput(false);
+      setCustomInput("");
+      setCurrentSubStep('budget');
     }
   };
 
@@ -195,7 +245,12 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
   const reset = () => {
     setStep(0);
     setAnswers({});
+    setSubAnswers({});
     setResult(null);
+    setShowSubQuestions(false);
+    setShowCustomInput(false);
+    setCustomInput("");
+    setCurrentSubStep(null);
     onClose();
   };
 
@@ -248,18 +303,78 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
                 {QUESTIONS[step].text}
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {QUESTIONS[step].options.map((option) => (
-                  <button
-                    key={option}
-                    onClick={() => handleAnswer(option)}
-                    className="p-4 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:bg-primary hover:text-white hover:border-primary transition-all duration-200 font-medium text-left flex items-center justify-between group shadow-sm hover:shadow-md"
-                  >
-                    {option}
-                    <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all text-white" />
-                  </button>
-                ))}
-              </div>
+              {/* カスタム入力フィールド表示 */}
+              {showCustomInput && (
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <label className="block text-sm font-medium text-slate-700">
+                      {step === 3 ? "アレルギーの詳細を入力してください" : "好きな味を入力してください"}
+                    </label>
+                    <input
+                      type="text"
+                      value={customInput}
+                      onChange={(e) => setCustomInput(e.target.value)}
+                      placeholder={step === 3 ? "例: 小麦、卵など" : "例: ココア、ストロベリーなど"}
+                      className="w-full p-3 border border-slate-300 rounded-xl focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
+                    />
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => handleCustomInput(step === 3 ? 'allergy' : 'taste')}
+                      disabled={!customInput.trim()}
+                      className="flex-1 bg-primary text-white py-3 px-6 rounded-xl disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-blue-600 transition-colors"
+                    >
+                      次へ
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowCustomInput(false);
+                        setCustomInput("");
+                      }}
+                      className="px-6 py-3 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors"
+                    >
+                      戻る
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* サブ質問表示 */}
+              {showSubQuestions && !showCustomInput && (
+                <div className="space-y-6">
+                  <h4 className="text-lg font-bold text-secondary text-center">
+                    {currentSubStep === 'taste' ? QUESTIONS[step].subQuestions.taste.text : QUESTIONS[step].subQuestions.budget.text}
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {(currentSubStep === 'taste' ? QUESTIONS[step].subQuestions.taste.options : QUESTIONS[step].subQuestions.budget.options).map((option: string) => (
+                      <button
+                        key={option}
+                        onClick={() => handleSubAnswer(currentSubStep!, option)}
+                        className="p-4 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:bg-primary hover:text-white hover:border-primary transition-all duration-200 font-medium text-left flex items-center justify-between group shadow-sm hover:shadow-md"
+                      >
+                        {option}
+                        <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all text-white" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 通常の質問表示 */}
+              {!showSubQuestions && !showCustomInput && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {QUESTIONS[step].options.map((option) => (
+                    <button
+                      key={option}
+                      onClick={() => handleAnswer(option)}
+                      className="p-4 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:bg-primary hover:text-white hover:border-primary transition-all duration-200 font-medium text-left flex items-center justify-between group shadow-sm hover:shadow-md"
+                    >
+                      {option}
+                      <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all text-white" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
