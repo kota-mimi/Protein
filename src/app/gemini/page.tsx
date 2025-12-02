@@ -173,7 +173,7 @@ export default function GeminiPage() {
     const customFlavor = preferences.customFlavor || "";
     
     if (favoriteFlavorCategory !== "未設定" || customFlavor) {
-      let flavorMatched = [];
+      let flavorMatched: Product[] = [];
       const flavorToSearch = customFlavor || favoriteFlavorCategory;
       
       if (flavorToSearch.includes("チョコ") || flavorToSearch.includes("ココア") || flavorToSearch === "チョコ") {
