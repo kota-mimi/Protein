@@ -147,62 +147,87 @@ export default function GeminiPage() {
       return true; // ALL の場合
     });
     
-    // 価格優先の場合は安い順にソート
-    if (preferences.priority === 'cost') {
-      filteredProducts = filteredProducts.sort((a, b) => (a.price || 999999) - (b.price || 999999));
-      console.log('💰 コスパ重視: 価格順でソート');
-    }
+    console.log(`🔍 カテゴリフィルター後: ${filteredProducts.length}件 (${recommendedType})`);
     
-    // 味優先の場合は人気の味を優先
-    if (preferences.priority === 'taste') {
-      // チョコ・バニラ系の人は甘い味を優先
-      if (preferences.isSweet) {
-        filteredProducts = filteredProducts.filter(product => 
-          product.name.includes('チョコ') || product.name.includes('バニラ') || 
-          product.name.includes('ココア') || product.name.includes('ミルク') || 
-          product.name.toLowerCase().includes('chocolate') || product.name.toLowerCase().includes('vanilla')
-        ).concat(filteredProducts.filter(product => 
-          !(product.name.includes('チョコ') || product.name.includes('バニラ') || 
-            product.name.includes('ココア') || product.name.includes('ミルク') || 
-            product.name.toLowerCase().includes('chocolate') || product.name.toLowerCase().includes('vanilla'))
-        ));
-        console.log('🍫 甘い味重視: チョコ・バニラ系を優先');
-      }
-      
-      // フルーツ系の人はフルーツ味を優先  
-      if (preferences.isFruit) {
-        filteredProducts = filteredProducts.filter(product =>
-          product.name.includes('フルーツ') || product.name.includes('ベリー') ||
-          product.name.includes('ストロベリー') || product.name.includes('バナナ') ||
-          product.name.toLowerCase().includes('fruit') || product.name.toLowerCase().includes('berry')
-        ).concat(filteredProducts.filter(product => 
-          !(product.name.includes('フルーツ') || product.name.includes('ベリー') ||
-            product.name.includes('ストロベリー') || product.name.includes('バナナ') ||
-            product.name.toLowerCase().includes('fruit') || product.name.toLowerCase().includes('berry'))
-        ));
-        console.log('🍓 フルーツ味重視: フルーツ系を優先');
-      }
-      
-      // プレーン系の人は無味・プレーンを優先
-      if (preferences.isNatural) {
-        filteredProducts = filteredProducts.filter(product =>
-          product.name.includes('プレーン') || product.name.includes('ナチュラル') ||
-          product.name.includes('無添加') || product.name.toLowerCase().includes('plain') ||
-          product.name.toLowerCase().includes('natural')
-        ).concat(filteredProducts.filter(product => 
-          !(product.name.includes('プレーン') || product.name.includes('ナチュラル') ||
-            product.name.includes('無添加') || product.name.toLowerCase().includes('plain') ||
-            product.name.toLowerCase().includes('natural'))
-        ));
-        console.log('🌱 ナチュラル重視: プレーン系を優先');
+    // 予算による価格フィルタリング
+    const budget = preferences.budget || "未設定";
+    if (budget !== "未設定") {
+      const originalCount = filteredProducts.length;
+      if (budget === "3000円以下") {
+        filteredProducts = filteredProducts.filter(p => (p.price || 0) <= 3000);
+        console.log(`💰 予算フィルター: 3000円以下 → ${filteredProducts.length}件 (${originalCount - filteredProducts.length}件除外)`);
+      } else if (budget === "3000-5000円") {
+        filteredProducts = filteredProducts.filter(p => (p.price || 0) > 3000 && (p.price || 0) <= 5000);
+        console.log(`💰 予算フィルター: 3000-5000円 → ${filteredProducts.length}件 (${originalCount - filteredProducts.length}件除外)`);
+      } else if (budget === "5000-8000円") {
+        filteredProducts = filteredProducts.filter(p => (p.price || 0) > 5000 && (p.price || 0) <= 8000);
+        console.log(`💰 予算フィルター: 5000-8000円 → ${filteredProducts.length}件 (${originalCount - filteredProducts.length}件除外)`);
+      } else if (budget === "8000円以上") {
+        filteredProducts = filteredProducts.filter(p => (p.price || 0) > 8000);
+        console.log(`💰 予算フィルター: 8000円以上 → ${filteredProducts.length}件 (${originalCount - filteredProducts.length}件除外)`);
       }
     }
     
-    console.log(`🔍 フィルター後: ${filteredProducts.length}件 (${recommendedType}カテゴリ)`);
-    console.log(`📊 商品カテゴリ分布:`, products.reduce((acc: {[key: string]: number}, p) => {
-      acc[p.category] = (acc[p.category] || 0) + 1;
-      return acc;
-    }, {}));
+    // 味の好みによる商品優先順位付け
+    const favoriteFlavorCategory = preferences.favoriteFlavorCategory || "未設定";
+    const customFlavor = preferences.customFlavor || "";
+    
+    if (favoriteFlavorCategory !== "未設定" || customFlavor) {
+      let flavorMatched = [];
+      const flavorToSearch = customFlavor || favoriteFlavorCategory;
+      
+      if (flavorToSearch.includes("チョコ") || flavorToSearch.includes("ココア") || flavorToSearch === "チョコ") {
+        flavorMatched = filteredProducts.filter(product => 
+          product.name.includes('チョコ') || product.name.includes('ココア') || 
+          product.name.toLowerCase().includes('chocolate') || product.name.toLowerCase().includes('cocoa')
+        );
+        console.log(`🍫 チョコ味マッチ: ${flavorMatched.length}件`);
+      } else if (flavorToSearch.includes("バニラ") || flavorToSearch === "バニラ") {
+        flavorMatched = filteredProducts.filter(product => 
+          product.name.includes('バニラ') || product.name.toLowerCase().includes('vanilla')
+        );
+        console.log(`🍦 バニラ味マッチ: ${flavorMatched.length}件`);
+      } else if (flavorToSearch.includes("いちご") || flavorToSearch.includes("ストロベリー") || flavorToSearch === "いちご") {
+        flavorMatched = filteredProducts.filter(product =>
+          product.name.includes('ストロベリー') || product.name.includes('いちご') || 
+          product.name.toLowerCase().includes('strawberry')
+        );
+        console.log(`🍓 いちご味マッチ: ${flavorMatched.length}件`);
+      } else if (flavorToSearch.includes("バナナ") || flavorToSearch === "バナナ") {
+        flavorMatched = filteredProducts.filter(product =>
+          product.name.includes('バナナ') || product.name.toLowerCase().includes('banana')
+        );
+        console.log(`🍌 バナナ味マッチ: ${flavorMatched.length}件`);
+      } else if (flavorToSearch.includes("抹茶") || flavorToSearch === "抹茶") {
+        flavorMatched = filteredProducts.filter(product =>
+          product.name.includes('抹茶') || product.name.toLowerCase().includes('matcha')
+        );
+        console.log(`🍵 抹茶味マッチ: ${flavorMatched.length}件`);
+      } else if (flavorToSearch.includes("カフェオレ") || flavorToSearch === "カフェオレ") {
+        flavorMatched = filteredProducts.filter(product =>
+          product.name.includes('カフェオレ') || product.name.includes('コーヒー') ||
+          product.name.toLowerCase().includes('coffee') || product.name.toLowerCase().includes('cafe')
+        );
+        console.log(`☕ カフェオレ味マッチ: ${flavorMatched.length}件`);
+      }
+      
+      // 味マッチした商品があれば優先表示
+      if (flavorMatched.length > 0) {
+        const otherProducts = filteredProducts.filter(p => !flavorMatched.includes(p));
+        filteredProducts = [...flavorMatched, ...otherProducts];
+        console.log(`✨ 味の好み適用: マッチ商品${flavorMatched.length}件を優先表示`);
+      }
+    }
+    
+    console.log(`🔍 最終フィルター後: ${filteredProducts.length}件`);
+    console.log(`📋 診断詳細:`, {
+      プロテイン種類: recommendedType,
+      予算: budget,
+      味の好み: favoriteFlavorCategory,
+      カスタム味: customFlavor,
+      摂取タイミング: preferences.timing,
+      推薦理由: preferences.reasons
+    });
     
     // 多様性を持たせた推薦アルゴリズム
     const sortedProducts = filteredProducts.sort((a, b) => {
