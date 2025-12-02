@@ -323,36 +323,36 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-slate-800/30 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <div className="bg-white border border-slate-200 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 bg-slate-800/30 backdrop-blur-md z-50 flex items-center justify-center p-2 sm:p-4">
+      <div className="bg-white border border-slate-200 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]">
         
         {/* Header */}
-        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <div className="p-4 sm:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
           <div className="flex items-center gap-2">
-            <Sparkles className="text-primary w-5 h-5 animate-pulse" />
-            <h2 className="text-xl font-bold text-secondary tracking-wide">AI プロテイン診断</h2>
+            <Sparkles className="text-primary w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
+            <h2 className="text-lg sm:text-xl font-bold text-secondary tracking-wide">AI プロテイン診断</h2>
           </div>
           <button onClick={reset} className="text-slate-400 hover:text-slate-700">
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-8 flex-1 overflow-y-auto bg-white">
+        <div className="p-4 sm:p-8 flex-1 overflow-y-auto bg-white">
           {isAnalyzing ? (
-            <div className="flex flex-col items-center justify-center h-64 space-y-6 text-center">
+            <div className="flex flex-col items-center justify-center h-48 sm:h-64 space-y-4 sm:space-y-6 text-center">
               <div className="relative">
-                <div className="w-16 h-16 border-4 border-slate-200 border-t-primary rounded-full animate-spin"></div>
-                <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary w-6 h-6" />
+                <div className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-slate-200 border-t-primary rounded-full animate-spin"></div>
+                <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary w-4 h-4 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-secondary mb-2">AIが分析中...</h3>
-                <p className="text-slate-500">あなたのライフスタイルに最適な配合を計算しています</p>
+                <h3 className="text-lg sm:text-xl font-bold text-secondary mb-2">AIが分析中...</h3>
+                <p className="text-sm sm:text-base text-slate-500">あなたのライフスタイルに最適な配合を計算しています</p>
               </div>
             </div>
           ) : (
             <div>
-              <div className="mb-8">
+              <div className="mb-6 sm:mb-8">
                 <div className="flex justify-between text-xs text-slate-400 mb-2 uppercase tracking-wider font-bold">
                   <span>Question {step + 1} of {TOTAL_QUESTIONS}</span>
                   <span>{Math.round(((step + (showSubQuestions ? (currentSubStep === 'budget' ? 2 : 1) : 0)) / TOTAL_QUESTIONS) * 100)}% 完了</span>
@@ -365,7 +365,7 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
                 </div>
               </div>
 
-              <h3 className="text-2xl font-bold text-secondary mb-8 text-center leading-relaxed">
+              <h3 className="text-lg sm:text-2xl font-bold text-secondary mb-6 sm:mb-8 text-center leading-relaxed">
                 {QUESTIONS[step].text}
               </h3>
 
@@ -384,17 +384,17 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
                       className="w-full p-3 border border-slate-300 rounded-xl focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
                     />
                   </div>
-                  <div className="flex gap-3">
+                  <div className="flex gap-2 sm:gap-3">
                     <button
                       onClick={() => handleCustomInput(step === 3 ? 'allergy' : 'taste')}
                       disabled={!customInput.trim()}
-                      className="flex-1 bg-primary text-white py-3 px-6 rounded-xl disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-blue-600 transition-colors"
+                      className="flex-1 bg-primary text-white py-2 sm:py-3 px-4 sm:px-6 rounded-xl disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-blue-600 transition-colors text-sm sm:text-base"
                     >
                       次へ
                     </button>
                     <button
                       onClick={handleBack}
-                      className="px-6 py-3 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors"
+                      className="px-4 sm:px-6 py-2 sm:py-3 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors text-sm sm:text-base"
                     >
                       戻る
                     </button>
@@ -404,26 +404,26 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
 
               {/* サブ質問表示 */}
               {showSubQuestions && !showCustomInput && QUESTIONS[step]?.subQuestions && (
-                <div className="space-y-6">
-                  <h4 className="text-lg font-bold text-secondary text-center">
+                <div className="space-y-4 sm:space-y-6">
+                  <h4 className="text-base sm:text-lg font-bold text-secondary text-center">
                     {currentSubStep === 'taste' ? QUESTIONS[step].subQuestions?.taste?.text : QUESTIONS[step].subQuestions?.budget?.text}
                   </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     {(currentSubStep === 'taste' ? QUESTIONS[step].subQuestions?.taste?.options : QUESTIONS[step].subQuestions?.budget?.options)?.map((option: string) => (
                       <button
                         key={option}
                         onClick={() => handleSubAnswer(currentSubStep!, option)}
-                        className="p-4 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:bg-primary hover:text-white hover:border-primary transition-all duration-200 font-medium text-left flex items-center justify-between group shadow-sm hover:shadow-md"
+                        className="p-3 sm:p-4 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:bg-primary hover:text-white hover:border-primary transition-all duration-200 font-medium text-left text-sm sm:text-base flex items-center justify-between group shadow-sm hover:shadow-md"
                       >
                         {option}
                         <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all text-white" />
                       </button>
                     )) || []}
                   </div>
-                  <div className="flex justify-start mt-6">
+                  <div className="flex justify-start mt-4 sm:mt-6">
                     <button
                       onClick={handleBack}
-                      className="px-6 py-3 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors"
+                      className="px-4 sm:px-6 py-2 sm:py-3 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors text-sm sm:text-base"
                     >
                       戻る
                     </button>
@@ -433,8 +433,8 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
 
               {/* 通常の質問表示 */}
               {!showSubQuestions && !showCustomInput && (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     {QUESTIONS[step].options.map((option) => {
                       const isSelected = QUESTIONS[step].allowMultiple 
                         ? selectedMultiple.includes(option)
@@ -444,7 +444,7 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
                         <button
                           key={option}
                           onClick={() => handleAnswer(option)}
-                          className={`p-4 rounded-xl border text-left flex items-center justify-between group shadow-sm hover:shadow-md transition-all duration-200 font-medium ${
+                          className={`p-3 sm:p-4 rounded-xl border text-left text-sm sm:text-base flex items-center justify-between group shadow-sm hover:shadow-md transition-all duration-200 font-medium ${
                             isSelected 
                               ? 'border-primary bg-primary text-white' 
                               : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-primary hover:text-white hover:border-primary'
@@ -470,18 +470,18 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
                   
                   {/* 複数選択の場合の次へボタンと戻るボタン */}
                   {QUESTIONS[step].allowMultiple && (
-                    <div className="flex gap-3 mt-6">
+                    <div className="flex gap-2 sm:gap-3 mt-4 sm:mt-6">
                       <button
                         onClick={handleBack}
                         disabled={step === 0}
-                        className="px-6 py-3 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-4 sm:px-6 py-2 sm:py-3 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                       >
                         戻る
                       </button>
                       <button
                         onClick={handleNext}
                         disabled={selectedMultiple.length === 0}
-                        className="flex-1 bg-primary text-white py-3 px-6 rounded-xl disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-blue-600 transition-colors"
+                        className="flex-1 bg-primary text-white py-2 sm:py-3 px-4 sm:px-6 rounded-xl disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-blue-600 transition-colors text-sm sm:text-base"
                       >
                         次へ ({selectedMultiple.length}個選択中)
                       </button>
@@ -490,10 +490,10 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
                   
                   {/* 単一選択の場合の戻るボタン */}
                   {!QUESTIONS[step].allowMultiple && step > 0 && (
-                    <div className="flex justify-start mt-6">
+                    <div className="flex justify-start mt-4 sm:mt-6">
                       <button
                         onClick={handleBack}
-                        className="px-6 py-3 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors"
+                        className="px-4 sm:px-6 py-2 sm:py-3 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors text-sm sm:text-base"
                       >
                         戻る
                       </button>
