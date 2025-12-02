@@ -594,10 +594,6 @@ export default function GeminiPage() {
                 <p className="text-slate-600">お気に入りのプロテインを見つけよう</p>
               </div>
 
-              {/* サイドバー広告（PC用） */}
-              <div className="hidden lg:block fixed right-4 top-1/2 transform -translate-y-1/2 z-30">
-                <AdBanner position="sidebar" />
-              </div>
 
             {/* Search & Advanced Filter Section */}
             <div className="mb-8">
@@ -849,34 +845,14 @@ export default function GeminiPage() {
                 : "space-y-4"
               }>
                 {paginatedProducts.map((product, index) => {
-                  const components = [];
-                  
                   // 商品データの基本的な検証
                   if (!product || !product.id) {
                     console.warn('不正な商品データ:', product);
                     return null;
                   }
                   
-                  // 10件目の後に広告を挿入（グリッドビューの場合）
-                  if (index === 9 && viewMode === 'grid') {
-                    components.push(
-                      <div key="ad-between-products" className="col-span-full mb-6">
-                        <AdBanner position="between-products" />
-                      </div>
-                    );
-                  }
-                  
-                  // リストビューの場合は10件目の後に広告
-                  if (index === 9 && viewMode === 'list') {
-                    components.push(
-                      <div key="ad-between-products" className="mb-6">
-                        <AdBanner position="between-products" />
-                      </div>
-                    );
-                  }
-                  
                   try {
-                    components.push(
+                    return (
                       <ProductCard 
                         key={`${product.id}-${index}-${product.name?.slice(0, 10) || 'unknown'}`} 
                         product={product} 
@@ -886,14 +862,12 @@ export default function GeminiPage() {
                     );
                   } catch (cardError) {
                     console.error('ProductCard描画エラー:', cardError, product);
-                    components.push(
+                    return (
                       <div key={`error-${product.id}-${index}`} className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
                         <p className="text-xs text-red-600">商品データエラー</p>
                       </div>
                     );
                   }
-                  
-                  return components;
                 })}
               </div>
             )}
