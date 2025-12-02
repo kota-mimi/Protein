@@ -211,11 +211,12 @@ export default function GeminiPage() {
         console.log(`☕ カフェオレ味マッチ: ${flavorMatched.length}件`);
       }
       
-      // 味マッチした商品があれば優先表示
+      // 味マッチした商品があれば、それだけを表示（混ぜない）
       if (flavorMatched.length > 0) {
-        const otherProducts = filteredProducts.filter(p => !flavorMatched.includes(p));
-        filteredProducts = [...flavorMatched, ...otherProducts];
-        console.log(`✨ 味の好み適用: マッチ商品${flavorMatched.length}件を優先表示`);
+        filteredProducts = flavorMatched;
+        console.log(`✨ 味の好み適用: マッチ商品${flavorMatched.length}件のみを表示`);
+      } else {
+        console.log(`⚠️ 指定された味の商品が見つかりません: ${flavorToSearch}`);
       }
     }
     
