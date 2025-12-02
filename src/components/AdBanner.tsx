@@ -8,7 +8,7 @@ interface AdBannerProps {
 
 const AdBanner: React.FC<AdBannerProps> = ({ position, size = 'responsive', className = '' }) => {
   
-  // 位置別の広告サイズとスタイル
+  // 位置別の広告サイズとスタイル  
   const getAdConfig = () => {
     switch (position) {
       case 'header-below':
@@ -18,7 +18,9 @@ const AdBanner: React.FC<AdBannerProps> = ({ position, size = 'responsive', clas
           bgColor: 'bg-gradient-to-r from-blue-500 to-purple-600',
           text: 'マイプロテイン 特別セール開催中！',
           subtext: '初回購入40%OFF + 送料無料',
-          mobile: 'h-20'
+          mobile: 'h-20',
+          // A8.netのアフィリエイトリンク（実際のリンクに置き換え）
+          affiliateLink: 'https://px.a8.net/svt/ejp?a8mat=3BK6PQ+XXXXXX+XXXX+XXXX'
         };
       case 'sidebar':
         return {
@@ -27,7 +29,8 @@ const AdBanner: React.FC<AdBannerProps> = ({ position, size = 'responsive', clas
           bgColor: 'bg-gradient-to-b from-green-400 to-blue-500',
           text: 'iHerb プロテイン',
           subtext: 'クーポンコード: NEW20',
-          mobile: 'hidden md:block'
+          mobile: 'hidden md:block',
+          affiliateLink: 'https://px.a8.net/svt/ejp?a8mat=3BK6PQ+YYYYYY+YYYY+YYYY'
         };
       case 'inline':
         return {
@@ -36,7 +39,8 @@ const AdBanner: React.FC<AdBannerProps> = ({ position, size = 'responsive', clas
           bgColor: 'bg-gradient-to-r from-orange-400 to-red-500',
           text: 'DNS プロテイン 新商品',
           subtext: '限定フレーバー登場！',
-          mobile: 'h-24'
+          mobile: 'h-24',
+          affiliateLink: 'https://px.a8.net/svt/ejp?a8mat=3BK6PQ+ZZZZZZ+ZZZZ+ZZZZ'
         };
       case 'between-products':
         return {
@@ -45,7 +49,8 @@ const AdBanner: React.FC<AdBannerProps> = ({ position, size = 'responsive', clas
           bgColor: 'bg-gradient-to-r from-purple-400 to-pink-500',
           text: 'Amazonで人気のプロテイン',
           subtext: 'プライム配送対応',
-          mobile: 'h-20'
+          mobile: 'h-20',
+          affiliateLink: 'https://amzn.to/あなたのAmazonリンク'
         };
       case 'footer-above':
         return {
@@ -55,6 +60,7 @@ const AdBanner: React.FC<AdBannerProps> = ({ position, size = 'responsive', clas
           text: 'プロテイン診断をもう一度！',
           subtext: '新しい商品が追加されました',
           mobile: 'h-16'
+          // 診断誘導なのでアフィリエイトリンクなし
         };
       default:
         return {
@@ -70,7 +76,8 @@ const AdBanner: React.FC<AdBannerProps> = ({ position, size = 'responsive', clas
 
   const config = getAdConfig();
 
-  return (
+  // A8.netリンクでラップ
+  const AdContent = (
     <div 
       className={`
         ${config.bgColor} 
@@ -115,6 +122,20 @@ const AdBanner: React.FC<AdBannerProps> = ({ position, size = 'responsive', clas
         AD
       </div>
     </div>
+  );
+
+  // A8.netリンクがある場合はリンクでラップ
+  return config.affiliateLink ? (
+    <a 
+      href={config.affiliateLink} 
+      target="_blank" 
+      rel="noopener noreferrer"
+      className="block"
+    >
+      {AdContent}
+    </a>
+  ) : (
+    AdContent
   );
 };
 

@@ -492,10 +492,10 @@ export default function GeminiPage() {
             <Button 
                 variant="primary" 
                 size="sm" 
-                className="hidden md:flex"
+                className="hidden md:flex text-xs md:text-sm px-3 py-2"
                 onClick={() => setIsDiagnosisOpen(true)}
             >
-                無料診断スタート
+                無料診断
             </Button>
             <button className="md:hidden p-2 text-secondary">
               <Menu className="w-6 h-6" />
@@ -531,11 +531,11 @@ export default function GeminiPage() {
                 各ショップの価格をリアルタイム比較し、<span className="text-primary border-b-2 border-primary/30 pb-0.5 mx-1 font-bold">最安値</span>で賢く手に入れよう。
               </p>
               
-              <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <Button size="lg" className="h-14 px-8 text-lg rounded-full w-full sm:w-auto shadow-xl shadow-primary/20 hover:shadow-primary/40" onClick={() => setIsDiagnosisOpen(true)}>
+              <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+                <Button size="lg" className="h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg rounded-full w-full sm:w-auto shadow-xl shadow-primary/20 hover:shadow-primary/40" onClick={() => setIsDiagnosisOpen(true)}>
                   今すぐ診断する
                 </Button>
-                <Button size="lg" variant="secondary" className="h-14 px-8 rounded-full w-full sm:w-auto shadow-xl shadow-slate-800/20" onClick={() => navigateTo('GUIDE')}>
+                <Button size="lg" variant="secondary" className="h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg rounded-full w-full sm:w-auto shadow-xl shadow-slate-800/20" onClick={() => navigateTo('GUIDE')}>
                   プロテインの選び方
                 </Button>
               </div>
