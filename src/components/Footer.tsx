@@ -29,11 +29,10 @@ const Footer: React.FC = () => {
           </div>
           
           <div>
-               <h4 className="font-bold text-gray-900 mb-4">カテゴリー</h4>
+               <h4 className="font-bold text-gray-900 mb-4">サポート</h4>
                <ul className="space-y-2 text-sm text-gray-600">
-                  <li><span className="text-gray-400">ホエイプロテイン</span></li>
-                  <li><span className="text-gray-400">ソイプロテイン</span></li>
-                  <li><span className="text-gray-400">コスパ重視</span></li>
+                  <li><Link href="/privacy" className="hover:text-blue-600">プライバシーポリシー</Link></li>
+                  <li><Link href="/terms" className="hover:text-blue-600">利用規約</Link></li>
               </ul>
           </div>
         </div>

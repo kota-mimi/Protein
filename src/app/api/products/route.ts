@@ -41,6 +41,7 @@ export async function GET() {
             format: 'json',
             keyword: keyword,
             applicationId: '1054552037945576340',
+            affiliateId: process.env.RAKUTEN_AFFILIATE_ID!,
             hits: '30',
             page: page.toString(),
             sort: '-reviewCount',
