@@ -1,6 +1,5 @@
 import React from 'react'
 import Link from 'next/link'
-import { FlaskConical } from 'lucide-react'
 
 const Footer: React.FC = () => {
   return (
@@ -8,10 +7,7 @@ const Footer: React.FC = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="grid md:grid-cols-4 gap-8 mb-12">
           <div className="col-span-1 md:col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                  <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white">
-                       <FlaskConical size={18} />
-                  </div>
+              <div className="mb-4">
                   <span className="font-bold text-lg text-gray-900">MITSUKERU</span>
               </div>
               <p className="text-sm text-gray-600 leading-relaxed max-w-sm">

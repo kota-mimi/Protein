@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Menu, Search, Dumbbell, Zap, TrendingUp, Filter, Sparkles, BookOpen, X, ChevronDown, ChevronUp, ArrowUpDown, SlidersHorizontal, Trophy, Coins, Tag } from 'lucide-react';
 import { Product } from '@/types';
 import { ProductCard } from '@/components/ProductCard';
@@ -97,7 +97,7 @@ export default function GeminiPage() {
     }
   }, []);
 
-  // 商品データを新しいシンプルAPIから取得
+  // 商品データを新しいシンプルAPIから取得（初回は20件のみ高速表示）
   useEffect(() => {
     const loadProducts = async () => {
       try {
@@ -109,10 +109,18 @@ export default function GeminiPage() {
         
         if (data.success && data.products) {
           console.log(`✅ 商品取得完了: ${data.products.length}件`);
-          setProducts(data.products);
-          setAllProducts(data.products);
-          setFilteredProducts(data.products);
+          
+          // 初回表示用に最初の20件のみを即座に表示
+          const initialProducts = data.products.slice(0, 20);
+          setProducts(initialProducts);
+          setFilteredProducts(initialProducts);
           setRecommendedProducts(data.products.slice(0, 50));
+          
+          // 残りの商品は少し遅れて読み込み（UX向上）
+          setTimeout(() => {
+            setAllProducts(data.products);
+            console.log('📦 全商品データをバックグラウンドで読み込み完了');
+          }, 500);
         } else {
           console.error('❌ 商品取得失敗:', data);
           setProducts([]);
@@ -363,14 +371,16 @@ export default function GeminiPage() {
   }, [searchQuery, performSearch]);
 
 
-  // allProductsが更新された時にフィルタリングを実行
+  // フィルタリング処理を最適化（利用可能な商品データのみを使用）
   useEffect(() => {
-    console.log('🔄 フィルタリング用useEffect実行: allProducts.length=', allProducts.length);
-    if (allProducts.length > 0) {
-      console.log('🎯 フィルタリング実行開始 - ソース商品数:', allProducts.length);
+    const availableProducts = allProducts.length > 0 ? allProducts : products;
+    console.log('🔄 フィルタリング用useEffect実行: availableProducts.length=', availableProducts.length);
+    
+    if (availableProducts.length > 0) {
+      console.log('🎯 フィルタリング実行開始 - ソース商品数:', availableProducts.length);
       
       // フィルタリングロジック
-      const sourceProducts = searchQuery && searchResults.length > 0 ? searchResults : allProducts;
+      const sourceProducts = searchQuery && searchResults.length > 0 ? searchResults : availableProducts;
       let displayProducts = sourceProducts.filter(p => {
         // 1. Search Query Filter
         if (searchQuery) {
@@ -407,11 +417,16 @@ export default function GeminiPage() {
 
       console.log('✅ フィルタリング完了:', displayProducts.length, '商品');
       setFilteredProducts(displayProducts);
+      
+      // ページネーションリセット（フィルターが変更された時）
+      if (currentPage > 1 && displayProducts.length <= (currentPage - 1) * itemsPerPage) {
+        setCurrentPage(1);
+      }
     } else {
-      console.log('⚠️ allProductsが空なのでフィルタリングスキップ');
+      console.log('⚠️ 利用可能な商品データがないのでフィルタリングスキップ');
       setFilteredProducts([]);
     }
-  }, [allProducts, selectedCategory, searchQuery, searchResults, minPrice, maxPrice, sortBy]);
+  }, [allProducts, products, selectedCategory, searchQuery, searchResults, minPrice, maxPrice, sortBy, currentPage, itemsPerPage]);
 
   const handleQuickFilter = async (id: string, applyFn: () => void | Promise<void>) => {
     setActiveTabId(id);
@@ -425,6 +440,15 @@ export default function GeminiPage() {
   // 新しいフィルタリングシステムを使用
   const displayProducts = filteredProducts;
   console.log(`🎯 表示商品数: ${displayProducts.length}商品`);
+
+  // パフォーマンス最適化: ページネーション済み商品のメモ化
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return displayProducts.slice(startIndex, endIndex);
+  }, [displayProducts, currentPage, itemsPerPage]);
+
+  console.log(`📄 ページ${currentPage}: ${paginatedProducts.length}件表示（全${displayProducts.length}件中）`);
 
   const categories = [
     { id: 'ALL', label: 'すべて' },
@@ -812,13 +836,7 @@ export default function GeminiPage() {
                 ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"
                 : "space-y-4"
               }>
-                {(() => {
-                  // ページネーション適用
-                  const startIndex = (currentPage - 1) * itemsPerPage;
-                  const endIndex = startIndex + itemsPerPage;
-                  const paginatedProducts = displayProducts.slice(startIndex, endIndex);
-                  
-                  return paginatedProducts.map((product, index) => {
+                {paginatedProducts.map((product, index) => {
                   // 商品データの基本的な検証
                   if (!product || !product.id) {
                     console.warn('不正な商品データ:', product);
@@ -842,8 +860,7 @@ export default function GeminiPage() {
                       </div>
                     );
                   }
-                  });
-                })()}
+                })}
               </div>
             )}
             
