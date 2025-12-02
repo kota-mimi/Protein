@@ -8,42 +8,81 @@ import { generateDiagnosisReport } from '@/lib/geminiService';
 interface AIDiagnosisModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onComplete: (recommendedType: string) => void;
+  onComplete: (diagnosisData: {type: string, preferences: any}) => void;
 }
 
 const QUESTIONS = [
   {
     id: 0,
-    text: "あなたの性別・年代は？",
-    options: ["男性 (10-20代)", "男性 (30-40代)", "男性 (50代以上)", "女性 (10-20代)", "女性 (30-40代)", "女性 (50代以上)"]
+    text: "目的はどれですか？（最重要）",
+    options: ["痩せたい（減量）", "引き締めたい", "筋肉つけたい（増量）", "健康維持", "間食を減らしたい"]
   },
   {
     id: 1,
-    text: "プロテインを飲む主な目的は？",
-    options: ["筋肥大・バルクアップ", "ダイエット・引き締め", "健康維持・栄養補給", "スポーツのパフォーマンス向上"]
+    text: "運動してますか？",
+    options: ["してない", "週1-2回", "週3-4回", "週5回以上"]
   },
   {
     id: 2,
-    text: "普段の運動頻度は？",
-    options: ["週4回以上 (ガッツリ)", "週1-3回 (適度に)", "ほぼしない (これから始める)"]
+    text: "牛乳でお腹ゴロゴロしやすいですか？",
+    options: ["はい（しやすい）", "いいえ（大丈夫）"]
   },
   {
     id: 3,
-    text: "味の好みは？",
-    options: ["甘いチョコ・バニラ系", "さっぱりフルーツ系", "人工甘味料なし・プレーン", "こだわりなし"]
+    text: "アレルギーはありますか？",
+    options: ["乳製品アレルギー", "大豆アレルギー", "特にない", "その他"]
   },
   {
     id: 4,
-    text: "一番重視するポイントは？",
-    options: ["価格 (コスパ)", "成分・品質", "味の美味しさ", "ブランドの信頼性"]
+    text: "肌荒れ・ニキビが出やすいタイプですか？",
+    options: ["はい（出やすい）", "いいえ（大丈夫）"]
+  },
+  {
+    id: 5,
+    text: "普段、肉・魚・卵・豆腐などのタンパク質は十分摂れていますか？",
+    options: ["十分摂れている", "普通", "少ない（不足気味）"]
+  },
+  {
+    id: 6,
+    text: "間食（お菓子・菓子パン）は多いですか？",
+    options: ["多い", "普通", "少ない"]
+  },
+  {
+    id: 7,
+    text: "いつプロテインを飲みたいですか？",
+    options: ["朝", "運動後", "夜", "間食代わり"]
+  },
+  {
+    id: 8,
+    text: "水と牛乳、どちらで飲みたいですか？",
+    options: ["水で飲みたい", "牛乳で飲みたい", "どっちでも"]
+  },
+  {
+    id: 9,
+    text: "味の好みと予算を教えてください",
+    options: ["甘めOK", "甘さ控えめ", "できればプレーン"],
+    hasSubQuestions: true,
+    subQuestions: {
+      taste: {
+        text: "好きな味は？",
+        options: ["チョコ", "カフェオレ", "バナナ", "抹茶", "いちご", "バニラ", "その他"],
+        allowOther: true
+      },
+      budget: {
+        text: "月の予算は？",
+        options: ["3000円以下", "3000-5000円", "5000-8000円", "8000円以上"]
+      }
+    }
   }
 ];
 
 export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onClose, onComplete }) => {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<{[key: number]: string}>({});
+  const [subAnswers, setSubAnswers] = useState<{taste?: string, customTaste?: string, budget?: string, allergyOther?: string}>({});
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  const [showSubQuestions, setShowSubQuestions] = useState(false);
 
   const handleAnswer = (answer: string) => {
     const newAnswers = { ...answers, [step]: answer };
@@ -59,66 +98,97 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
   const analyze = async (finalAnswers: {[key: number]: string}) => {
     setIsAnalyzing(true);
     
-    // 詳細な分析ロジックでユーザーにぴったりの推奨タイプを決定
+    console.log('🧠 新診断開始', finalAnswers, subAnswers);
+    
+    // 最適なプロテイン判定ロジック
     let recommendedType = 'WHEY'; // デフォルト
+    let reasons = []; // 推薦理由
     
-    const gender = finalAnswers[0];
-    const purpose = finalAnswers[1];
-    const frequency = finalAnswers[2];
-    const taste = finalAnswers[3];
-    const priority = finalAnswers[4];
+    const purpose = finalAnswers[0];        // 目的
+    const exercise = finalAnswers[1];       // 運動頻度  
+    const lactoseIssue = finalAnswers[2];   // 牛乳でお腹ゴロゴロ
+    const allergy = finalAnswers[3];        // アレルギー
+    const skinIssue = finalAnswers[4];      // 肌荒れ・ニキビ
+    const proteinIntake = finalAnswers[5];  // 普段のタンパク質摂取
+    const snacking = finalAnswers[6];       // 間食
+    const timing = finalAnswers[7];         // 飲むタイミング
+    const liquid = finalAnswers[8];         // 水or牛乳
+    const tastePreference = finalAnswers[9]; // 味の好み
     
-    // 目的を最優先に、他の要因も考慮
-    if (purpose.includes("ダイエット") || purpose.includes("引き締め")) {
-      // ダイエット・引き締め目的
-      if (gender.includes("女性") || taste.includes("人工甘味料なし")) {
-        recommendedType = 'VEGAN'; // ソイプロテイン（女性・ナチュラル志向）
-      } else {
-        recommendedType = 'WHEY'; // ホエイプロテイン（男性ダイエット）
+    console.log(`📋 詳細回答:`, {purpose, exercise, lactoseIssue, allergy, skinIssue, proteinIntake, snacking, timing, liquid, tastePreference});
+    
+    // 1. アレルギー・体質で強制決定（最優先）
+    if (allergy.includes("乳製品")) {
+      recommendedType = 'VEGAN';
+      reasons.push("乳製品アレルギーのため、ソイプロテインを推奨");
+      console.log('🚨 乳製品アレルギー → VEGAN');
+    } else if (allergy.includes("大豆")) {
+      recommendedType = 'WHEY';
+      reasons.push("大豆アレルギーのため、ホエイプロテインを推奨");
+      console.log('🚨 大豆アレルギー → WHEY');
+    } else if (lactoseIssue.includes("はい")) {
+      recommendedType = 'VEGAN';
+      reasons.push("乳糖不耐症の可能性があるため、消化に優しいソイプロテインを推奨");
+      console.log('🚨 乳糖不耐症 → VEGAN');
+    } else {
+      // 2. 目的による判定
+      if (purpose.includes("痩せたい") || purpose.includes("引き締め")) {
+        recommendedType = 'VEGAN';
+        reasons.push("ダイエット・引き締めに効果的なソイプロテインを推奨");
+        console.log('🎯 ダイエット目的 → VEGAN');
+      } else if (purpose.includes("筋肉つけたい")) {
+        recommendedType = 'WHEY';
+        reasons.push("筋肉増量に最適な吸収の早いホエイプロテインを推奨");
+        console.log('🎯 筋肥大目的 → WHEY');
+      } else if (purpose.includes("間食を減らしたい")) {
+        recommendedType = 'CASEIN';
+        reasons.push("満腹感が持続するカゼインプロテインで間食を抑制");
+        console.log('🎯 間食抑制 → CASEIN');
+      } else if (purpose.includes("健康維持")) {
+        recommendedType = 'WHEY';
+        reasons.push("健康維持に最適なバランスの良いホエイプロテインを推奨");
+        console.log('🎯 健康維持 → WHEY');
       }
-    } else if (purpose.includes("筋肥大") || purpose.includes("バルクアップ")) {
-      // 筋肥大目的
-      if (frequency.includes("週4回以上")) {
-        recommendedType = 'WHEY'; // 高頻度トレーニング → ホエイ
-      } else {
-        recommendedType = 'CASEIN'; // 低頻度 → 持続型カゼイン
+      
+      // 3. 運動頻度での微調整
+      if (exercise.includes("週5回以上") && purpose.includes("筋肉")) {
+        recommendedType = 'WHEY';
+        reasons.push("高頻度トレーニングには即効性のホエイが最適");
+        console.log('⚡ 高頻度運動 → WHEY強化');
       }
-    } else if (purpose.includes("健康維持") || purpose.includes("栄養補給")) {
-      // 健康維持目的
-      if (gender.includes("女性") || gender.includes("50代以上")) {
-        recommendedType = 'VEGAN'; // 年配・女性 → 消化に優しいソイ
-      } else if (frequency.includes("ほぼしない")) {
-        recommendedType = 'CASEIN'; // 運動しない → ゆっくり吸収カゼイン
-      } else {
-        recommendedType = 'WHEY'; // その他健康維持
-      }
-    } else if (purpose.includes("スポーツ") || purpose.includes("パフォーマンス")) {
-      // スポーツパフォーマンス目的
-      if (frequency.includes("週4回以上")) {
-        recommendedType = 'WHEY'; // 高頻度 → 即効性ホエイ
-      } else {
-        recommendedType = 'CASEIN'; // 持続型でパフォーマンスサポート
+      
+      // 4. 肌荒れ考慮
+      if (skinIssue.includes("はい")) {
+        if (recommendedType === 'WHEY') {
+          recommendedType = 'VEGAN';
+          reasons.push("肌荒れしやすい体質のため、添加物の少ないソイプロテインに変更");
+          console.log('🌿 肌荒れ対策 → VEGAN');
+        }
       }
     }
     
-    // 特別な条件での調整
-    if (priority.includes("価格") && !purpose.includes("筋肥大")) {
-      recommendedType = 'WHEY'; // コスパ重視 → ホエイ
-    }
+    // 5. 詳細な好み情報をまとめ
+    const preferences = {
+      proteinType: recommendedType,
+      reasons: reasons,
+      timing: timing,
+      liquid: liquid,
+      budget: subAnswers.budget || "未設定",
+      tastePreference: tastePreference,
+      favoriteFlavorCategory: subAnswers.taste || "未設定",
+      customFlavor: subAnswers.customTaste || "",
+      allergyOther: subAnswers.allergyOther || "",
+      exerciseLevel: exercise,
+      primaryGoal: purpose,
+      proteinDeficiency: proteinIntake.includes("少ない")
+    };
     
-    if (taste.includes("人工甘味料なし")) {
-      // ナチュラル志向
-      if (purpose.includes("筋肥大")) {
-        recommendedType = 'WHEY'; // 筋肥大 + ナチュラル
-      } else {
-        recommendedType = Math.random() > 0.5 ? 'VEGAN' : 'CASEIN'; // その他はソイかカゼイン
-      }
-    }
+    console.log(`💡 最終診断結果: ${recommendedType}`, preferences);
     
     // 短い遅延後に完了処理
     setTimeout(() => {
       setIsAnalyzing(false);
-      onComplete(recommendedType);
+      onComplete({ type: recommendedType, preferences });
     }, 1500);
   };
 

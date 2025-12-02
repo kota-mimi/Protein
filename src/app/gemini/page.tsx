@@ -11,6 +11,16 @@ import { ProductDetailModal } from '@/components/ProductDetailModal';
 import { Button } from '@/components/ui/Button';
 import { fetchProducts } from '@/lib/productService';
 
+// 配列をシャッフルする関数
+const shuffleArray = <T>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
 export default function GeminiPage() {
   console.log('🔥 GeminiPage component rendering');
   console.log('🔧 React useEffect import:', typeof useEffect);
@@ -121,19 +131,80 @@ export default function GeminiPage() {
     setIsDetailOpen(true);
   };
 
-  const handleDiagnosisComplete = (recommendedType: string) => {
+  const handleDiagnosisComplete = (diagnosisData: {type: string, preferences: any}) => {
     setCurrentView('HOME');
     setIsDiagnosisOpen(false);
     
+    const { type: recommendedType, preferences } = diagnosisData;
+    console.log(`🎯 診断結果: ${recommendedType}`, preferences);
+    console.log(`📦 全商品数: ${products.length}`);
+    
     // 診断結果に基づいて推薦商品を厳選（5個）
-    const filteredProducts = products.filter(product => {
+    let filteredProducts = products.filter(product => {
       if (recommendedType === 'WHEY') return product.category === 'WHEY';
       if (recommendedType === 'VEGAN') return product.category === 'VEGAN';
       if (recommendedType === 'CASEIN') return product.category === 'CASEIN';
       return true; // ALL の場合
     });
     
-    // 評価とレビュー数でソートして上位5個を選択
+    // 価格優先の場合は安い順にソート
+    if (preferences.priority === 'cost') {
+      filteredProducts = filteredProducts.sort((a, b) => (a.price || 999999) - (b.price || 999999));
+      console.log('💰 コスパ重視: 価格順でソート');
+    }
+    
+    // 味優先の場合は人気の味を優先
+    if (preferences.priority === 'taste') {
+      // チョコ・バニラ系の人は甘い味を優先
+      if (preferences.isSweet) {
+        filteredProducts = filteredProducts.filter(product => 
+          product.name.includes('チョコ') || product.name.includes('バニラ') || 
+          product.name.includes('ココア') || product.name.includes('ミルク') || 
+          product.name.toLowerCase().includes('chocolate') || product.name.toLowerCase().includes('vanilla')
+        ).concat(filteredProducts.filter(product => 
+          !(product.name.includes('チョコ') || product.name.includes('バニラ') || 
+            product.name.includes('ココア') || product.name.includes('ミルク') || 
+            product.name.toLowerCase().includes('chocolate') || product.name.toLowerCase().includes('vanilla'))
+        ));
+        console.log('🍫 甘い味重視: チョコ・バニラ系を優先');
+      }
+      
+      // フルーツ系の人はフルーツ味を優先  
+      if (preferences.isFruit) {
+        filteredProducts = filteredProducts.filter(product =>
+          product.name.includes('フルーツ') || product.name.includes('ベリー') ||
+          product.name.includes('ストロベリー') || product.name.includes('バナナ') ||
+          product.name.toLowerCase().includes('fruit') || product.name.toLowerCase().includes('berry')
+        ).concat(filteredProducts.filter(product => 
+          !(product.name.includes('フルーツ') || product.name.includes('ベリー') ||
+            product.name.includes('ストロベリー') || product.name.includes('バナナ') ||
+            product.name.toLowerCase().includes('fruit') || product.name.toLowerCase().includes('berry'))
+        ));
+        console.log('🍓 フルーツ味重視: フルーツ系を優先');
+      }
+      
+      // プレーン系の人は無味・プレーンを優先
+      if (preferences.isNatural) {
+        filteredProducts = filteredProducts.filter(product =>
+          product.name.includes('プレーン') || product.name.includes('ナチュラル') ||
+          product.name.includes('無添加') || product.name.toLowerCase().includes('plain') ||
+          product.name.toLowerCase().includes('natural')
+        ).concat(filteredProducts.filter(product => 
+          !(product.name.includes('プレーン') || product.name.includes('ナチュラル') ||
+            product.name.includes('無添加') || product.name.toLowerCase().includes('plain') ||
+            product.name.toLowerCase().includes('natural'))
+        ));
+        console.log('🌱 ナチュラル重視: プレーン系を優先');
+      }
+    }
+    
+    console.log(`🔍 フィルター後: ${filteredProducts.length}件 (${recommendedType}カテゴリ)`);
+    console.log(`📊 商品カテゴリ分布:`, products.reduce((acc, p) => {
+      acc[p.category] = (acc[p.category] || 0) + 1;
+      return acc;
+    }, {}));
+    
+    // 多様性を持たせた推薦アルゴリズム
     const sortedProducts = filteredProducts.sort((a, b) => {
       // 評価が高く、レビュー数も多い商品を優先
       const scoreA = (a.rating || 0) * Math.log(a.reviews || 1);
@@ -141,8 +212,20 @@ export default function GeminiPage() {
       return scoreB - scoreA;
     });
     
+    // 価格帯別に分散して選択（高品質・中品質・コスパ）
+    const highEnd = sortedProducts.slice(0, 10); // 上位10個から2個
+    const midRange = sortedProducts.slice(10, 25); // 中間から2個  
+    const budget = sortedProducts.slice(25); // 残りから1個
+    
+    const diverseRecommendation = [
+      ...shuffleArray(highEnd).slice(0, 2),
+      ...shuffleArray(midRange).slice(0, 2), 
+      ...shuffleArray(budget).slice(0, 1)
+    ];
+    
     // 5個に制限して推薦商品を設定
-    const recommended = sortedProducts.slice(0, 5);
+    const recommended = diverseRecommendation.slice(0, 5);
+    console.log(`✅ 最終推薦: ${recommended.length}件`, recommended.map(p => `${p.name} (${p.category})`));
     setRecommendedProducts(recommended);
     setShowRecommendations(true);
     
