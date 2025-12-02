@@ -757,23 +757,32 @@ export default function GeminiPage() {
                   <div className="flex bg-gray-100 rounded-md p-1">
                     <button
                       onClick={() => setViewMode('grid')}
-                      className={`flex-1 px-3 py-2 text-xs font-medium rounded transition-colors ${
+                      className={`flex items-center justify-center px-3 py-2 rounded transition-colors ${
                         viewMode === 'grid' 
                           ? 'bg-white text-gray-900 shadow-sm' 
                           : 'text-gray-600 hover:text-gray-900'
                       }`}
                     >
-                      📱 グリッド
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="7" height="7" rx="1"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1"/>
+                      </svg>
                     </button>
                     <button
                       onClick={() => setViewMode('list')}
-                      className={`flex-1 px-3 py-2 text-xs font-medium rounded transition-colors ${
+                      className={`flex items-center justify-center px-3 py-2 rounded transition-colors ${
                         viewMode === 'list' 
                           ? 'bg-white text-gray-900 shadow-sm' 
                           : 'text-gray-600 hover:text-gray-900'
                       }`}
                     >
-                      📋 リスト
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <rect x="3" y="6" width="18" height="2" rx="1"/>
+                        <rect x="3" y="11" width="18" height="2" rx="1"/>
+                        <rect x="3" y="16" width="18" height="2" rx="1"/>
+                      </svg>
                     </button>
                   </div>
                 </div>
