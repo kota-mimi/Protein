@@ -199,7 +199,7 @@ export default function GeminiPage() {
     }
     
     console.log(`🔍 フィルター後: ${filteredProducts.length}件 (${recommendedType}カテゴリ)`);
-    console.log(`📊 商品カテゴリ分布:`, products.reduce((acc, p) => {
+    console.log(`📊 商品カテゴリ分布:`, products.reduce((acc: {[key: string]: number}, p) => {
       acc[p.category] = (acc[p.category] || 0) + 1;
       return acc;
     }, {}));
