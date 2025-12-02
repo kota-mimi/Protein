@@ -340,13 +340,13 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
               )}
 
               {/* サブ質問表示 */}
-              {showSubQuestions && !showCustomInput && (
+              {showSubQuestions && !showCustomInput && QUESTIONS[step]?.subQuestions && (
                 <div className="space-y-6">
                   <h4 className="text-lg font-bold text-secondary text-center">
-                    {currentSubStep === 'taste' ? QUESTIONS[step].subQuestions.taste.text : QUESTIONS[step].subQuestions.budget.text}
+                    {currentSubStep === 'taste' ? QUESTIONS[step].subQuestions?.taste?.text : QUESTIONS[step].subQuestions?.budget?.text}
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {(currentSubStep === 'taste' ? QUESTIONS[step].subQuestions.taste.options : QUESTIONS[step].subQuestions.budget.options).map((option: string) => (
+                    {(currentSubStep === 'taste' ? QUESTIONS[step].subQuestions?.taste?.options : QUESTIONS[step].subQuestions?.budget?.options)?.map((option: string) => (
                       <button
                         key={option}
                         onClick={() => handleSubAnswer(currentSubStep!, option)}
@@ -355,8 +355,7 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
                         {option}
                         <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all text-white" />
                       </button>
-                    ))}
-                  </div>
+                    )) || []}</div>
                 </div>
               )}
 
