@@ -49,8 +49,9 @@ const QUESTIONS = [
   },
   {
     id: 7,
-    text: "いつプロテインを飲みたいですか？",
-    options: ["朝", "運動後", "夜", "間食代わり"]
+    text: "いつプロテインを飲みたいですか？（複数選択可）",
+    options: ["朝", "運動後", "夜", "間食代わり"],
+    allowMultiple: true
   },
   {
     id: 8,
@@ -76,9 +77,21 @@ const QUESTIONS = [
   }
 ];
 
+const getTotalQuestionCount = () => {
+  let count = QUESTIONS.length;
+  QUESTIONS.forEach(q => {
+    if (q.hasSubQuestions && q.subQuestions) {
+      count += Object.keys(q.subQuestions).length;
+    }
+  });
+  return count;
+};
+
+const TOTAL_QUESTIONS = getTotalQuestionCount();
+
 export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onClose, onComplete }) => {
   const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<{[key: number]: string}>({});
+  const [answers, setAnswers] = useState<{[key: number]: string | string[]}>({});
   const [subAnswers, setSubAnswers] = useState<{taste?: string, customTaste?: string, budget?: string, allergyOther?: string}>({});
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -86,8 +99,20 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
   const [customInput, setCustomInput] = useState("");
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [currentSubStep, setCurrentSubStep] = useState<'taste' | 'budget' | null>(null);
+  const [selectedMultiple, setSelectedMultiple] = useState<string[]>([]);
 
   const handleAnswer = (answer: string) => {
+    const currentQuestion = QUESTIONS[step];
+    
+    // 複数選択の場合
+    if (currentQuestion.allowMultiple) {
+      const currentSelected = selectedMultiple.includes(answer) 
+        ? selectedMultiple.filter(item => item !== answer)
+        : [...selectedMultiple, answer];
+      setSelectedMultiple(currentSelected);
+      return; // 複数選択の場合は次に進まない
+    }
+    
     const newAnswers = { ...answers, [step]: answer };
     setAnswers(newAnswers);
     
@@ -108,6 +133,43 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
       setStep(step + 1);
     } else {
       analyze(newAnswers);
+    }
+  };
+
+  const handleNext = () => {
+    const currentQuestion = QUESTIONS[step];
+    
+    if (currentQuestion.allowMultiple && selectedMultiple.length > 0) {
+      const newAnswers = { ...answers, [step]: selectedMultiple };
+      setAnswers(newAnswers);
+      setSelectedMultiple([]);
+      
+      if (step < QUESTIONS.length - 1) {
+        setStep(step + 1);
+      } else {
+        analyze(newAnswers);
+      }
+    }
+  };
+
+  const handleBack = () => {
+    if (showSubQuestions) {
+      if (currentSubStep === 'budget') {
+        setCurrentSubStep('taste');
+      } else {
+        setShowSubQuestions(false);
+        setCurrentSubStep(null);
+      }
+    } else if (showCustomInput) {
+      setShowCustomInput(false);
+      setCustomInput("");
+    } else if (step > 0) {
+      setStep(step - 1);
+      // 前の質問が複数選択の場合、選択状態を復元
+      const prevQuestion = QUESTIONS[step - 1];
+      if (prevQuestion.allowMultiple && answers[step - 1]) {
+        setSelectedMultiple(Array.isArray(answers[step - 1]) ? answers[step - 1] as string[] : []);
+      }
     }
   };
 
@@ -145,7 +207,7 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
     }
   };
 
-  const analyze = async (finalAnswers: {[key: number]: string}) => {
+  const analyze = async (finalAnswers: {[key: number]: string | string[]}) => {
     setIsAnalyzing(true);
     
     console.log('🧠 新診断開始', finalAnswers, subAnswers);
@@ -154,18 +216,21 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
     let recommendedType = 'WHEY'; // デフォルト
     let reasons = []; // 推薦理由
     
-    const purpose = finalAnswers[0];        // 目的
-    const exercise = finalAnswers[1];       // 運動頻度  
-    const lactoseIssue = finalAnswers[2];   // 牛乳でお腹ゴロゴロ
-    const allergy = finalAnswers[3];        // アレルギー
-    const skinIssue = finalAnswers[4];      // 肌荒れ・ニキビ
-    const proteinIntake = finalAnswers[5];  // 普段のタンパク質摂取
-    const snacking = finalAnswers[6];       // 間食
-    const timing = finalAnswers[7];         // 飲むタイミング
-    const liquid = finalAnswers[8];         // 水or牛乳
-    const tastePreference = finalAnswers[9]; // 味の好み
+    const purpose = finalAnswers[0] as string;        // 目的
+    const exercise = finalAnswers[1] as string;       // 運動頻度  
+    const lactoseIssue = finalAnswers[2] as string;   // 牛乳でお腹ゴロゴロ
+    const allergy = finalAnswers[3] as string;        // アレルギー
+    const skinIssue = finalAnswers[4] as string;      // 肌荒れ・ニキビ
+    const proteinIntake = finalAnswers[5] as string;  // 普段のタンパク質摂取
+    const snacking = finalAnswers[6] as string;       // 間食
+    const timing = finalAnswers[7] as string | string[]; // 飲むタイミング（複数選択可）
+    const liquid = finalAnswers[8] as string;         // 水or牛乳
+    const tastePreference = finalAnswers[9] as string; // 味の好み
     
-    console.log(`📋 詳細回答:`, {purpose, exercise, lactoseIssue, allergy, skinIssue, proteinIntake, snacking, timing, liquid, tastePreference});
+    // タイミングを文字列形式に変換（複数選択対応）
+    const timingString = Array.isArray(timing) ? timing.join('、') : timing;
+    
+    console.log(`📋 詳細回答:`, {purpose, exercise, lactoseIssue, allergy, skinIssue, proteinIntake, snacking, timing: timingString, liquid, tastePreference});
     
     // 1. アレルギー・体質で強制決定（最優先）
     if (allergy.includes("乳製品")) {
@@ -221,7 +286,7 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
     const preferences = {
       proteinType: recommendedType,
       reasons: reasons,
-      timing: timing,
+      timing: timingString, // 複数選択対応済み
       liquid: liquid,
       budget: subAnswers.budget || "未設定",
       tastePreference: tastePreference,
@@ -251,6 +316,7 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
     setShowCustomInput(false);
     setCustomInput("");
     setCurrentSubStep(null);
+    setSelectedMultiple([]);
     onClose();
   };
 
@@ -288,13 +354,13 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
             <div>
               <div className="mb-8">
                 <div className="flex justify-between text-xs text-slate-400 mb-2 uppercase tracking-wider font-bold">
-                  <span>Question {step + 1} of {QUESTIONS.length}</span>
-                  <span>{Math.round(((step) / QUESTIONS.length) * 100)}% 完了</span>
+                  <span>Question {step + 1} of {TOTAL_QUESTIONS}</span>
+                  <span>{Math.round(((step + (showSubQuestions ? (currentSubStep === 'budget' ? 2 : 1) : 0)) / TOTAL_QUESTIONS) * 100)}% 完了</span>
                 </div>
                 <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                   <div 
                     className="bg-primary h-full transition-all duration-500 ease-out shadow-sm"
-                    style={{ width: `${((step + 1) / QUESTIONS.length) * 100}%` }}
+                    style={{ width: `${((step + 1 + (showSubQuestions ? (currentSubStep === 'budget' ? 2 : 1) : 0)) / TOTAL_QUESTIONS) * 100}%` }}
                   ></div>
                 </div>
               </div>
@@ -327,10 +393,7 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
                       次へ
                     </button>
                     <button
-                      onClick={() => {
-                        setShowCustomInput(false);
-                        setCustomInput("");
-                      }}
+                      onClick={handleBack}
                       className="px-6 py-3 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors"
                     >
                       戻る
@@ -355,23 +418,87 @@ export const AIDiagnosisModal: React.FC<AIDiagnosisModalProps> = ({ isOpen, onCl
                         {option}
                         <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all text-white" />
                       </button>
-                    )) || []}</div>
+                    )) || []}
+                  </div>
+                  <div className="flex justify-start mt-6">
+                    <button
+                      onClick={handleBack}
+                      className="px-6 py-3 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors"
+                    >
+                      戻る
+                    </button>
+                  </div>
                 </div>
               )}
 
               {/* 通常の質問表示 */}
               {!showSubQuestions && !showCustomInput && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {QUESTIONS[step].options.map((option) => (
-                    <button
-                      key={option}
-                      onClick={() => handleAnswer(option)}
-                      className="p-4 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:bg-primary hover:text-white hover:border-primary transition-all duration-200 font-medium text-left flex items-center justify-between group shadow-sm hover:shadow-md"
-                    >
-                      {option}
-                      <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all text-white" />
-                    </button>
-                  ))}
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {QUESTIONS[step].options.map((option) => {
+                      const isSelected = QUESTIONS[step].allowMultiple 
+                        ? selectedMultiple.includes(option)
+                        : false;
+                      
+                      return (
+                        <button
+                          key={option}
+                          onClick={() => handleAnswer(option)}
+                          className={`p-4 rounded-xl border text-left flex items-center justify-between group shadow-sm hover:shadow-md transition-all duration-200 font-medium ${
+                            isSelected 
+                              ? 'border-primary bg-primary text-white' 
+                              : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-primary hover:text-white hover:border-primary'
+                          }`}
+                        >
+                          <span className="flex items-center gap-2">
+                            {QUESTIONS[step].allowMultiple && (
+                              <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                                isSelected ? 'border-white bg-white' : 'border-slate-400'
+                              }`}>
+                                {isSelected && <Check className="w-3 h-3 text-primary" />}
+                              </div>
+                            )}
+                            {option}
+                          </span>
+                          {!QUESTIONS[step].allowMultiple && (
+                            <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all text-white" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  
+                  {/* 複数選択の場合の次へボタンと戻るボタン */}
+                  {QUESTIONS[step].allowMultiple && (
+                    <div className="flex gap-3 mt-6">
+                      <button
+                        onClick={handleBack}
+                        disabled={step === 0}
+                        className="px-6 py-3 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        戻る
+                      </button>
+                      <button
+                        onClick={handleNext}
+                        disabled={selectedMultiple.length === 0}
+                        className="flex-1 bg-primary text-white py-3 px-6 rounded-xl disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-blue-600 transition-colors"
+                      >
+                        次へ ({selectedMultiple.length}個選択中)
+                      </button>
+                    </div>
+                  )}
+                  
+                  {/* 単一選択の場合の戻るボタン */}
+                  {!QUESTIONS[step].allowMultiple && step > 0 && (
+                    <div className="flex justify-start mt-6">
+                      <button
+                        onClick={handleBack}
+                        className="px-6 py-3 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors"
+                      >
+                        戻る
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
