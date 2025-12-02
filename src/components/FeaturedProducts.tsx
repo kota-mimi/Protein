@@ -317,7 +317,7 @@ export default function FeaturedProducts() {
                   </div>
                 </div>
                 <Link 
-                  href="/products" 
+                  href="/gemini" 
                   className={`hidden sm:flex items-center gap-3 ${categoryThemes[category.category as keyof typeof categoryThemes].accent} hover:${categoryThemes[category.category as keyof typeof categoryThemes].text} font-semibold px-6 py-3 bg-white/60 backdrop-blur-sm hover:bg-white rounded-xl transition-all duration-200 shadow-sm hover:shadow-md group`}
                 >
                   すべて見る
@@ -435,7 +435,7 @@ export default function FeaturedProducts() {
               {category.products.length > 12 && (
                 <div className="mt-8 text-center">
                   <Link 
-                    href="/products"
+                    href="/gemini"
                     className={`group inline-flex items-center gap-4 ${categoryColors[category.category as keyof typeof categoryColors]} text-white font-bold py-4 px-8 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 backdrop-blur-sm`}
                   >
                     <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
@@ -492,7 +492,7 @@ export default function FeaturedProducts() {
                 </Link>
                 
                 <Link 
-                  href="/products"
+                  href="/gemini"
                   className="group inline-flex items-center gap-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/20 hover:border-white/40 font-bold py-5 px-10 rounded-2xl transition-all duration-300 hover:scale-105"
                 >
                   <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">

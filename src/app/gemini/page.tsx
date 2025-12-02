@@ -63,6 +63,13 @@ export default function GeminiPage() {
   
   // フィルタリングされた商品の状態管理
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  
+  // ページネーション状態
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(20);
+  
+  // レイアウト切り替え状態
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Handle scroll for navbar styling
   useEffect(() => {
@@ -741,6 +748,43 @@ export default function GeminiPage() {
               </div>
             </div>
 
+            {/* ページネーションとレイアウト切り替えコントロール */}
+            {displayProducts.length > itemsPerPage && (
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+                {/* レイアウト切り替え */}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600 font-medium">表示形式:</span>
+                  <div className="flex bg-gray-100 rounded-md p-1">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`flex-1 px-3 py-2 text-xs font-medium rounded transition-colors ${
+                        viewMode === 'grid' 
+                          ? 'bg-white text-gray-900 shadow-sm' 
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      📱 グリッド
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`flex-1 px-3 py-2 text-xs font-medium rounded transition-colors ${
+                        viewMode === 'list' 
+                          ? 'bg-white text-gray-900 shadow-sm' 
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      📋 リスト
+                    </button>
+                  </div>
+                </div>
+                
+                {/* ページネーション情報 */}
+                <div className="text-sm text-gray-600">
+                  {displayProducts.length} 件中 {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, displayProducts.length)} 件を表示
+                </div>
+              </div>
+            )}
+
             {/* Product Grid - Compact 2 columns on Mobile, 5 on Large Screens */}
             {isLoading || isLoadingAllProducts ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -754,8 +798,17 @@ export default function GeminiPage() {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                {displayProducts.map((product, index) => {
+              <div className={viewMode === 'grid' 
+                ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"
+                : "space-y-4"
+              }>
+                {(() => {
+                  // ページネーション適用
+                  const startIndex = (currentPage - 1) * itemsPerPage;
+                  const endIndex = startIndex + itemsPerPage;
+                  const paginatedProducts = displayProducts.slice(startIndex, endIndex);
+                  
+                  return paginatedProducts.map((product, index) => {
                   // 商品データの基本的な検証
                   if (!product || !product.id) {
                     console.warn('不正な商品データ:', product);
@@ -768,6 +821,7 @@ export default function GeminiPage() {
                         key={`${product.id}-${index}-${product.name?.slice(0, 10) || 'unknown'}`} 
                         product={product} 
                         onOpenDetail={handleOpenDetail}
+                        viewMode={viewMode}
                       />
                     );
                   } catch (cardError) {
@@ -778,7 +832,102 @@ export default function GeminiPage() {
                       </div>
                     );
                   }
-                })}
+                  });
+                })()}
+              </div>
+            )}
+            
+            {/* ページネーション */}
+            {displayProducts.length > itemsPerPage && (
+              <div className="mt-8 flex justify-center">
+                <div className="flex items-center space-x-2">
+                  {/* 前へボタン */}
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    前へ
+                  </button>
+                  
+                  {/* ページ番号 */}
+                  {(() => {
+                    const totalPages = Math.ceil(displayProducts.length / itemsPerPage);
+                    const pages = [];
+                    const showPages = 5;
+                    
+                    let startPage = Math.max(1, currentPage - Math.floor(showPages / 2));
+                    let endPage = Math.min(totalPages, startPage + showPages - 1);
+                    
+                    if (endPage - startPage + 1 < showPages) {
+                      startPage = Math.max(1, endPage - showPages + 1);
+                    }
+                    
+                    // 最初のページ
+                    if (startPage > 1) {
+                      pages.push(
+                        <button
+                          key={1}
+                          onClick={() => setCurrentPage(1)}
+                          className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                        >
+                          1
+                        </button>
+                      );
+                      if (startPage > 2) {
+                        pages.push(
+                          <span key="start-ellipsis" className="px-2 text-gray-500">...</span>
+                        );
+                      }
+                    }
+                    
+                    // 現在のページ周辺
+                    for (let i = startPage; i <= endPage; i++) {
+                      pages.push(
+                        <button
+                          key={i}
+                          onClick={() => setCurrentPage(i)}
+                          className={`px-3 py-2 text-sm font-medium rounded-md ${
+                            i === currentPage
+                              ? 'text-blue-600 bg-blue-50 border border-blue-300'
+                              : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          {i}
+                        </button>
+                      );
+                    }
+                    
+                    // 最後のページ
+                    if (endPage < totalPages) {
+                      if (endPage < totalPages - 1) {
+                        pages.push(
+                          <span key="end-ellipsis" className="px-2 text-gray-500">...</span>
+                        );
+                      }
+                      pages.push(
+                        <button
+                          key={totalPages}
+                          onClick={() => setCurrentPage(totalPages)}
+                          className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                        >
+                          {totalPages}
+                        </button>
+                      );
+                    }
+                    
+                    return pages;
+                  })()}
+                  
+                  {/* 次へボタン */}
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(displayProducts.length / itemsPerPage)))}
+                    disabled={currentPage === Math.ceil(displayProducts.length / itemsPerPage)}
+                    className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    次へ
+                  </button>
+                </div>
               </div>
             )}
 

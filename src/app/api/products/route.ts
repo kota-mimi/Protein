@@ -24,27 +24,18 @@ export async function GET() {
     const rakutenApiUrl = 'https://app.rakuten.co.jp/services/api/IchibaItem/Search/20220601'
     const allProducts = []
     
-    // プロテイン関連キーワードを大幅拡張
+    // テスト用：軽量化設定（3キーワード × 1ページ = 最大30商品）
     const keywords = [
-      'ホエイプロテイン',
-      'ソイプロテイン',
-      'カゼインプロテイン',
-      'プロテイン',
       'ザバス',
       'ビーレジェンド',
-      'マイプロテイン',
-      'エクスプロージョン',
-      'DNS',
-      'アルプロン',
-      'ウイダー',
-      'ケンタイ'
+      'マイプロテイン'
     ]
     
-    console.log(`🔍 ${keywords.length}個のキーワードで検索開始`)
+    console.log(`🔍 ${keywords.length}個のキーワードで検索開始（テスト用軽量化）`)
     
-    // 各キーワードで4ページまで取得（より多くの商品を収集）
+    // テスト用：各キーワードで1ページのみ取得
     for (const keyword of keywords) {
-      for (let page = 1; page <= 4; page++) {
+      for (let page = 1; page <= 1; page++) {
         try {
           const params = new URLSearchParams({
             format: 'json',
