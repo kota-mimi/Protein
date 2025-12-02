@@ -11,6 +11,7 @@ import { ProductDetailModal } from '@/components/ProductDetailModal';
 import { Button } from '@/components/ui/Button';
 import { fetchProducts } from '@/lib/productService';
 import Footer from '@/components/Footer';
+import AdBanner from '@/components/AdBanner';
 
 // 配列をシャッフルする関数
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -541,6 +542,11 @@ export default function GeminiPage() {
             </div>
           </header>
 
+          {/* ヘッダー直下の最優先広告スペース */}
+          <section className="container mx-auto px-4 py-6 bg-gradient-to-br from-slate-50 to-blue-50">
+            <AdBanner position="header-below" />
+          </section>
+
           {/* AI診断結果の推薦商品セクション */}
           {showRecommendations && (
             <section id="recommendations" className="container mx-auto px-4 py-8 bg-gradient-to-br from-orange-50 to-amber-50 border-b border-slate-100">
@@ -579,13 +585,19 @@ export default function GeminiPage() {
           )}
 
           {/* Main Content Area */}
-          <main id="ranking" className="container mx-auto px-4 py-8 bg-white min-h-[600px]">
-            
-            {/* Page Title */}
-            <div className="mb-6 text-center">
-              <h1 className="text-2xl font-bold text-slate-800 mb-2">プロテイン商品一覧</h1>
-              <p className="text-slate-600">お気に入りのプロテインを見つけよう</p>
-            </div>
+          <main id="ranking" className="bg-white min-h-[600px]">
+            <div className="container mx-auto px-4 py-8">
+              
+              {/* Page Title */}
+              <div className="mb-6 text-center">
+                <h1 className="text-2xl font-bold text-slate-800 mb-2">プロテイン商品一覧</h1>
+                <p className="text-slate-600">お気に入りのプロテインを見つけよう</p>
+              </div>
+
+              {/* サイドバー広告（PC用） */}
+              <div className="hidden lg:block fixed right-4 top-1/2 transform -translate-y-1/2 z-30">
+                <AdBanner position="sidebar" />
+              </div>
 
             {/* Search & Advanced Filter Section */}
             <div className="mb-8">
@@ -837,14 +849,34 @@ export default function GeminiPage() {
                 : "space-y-4"
               }>
                 {paginatedProducts.map((product, index) => {
+                  const components = [];
+                  
                   // 商品データの基本的な検証
                   if (!product || !product.id) {
                     console.warn('不正な商品データ:', product);
                     return null;
                   }
                   
+                  // 10件目の後に広告を挿入（グリッドビューの場合）
+                  if (index === 9 && viewMode === 'grid') {
+                    components.push(
+                      <div key="ad-between-products" className="col-span-full mb-6">
+                        <AdBanner position="between-products" />
+                      </div>
+                    );
+                  }
+                  
+                  // リストビューの場合は10件目の後に広告
+                  if (index === 9 && viewMode === 'list') {
+                    components.push(
+                      <div key="ad-between-products" className="mb-6">
+                        <AdBanner position="between-products" />
+                      </div>
+                    );
+                  }
+                  
                   try {
-                    return (
+                    components.push(
                       <ProductCard 
                         key={`${product.id}-${index}-${product.name?.slice(0, 10) || 'unknown'}`} 
                         product={product} 
@@ -854,12 +886,14 @@ export default function GeminiPage() {
                     );
                   } catch (cardError) {
                     console.error('ProductCard描画エラー:', cardError, product);
-                    return (
+                    components.push(
                       <div key={`error-${product.id}-${index}`} className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
                         <p className="text-xs text-red-600">商品データエラー</p>
                       </div>
                     );
                   }
+                  
+                  return components;
                 })}
               </div>
             )}
@@ -968,6 +1002,15 @@ export default function GeminiPage() {
                 <Button variant="outline" onClick={() => { setSearchQuery(''); setSelectedCategory('ALL'); setMinPrice(''); setMaxPrice(''); setActiveTabId('POPULAR'); }}>すべての商品を表示</Button>
               </div>
             )}
+
+            </div>
+
+            {/* フッター直上の広告スペース */}
+            <section className="bg-gradient-to-br from-gray-50 to-slate-100 py-8">
+              <div className="container mx-auto px-4">
+                <AdBanner position="footer-above" />
+              </div>
+            </section>
 
           </main>
         </>
