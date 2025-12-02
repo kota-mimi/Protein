@@ -38,6 +38,7 @@ export default function ProductsPage() {
   const [sortBy, setSortBy] = useState<string>('price')
   const [currentPage, setCurrentPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid') // レイアウト切り替え
   
   const ITEMS_PER_PAGE = 24
 
@@ -189,6 +190,33 @@ export default function ProductsPage() {
               </select>
             </div>
 
+            {/* 表示レイアウト切り替え */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">表示</label>
+              <div className="flex bg-gray-100 rounded-md p-1">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`flex-1 px-3 py-2 text-xs font-medium rounded transition-colors ${
+                    viewMode === 'grid' 
+                      ? 'bg-white text-gray-900 shadow-sm' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  📱 グリッド
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`flex-1 px-3 py-2 text-xs font-medium rounded transition-colors ${
+                    viewMode === 'list' 
+                      ? 'bg-white text-gray-900 shadow-sm' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  📋 リスト
+                </button>
+              </div>
+            </div>
+
             {/* 表示件数情報 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">表示中</label>
@@ -199,66 +227,134 @@ export default function ProductsPage() {
           </div>
         </div>
 
-        {/* 商品グリッド */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 mb-8">
+        {/* 商品表示エリア */}
+        <div className={`mb-8 ${
+          viewMode === 'grid' 
+            ? 'grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6'
+            : 'space-y-4'
+        }`}>
           {paginatedProducts.map((product) => (
-            <div key={product.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border">
-              {/* 商品画像 */}
-              <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden">
-                <img
-                  src={product.imageUrl || '/placeholder-protein.jpg'}
-                  alt={product.name}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                  onError={(e) => {
-                    e.currentTarget.src = '/placeholder-protein.jpg'
-                  }}
-                />
-              </div>
-
-              {/* 商品情報 */}
-              <div className="p-4">
-                {/* ブランド */}
-                <div className="text-xs text-blue-600 font-medium mb-1">{product.brand}</div>
-                
-                {/* 商品名 */}
-                <h3 className="font-medium text-sm text-gray-900 mb-2 line-clamp-2 h-10">
-                  {product.name}
-                </h3>
-
-                {/* 栄養情報 */}
-                <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 mb-3">
-                  <div>タンパク質: {product.nutrition.protein}g</div>
-                  <div>カロリー: {product.nutrition.calories}kcal</div>
+            viewMode === 'grid' ? (
+              // グリッド表示
+              <div key={product.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border">
+                {/* 商品画像 */}
+                <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden">
+                  <img
+                    src={product.imageUrl || '/placeholder-protein.jpg'}
+                    alt={product.name}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    onError={(e) => {
+                      e.currentTarget.src = '/placeholder-protein.jpg'
+                    }}
+                  />
                 </div>
 
-                {/* レビュー */}
-                {product.reviewCount > 0 && (
-                  <div className="flex items-center mb-2">
-                    <span className="text-yellow-400 text-sm">★{product.reviewAverage.toFixed(1)}</span>
-                    <span className="text-xs text-gray-500 ml-1">({product.reviewCount})</span>
+                {/* 商品情報 */}
+                <div className="p-4">
+                  {/* ブランド */}
+                  <div className="text-xs text-blue-600 font-medium mb-1">{product.brand}</div>
+                  
+                  {/* 商品名 */}
+                  <h3 className="font-medium text-sm text-gray-900 mb-2 line-clamp-2 h-10">
+                    {product.name}
+                  </h3>
+
+                  {/* 栄養情報 */}
+                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 mb-3">
+                    <div>タンパク質: {product.nutrition.protein}g</div>
+                    <div>カロリー: {product.nutrition.calories}kcal</div>
                   </div>
-                )}
 
-                {/* 価格 */}
-                <div className="mb-3">
-                  <div className="text-lg font-bold text-gray-900">¥{product.price.toLocaleString()}</div>
-                  <div className="text-xs text-gray-500">1回分 ¥{product.pricePerServing}</div>
+                  {/* レビュー */}
+                  {product.reviewCount > 0 && (
+                    <div className="flex items-center mb-2">
+                      <span className="text-yellow-400 text-sm">★{product.reviewAverage.toFixed(1)}</span>
+                      <span className="text-xs text-gray-500 ml-1">({product.reviewCount})</span>
+                    </div>
+                  )}
+
+                  {/* 価格 */}
+                  <div className="mb-3">
+                    <div className="text-lg font-bold text-gray-900">¥{product.price.toLocaleString()}</div>
+                    <div className="text-xs text-gray-500">1回分 ¥{product.pricePerServing}</div>
+                  </div>
+
+                  {/* 購入ボタン */}
+                  <a
+                    href={product.affiliateUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md text-center transition-colors"
+                  >
+                    楽天で購入
+                  </a>
+
+                  {/* ショップ名 */}
+                  <div className="text-xs text-gray-400 text-center mt-2">{product.shopName}</div>
                 </div>
-
-                {/* 購入ボタン */}
-                <a
-                  href={product.affiliateUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md text-center transition-colors"
-                >
-                  楽天で購入
-                </a>
-
-                {/* ショップ名 */}
-                <div className="text-xs text-gray-400 text-center mt-2">{product.shopName}</div>
               </div>
-            </div>
+            ) : (
+              // リスト表示
+              <div key={product.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border p-4">
+                <div className="flex gap-4">
+                  {/* 商品画像 */}
+                  <div className="flex-shrink-0 w-24 h-24 bg-gray-100 rounded-lg overflow-hidden">
+                    <img
+                      src={product.imageUrl || '/placeholder-protein.jpg'}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = '/placeholder-protein.jpg'
+                      }}
+                    />
+                  </div>
+
+                  {/* 商品情報 */}
+                  <div className="flex-grow min-w-0">
+                    <div className="flex flex-col h-full">
+                      {/* 上段：ブランド・商品名 */}
+                      <div>
+                        <div className="text-xs text-blue-600 font-medium mb-1">{product.brand}</div>
+                        <h3 className="font-medium text-base text-gray-900 mb-2 line-clamp-2">
+                          {product.name}
+                        </h3>
+                      </div>
+
+                      {/* 中段：栄養・レビュー */}
+                      <div className="flex-grow">
+                        <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-2">
+                          <span>タンパク質: {product.nutrition.protein}g</span>
+                          <span>カロリー: {product.nutrition.calories}kcal</span>
+                        </div>
+                        {product.reviewCount > 0 && (
+                          <div className="flex items-center mb-2">
+                            <span className="text-yellow-400 text-sm">★{product.reviewAverage.toFixed(1)}</span>
+                            <span className="text-sm text-gray-500 ml-1">({product.reviewCount})</span>
+                          </div>
+                        )}
+                        <div className="text-xs text-gray-400">{product.shopName}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 右側：価格・購入ボタン */}
+                  <div className="flex-shrink-0 text-right">
+                    <div className="mb-3">
+                      <div className="text-xl font-bold text-gray-900">¥{product.price.toLocaleString()}</div>
+                      <div className="text-sm text-gray-500">1回分 ¥{product.pricePerServing}</div>
+                    </div>
+                    <a
+                      href={product.affiliateUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-6 rounded-md text-center transition-colors whitespace-nowrap"
+                    >
+                      楽天で購入
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )
           ))}
         </div>
 
