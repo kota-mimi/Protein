@@ -137,13 +137,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenDetail,
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/5 to-transparent"></div>
 
-        <div className="absolute bottom-2 left-2 flex gap-1 flex-wrap pr-2">
-          {(product.tags && Array.isArray(product.tags) ? product.tags : []).slice(0, 2).map(tag => (
-             <span key={tag} className="text-[10px] font-bold bg-white/95 text-slate-800 px-1.5 py-0.5 rounded backdrop-blur-sm border border-slate-100 shadow-sm">
-               {tag}
-             </span>
-          ))}
-        </div>
       </div>
 
       {/* Content */}
