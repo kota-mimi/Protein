@@ -22,10 +22,10 @@ export const AIChatWidget: React.FC = () => {
 
   // クイック返信オプション
   const quickReplies = [
-    { icon: Dumbbell, text: '筋肉をつけたい', color: 'from-red-500 to-pink-500' },
-    { icon: Target, text: 'ダイエット中', color: 'from-green-500 to-emerald-500' },
-    { icon: Zap, text: 'おすすめプロテイン', color: 'from-blue-500 to-purple-500' },
-    { icon: Sparkles, text: '初心者です', color: 'from-orange-500 to-yellow-500' }
+    { icon: Dumbbell, text: '筋肉をつけたい', color: 'from-blue-500 to-blue-600' },
+    { icon: Target, text: 'ダイエット中', color: 'from-blue-600 to-blue-700' },
+    { icon: Zap, text: 'おすすめプロテイン', color: 'from-blue-500 to-blue-700' },
+    { icon: Sparkles, text: '初心者です', color: 'from-blue-400 to-blue-600' }
   ];
 
   const scrollToBottom = () => {
@@ -83,9 +83,9 @@ export const AIChatWidget: React.FC = () => {
       {isOpen && (
         <div className="mb-4 w-[350px] md:w-[400px] h-[500px] backdrop-blur-xl bg-white/90 border border-white/20 rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-slide-up ring-1 ring-white/30">
           {/* Header with Gradient */}
-          <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 p-4 border-b border-white/10 flex justify-between items-center shadow-lg z-10 relative overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 p-4 border-b border-white/10 flex justify-between items-center shadow-lg z-10 relative overflow-hidden">
             {/* 背景パターン */}
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 via-blue-500/20 to-blue-600/20"></div>
             <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
             <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full blur-lg"></div>
             
@@ -122,7 +122,7 @@ export const AIChatWidget: React.FC = () => {
                 <div
                   className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-lg backdrop-blur-sm ${
                     msg.role === 'user'
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-tr-none font-medium border border-white/20'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-tr-none font-medium border border-white/20'
                       : 'bg-white/90 text-gray-800 rounded-tl-none font-medium border border-slate-200/50'
                   }`}
                   style={{ 
@@ -160,7 +160,7 @@ export const AIChatWidget: React.FC = () => {
               <div className="flex justify-start">
                 <div className="bg-white/90 rounded-2xl rounded-tl-none px-4 py-3 border border-slate-200/50 shadow-lg backdrop-blur-sm">
                   <div className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-purple-600" />
+                    <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
                     <span className="text-xs text-gray-500">AI が回答中...</span>
                   </div>
                 </div>
@@ -179,16 +179,16 @@ export const AIChatWidget: React.FC = () => {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                   placeholder="何でも聞いてください..."
-                  className="w-full bg-white/90 text-gray-800 text-sm rounded-2xl px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-purple-400 border border-slate-200/50 placeholder-gray-400 shadow-sm backdrop-blur-sm"
+                  className="w-full bg-white/90 text-gray-800 text-sm rounded-2xl px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-400 border border-slate-200/50 placeholder-gray-400 shadow-sm backdrop-blur-sm"
                 />
-                <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-purple-500 transition-colors">
+                <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors">
                   <Mic className="w-4 h-4" />
                 </button>
               </div>
               <button
                 onClick={handleSend}
                 disabled={isLoading || !input.trim()}
-                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white p-3 rounded-2xl transition-all disabled:opacity-50 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white p-3 rounded-2xl transition-all disabled:opacity-50 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
               >
                 <Send className="w-5 h-5" />
               </button>
@@ -203,11 +203,11 @@ export const AIChatWidget: React.FC = () => {
         className={`group relative flex items-center justify-center w-16 h-16 rounded-2xl shadow-2xl transition-all duration-500 overflow-hidden ${
           isOpen 
             ? 'bg-gradient-to-r from-gray-600 to-gray-700 rotate-180 scale-90' 
-            : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-purple-600 hover:to-pink-600 hover:scale-110 hover:rotate-12'
+            : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 hover:scale-110 hover:rotate-12'
         }`}
       >
         {/* 背景エフェクト */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-400/30 via-purple-400/30 to-pink-400/30 blur-sm"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-400/30 via-blue-500/30 to-blue-600/30 blur-sm"></div>
         <div className="absolute top-0 right-0 w-8 h-8 bg-white/20 rounded-full blur-lg"></div>
         <div className="absolute bottom-0 left-0 w-6 h-6 bg-white/10 rounded-full blur-md"></div>
         
