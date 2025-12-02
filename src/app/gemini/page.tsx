@@ -10,6 +10,7 @@ import { ProteinGuide } from '@/components/ProteinGuide';
 import { ProductDetailModal } from '@/components/ProductDetailModal';
 import { Button } from '@/components/ui/Button';
 import { fetchProducts } from '@/lib/productService';
+import Footer from '@/components/Footer';
 
 // 配列をシャッフルする関数
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -956,25 +957,7 @@ export default function GeminiPage() {
       )}
 
       {/* Footer */}
-      <footer className="bg-slate-800 text-white py-12 text-sm border-t border-slate-800">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
-                <span className="text-lg font-bold">MITSUKERU</span>
-            </div>
-            <div className="flex space-x-6 text-slate-300">
-              <a href="#" className="hover:text-white transition-colors">運営会社</a>
-              <a href="#" className="hover:text-white transition-colors">掲載依頼（メーカー様）</a>
-              <a href="#" className="hover:text-white transition-colors">プライバシーポリシー</a>
-              <a href="#" className="hover:text-white transition-colors">お問い合わせ</a>
-            </div>
-          </div>
-          <p className="text-center text-xs text-slate-400">
-            ※当サイトはアフィリエイトプログラムに参加しています。商品購入により一定の手数料を得る場合があります。<br/>
-            &copy; 2024 MITSUKERU Media. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
 
       {/* AI Diagnosis Modal */}
       <AIDiagnosisModal 
