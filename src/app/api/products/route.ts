@@ -42,9 +42,9 @@ export async function GET() {
     
     console.log(`🔍 ${keywords.length}個のキーワードで検索開始`)
     
-    // 【一時的】UI改善中のため1ページのみ取得（後で4ページに戻す）
-    for (const keyword of keywords.slice(0, 3)) { // キーワードも3個に絞る
-      for (let page = 1; page <= 1; page++) { // 1ページのみ
+    // 各キーワードで4ページまで取得（より多くの商品を収集）
+    for (const keyword of keywords) {
+      for (let page = 1; page <= 4; page++) {
         try {
           const params = new URLSearchParams({
             format: 'json',
