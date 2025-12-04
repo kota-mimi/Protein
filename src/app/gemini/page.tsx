@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Menu, Search, Dumbbell, Zap, TrendingUp, Filter, Sparkles, BookOpen, X, ChevronDown, ChevronUp, ArrowUpDown, SlidersHorizontal, Trophy, Coins, Tag } from 'lucide-react';
 import { Product } from '@/types';
 import { ProductCard } from '@/components/ProductCard';
-import { AIChatWidget } from '@/components/AIChatWidget';
 import { AIDiagnosisModal } from '@/components/AIDiagnosisModal';
 import { ProteinGuide } from '@/components/ProteinGuide';
 import { ProductDetailModal } from '@/components/ProductDetailModal';
@@ -1007,7 +1006,6 @@ export default function GeminiPage() {
         onClose={() => setIsDetailOpen(false)}
       />
 
-      <AIChatWidget />
     </div>
   );
 }
