@@ -10,7 +10,6 @@ import { ProductDetailModal } from '@/components/ProductDetailModal';
 import { Button } from '@/components/ui/Button';
 import { fetchProducts } from '@/lib/productService';
 import Footer from '@/components/Footer';
-import AdBanner from '@/components/AdBanner';
 
 // 配列をシャッフルする関数
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -541,10 +540,6 @@ export default function GeminiPage() {
             </div>
           </header>
 
-          {/* ヘッダー直下の最優先広告スペース */}
-          <section className="container mx-auto px-4 py-6 bg-gradient-to-br from-slate-50 to-blue-50">
-            <AdBanner position="header-below" />
-          </section>
 
           {/* AI診断結果の推薦商品セクション */}
           {showRecommendations && (
@@ -978,12 +973,6 @@ export default function GeminiPage() {
 
             </div>
 
-            {/* フッター直上の広告スペース */}
-            <section className="bg-gradient-to-br from-gray-50 to-slate-100 py-8">
-              <div className="container mx-auto px-4">
-                <AdBanner position="footer-above" />
-              </div>
-            </section>
 
           </main>
         </>

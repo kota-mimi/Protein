@@ -3,7 +3,6 @@
 import React from 'react';
 import { ArrowLeft, Zap, Moon, Leaf, Clock, Target, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Button } from './ui/Button';
-import AdBanner from './AdBanner';
 
 interface ProteinGuideProps {
   onBack: () => void;
@@ -32,10 +31,6 @@ export const ProteinGuide: React.FC<ProteinGuideProps> = ({ onBack }) => {
           </p>
         </div>
 
-        {/* ガイド用広告 */}
-        <section className="mb-12">
-          <AdBanner position="inline" />
-        </section>
 
         {/* Section 1: Types */}
         <section className="mb-16">
